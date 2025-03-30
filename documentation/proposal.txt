@@ -1,0 +1,376 @@
+TYPE YOUR TOPIC HERE
+ 
+By
+ 
+NAME SURNAME
+ 
+ 
+Submitted in partial fulfilment of the requirements for the degree
+ 
+BACHELOR TECHNOLOGIAE: COURSE NAME
+ 
+in the
+Department of ………………
+SCHOOL OF INFORMATION SCIENCES AND TECHNOLOGY
+HARARE INSTITUTE OF TECHNOLOGY
+ 
+ 
+Supervisor: Title Name Surname
+Co-Supervisor: Title Name Surname
+ 
+Month Year
+ 
+ 
+ 
+ 
+ 
+Abstract
+Type your abstract. The abstract should be a maximum of 500 words.  
+ 
+Keywords: Key word 1, key word 2 etc.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Contents
+Abstract​1
+Introduction​3
+Motivation​3
+Premises of the Research​3
+Related Work​3
+Problem Statement​3
+Technical Objectives​3
+Justification​3
+Hypothesis​3
+Proposed tools​3
+Expected Results​3
+Ethics Consideration​4
+Time Table​4
+Estimated Budget​4
+References​4
+Glossary​4
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Introduction
+The Distributed Ledger-Based Token System for Petty Cash Solutions is a modern approach designed to simplify the management of petty cash transactions within businesses and organizations. Leveraging a digital ledger system, this platform allows for the issuance, tracking, and redemption of digital tokens that represent monetary values for small, everyday transactions, often referred to as petty cash.
+
+Motivation
+In Zimbabwe, the introduction of the new currency, ZiG, brought about a renewed focus on the challenges faced by merchants and consumers alike in managing small-denomination transactions. One of the most pressing issues in the local commerce system, especially in closed environments such as corporate cafeterias, small retailers, and campus markets, was the persistent problem of handling loose change. Traditionally, merchants have resorted to manually recording owed changes in physical ledgers—a method fraught with challenges.
+
+Challenges with Traditional Systems
+
+The conventional approach of using physical ledgers to track transactions involving small change was laden with inefficiencies and errors. Merchants and customers often encountered several issues:
+
+​•​Poor Bookkeeping: Manual entries are susceptible to human error, leading to inaccurate records that could disrupt financial tracking and customer trust. 
+​•​Inconsistent Records: With multiple entries being recorded daily, the likelihood of inconsistent or duplicate records was high, complicating the reconciliation process. 
+​•​Forgetfulness: Customers or change owners might forget about their recorded changes, leading to financial losses over time. 
+​•​Security Risks: Physical ledgers are vulnerable to theft, damage, or loss, posing a significant risk to the integrity of financial records. 
+These challenges highlighted a clear need for a more robust and reliable solution to manage petty cash and change transactions effectively.
+
+Inspiration for the Project
+
+The inspiration for the Ledger-Based Token System for Petty Cash Solutions stemmed from the urgent need to address these inefficiencies and secure the process of managing change. Observing the daily frustrations of merchants and customers motivated the development of a system that not only simplifies transactions but also enhances security and accountability.
+
+Premises of the Research
+Adopted Standard: ISO 9001:2015
+
+For this project, the Ledger-Based Token System for Petty Cash Solutions, we have chosen to adhere to the ISO 9001:2015 standard. This standard is not only a globally recognized benchmark for quality management systems but also emphasizes the importance of consistency in product and service quality that meets customer and applicable statutory and regulatory requirements.
+
+Justification for Choosing ISO 9001:2015
+
+1. Customer Focus:
+
+​•​ISO 9001:2015 is fundamentally built around the principle of enhancing customer satisfaction through the effective application of the system, including processes for improvement and the assurance of conformity to customer and applicable statutory and regulatory requirements. 
+​•​In the context of the Ledger-Based Token System, adhering to this standard ensures that the system consistently meets user expectations and handles change transactions securely and efficiently, enhancing overall customer satisfaction. 
+2. Process Approach:
+
+​•​This standard encourages an understanding and consistency in process interactions, which is vital for the seamless operation of a ledger-based system. 
+​•​By applying a process approach, the project ensures that various components such as token generation, transaction processing, and ledger updates are systematically managed to achieve more efficient results and maintain reliability. 
+3. Continual Improvement:
+
+​•​ISO 9001:2015 emphasizes continual improvement as a key objective. For the Ledger-Based Token System, this means the system will continually evolve to adapt to new technologies, enhance functionalities, and better meet the needs of users. 
+​•​This ongoing improvement will help in adapting to the dynamic financial landscape of Zimbabwe, ensuring the system remains relevant and effective. 
+4. Risk-Based Thinking:
+
+​•​The standard encourages risk assessment and appropriate risk management, which is particularly pertinent in financial applications. 
+​•​By integrating risk-based thinking throughout the project lifecycle, the system minimizes financial discrepancies, secures data handling, and prevents fraud, thereby protecting both the merchants and their customers. 
+5. Documentation and Traceability:
+
+​•​ISO 9001:2015 requires thorough documentation, which supports the transparency and traceability needed in financial systems. 
+​•​For our project, this means every transaction processed through the system is recorded, traceable, and verifiable, which not only aids in financial reconciliation but also in auditing and compliance with regulatory requirements. 
+6. Leadership and Engagement:
+
+​•​Following this standard ensures that leadership is involved in guiding and supporting the project, fostering a culture that recognizes and understands the importance of an effective quality management system. 
+​•​This will encourage greater engagement and accountability from all team members involved in the project, aligning with project goals and user expectations. 
+Conclusion
+
+Adhering to the ISO 9001:2015 standard provides a robust framework for managing the quality of the Ledger-Based Token System. It ensures that the project not only meets but exceeds the expectations of all stakeholders involved, including merchants, customers, and regulatory bodies. By embedding the principles of this standard into the project, we are setting a foundation for a system that is reliable, secure, and continuously improving, thereby delivering real value to its users.​
+ 
+Related Work
+In preparing the documentation for the Ledger-Based Token System for Petty Cash Solutions, several research papers have been reviewed to understand the existing landscape and identify gaps that this project can address. Below is a summary of relevant studies:
+
+​​Blockchain Technology in E-Voting Systems 
+​•​Source: MDPI Electronics Journal 
+​•​Summary: This paper discusses the application of blockchain technology in electronic voting systems, emphasizing security, transparency, and integrity. While the primary focus is on e-voting, the underlying principles of using blockchain for secure, decentralized transactions can be adapted to petty cash management. Key benefits such as decentralization and transparency align well with the objectives of reducing errors and improving accountability in petty cash systems. 
+​•​Relevance: Offers insights into how blockchain technology can be leveraged for security and transparency in systems that require strict audit trails and user verification. 
+​•​Gap Identified: The study highlights scalability as a challenge, suggesting a need for research into scalable blockchain solutions that could be adapted for petty cash management in larger organizations. 
+​​Distributed Ledger-Based Deposits 
+​•​Source: J.P. Morgan 
+​•​Summary: The paper explores distributed ledger technology for managing deposit tokens in the banking sector, emphasizing the efficiency and security of blockchain in handling transactions that traditionally require physical management. 
+​•​Relevance: Directly applicable to the petty cash solution, as it discusses the transition from physical to digital tokens in a financial context. 
+​•​Gap Identified: While focused on banking, the application to non-banking sectors like petty cash management in businesses could be explored further. 
+​​Asset Tokenisation 
+​•​Source: PwC 
+​•​Summary: Discusses the benefits of asset tokenization and its implications for capital markets. The principles outlined can be extrapolated to the management of digital tokens representing physical assets or cash equivalents. 
+​•​Relevance: Provides a framework for understanding how digital tokens can represent real-world assets, pertinent to the representation of petty cash as digital tokens. 
+​•​Gap Identified: The need for studies on the specific application of tokenization technology in everyday business transactions, particularly for small and medium enterprises. 
+​​Blockchain-Based E-Voting Systems: A Technology Review 
+​•​Source: MDPI 
+​•​Summary: This extensive review covers blockchain applications in e-voting, focusing on the benefits of enhanced security, privacy, and transparency, which are critical for building trust in digital systems. 
+​•​Relevance: While centered on voting, the principles are relevant to any system requiring secure and transparent handling of transactions, such as petty cash systems. 
+​•​Gap Identified: The lack of emphasis on usability and accessibility suggests a potential area for improvement in designing user-friendly petty cash management systems using blockchain. 
+​​Design and Implementation of Ledger-Based Points Transfer System 
+​•​Source: Hindawi 
+​•​Summary: This study describes the implementation of a lightweight ledger-based system for transferring points in low-power wide-area networks (LPWAN), ensuring data security and suitability for devices with limited computational power. 
+​•​Relevance: The technical solutions for ensuring security and efficiency in low-resource environments can be analogous to developing petty cash systems that are efficient and secure. 
+​•​Gap Identified: Adaptation of these technologies for use in more traditional business environments, focusing on petty cash rather than points, could fill a significant gap. 
+Problem Statement
+In Zimbabwe, small-scale transactions in closed environments such as corporate cafeterias, educational institutions, and local markets frequently result in the need for petty cash changes
+
+Technical Objectives​
+To Create a Central Management System:
+Objective: This is the core of the system. This serves as the cash reserve. Since the token will be a stable coin, backed by a fiat currency there is need for reserves of the cash in hand to bring faith in the token. The Reserve works hand in hand with the organization providing the jurisdicaton of the token for regulation purposes and to foster faith of the token towards other parties conducting business on the organizations jurisdiction. The central reserve shall function as a deposit and withdrawal of the tokens. Withdrawals will carry a charge which will be one of the revenue generators of the business model.
+
+
+​​To Develop a Secure Digital Ledger System: 
+​•​Objective: Create a robust digital platform that employs blockchain or distributed ledger technology to manage petty cash transactions securely. This system will ensure that all entries are immutable, verifiable, and protected from unauthorized access or fraud. 
+​​To Implement Real-Time Transaction Processing: 
+​•​Objective: Develop the capability for immediate processing of transactions, ensuring that token exchanges and balance updates occur in real time. This will enhance operational efficiency and provide users with up-to-date account information without delays. 
+​​To Facilitate Seamless Integration with Existing Financial Systems: 
+​•​Objective: Design the system to be easily integrated with existing financial software and systems used by businesses and institutions. This includes ensuring compatibility with common accounting packages and payment processing systems. 
+​​To Provide Comprehensive Transaction Auditing and Reporting Tools: 
+​•​Objective: Equip the system with advanced auditing and reporting features that allow for detailed tracking of all transactions. These tools will support financial transparency, facilitate compliance with regulatory requirements, and aid in financial decision-making. 
+​​To Enhance User Experience Through a User-Friendly Interface: 
+​•​Objective: Develop an intuitive and accessible user interface that simplifies the process of managing and redeeming tokens. The interface should be accessible on various devices, including smartphones and computers, to accommodate all users. 
+​​To Promote Scalability and Flexibility in System Design: 
+​•​Objective: Ensure that the system is scalable, capable of handling a growing number of transactions as user adoption increases. It should also be flexible enough to adapt to different business sizes and types, from small cafes to large educational institutions. 
+​​To Reduce Environmental Impact: 
+​•​Objective: By digitizing the petty cash management process, the system will significantly reduce the use of paper, contributing to environmental sustainability efforts. This aligns with global environmental goals and helps businesses reduce their carbon footprint. 
+Justification
+Enhancing Efficiency and Accuracy
+
+Traditional methods of managing petty cash, primarily through physical cash and manual ledger entries, are fraught with inefficiencies and prone to human error. These methods can lead to inaccuracies in transaction recording, delays in processing changes, and inconsistencies in financial records. By digitizing this process, the Ledger-Based Token System introduces a high level of efficiency, reducing transaction times and eliminating the common errors associated with manual record-keeping. The automation of entries ensures that each transaction is recorded precisely at the moment it occurs, enhancing the overall accuracy of financial records.
+
+Improving Security and Reducing Fraud
+
+Cash-based systems are inherently vulnerable to theft and mismanagement. Physical ledgers can be easily altered, lost, or damaged, leading to further vulnerabilities in the security of financial transactions. The proposed system uses digital tokens that are secured by blockchain technology, offering a significant upgrade in security measures. Blockchain’s immutable ledger means that once a transaction is recorded, it cannot be altered or deleted, which helps prevent fraud and unauthorized modifications of financial data.
+
+Cost Reduction
+
+Managing physical cash and maintaining manual ledgers involve significant administrative costs, including the labor involved in bookkeeping and the physical space required to securely store cash and records. The Ledger-Based Token System minimizes these costs by automating most processes and reducing the need for extensive physical security measures. Furthermore, the digital nature of the system decreases the reliance on paper, contributing to cost savings on supplies.
+
+Regulatory Compliance and Transparency
+
+As financial regulations continue to evolve, compliance becomes increasingly complex for businesses. The Ledger-Based Token System facilitates compliance with financial regulations through transparent and traceable transaction records. Each transaction is logged with a timestamp and user details, providing an auditable trail that is easily accessible for regulatory reviews. This level of transparency not only aids in compliance but also builds trust with users who can view and verify their transaction histories at any time.
+
+Enhancing Customer Experience
+
+The system provides a seamless and user-friendly interface for managing petty cash transactions. Customers no longer need to carry small denominations of cash or remember to collect physical tokens. Instead, they can rely on the digital tokens stored securely in their accounts, accessible via mobile devices or computers. This convenience significantly enhances the customer experience, potentially increasing user engagement and satisfaction.
+
+Supporting Environmental Sustainability
+
+The shift from a paper-based system to a digital one greatly reduces the paper waste associated with printing receipts and maintaining physical ledgers. By adopting this digital solution, businesses contribute to environmental sustainability efforts, reducing their ecological footprint and aligning with global trends towards greener business practices.
+
+Bridging the Technological Gap
+
+Finally, introducing a digital ledger system for petty cash management aligns with broader technological advancements in finance. It positions businesses at the forefront of digital innovation, enabling them to keep pace with technological practices
+ 
+Hypothesis
+Primary Hypothesis
+
+"Implementing a digital ledger-based token system for managing petty cash transactions will significantly reduce transaction times, decrease incidences of errors, and improve the security of financial records within closed systems such as corporate cafeterias and educational institutions compared to traditional cash and manual ledger methods."
+
+Explanation
+
+This hypothesis suggests that by digitizing the process of managing petty cash through a ledger-based system, organizations will experience a measurable improvement in operational efficiency, accuracy, and security. The implementation of this system is presumed to streamline petty cash transactions by automating the recording process, thus minimizing the manual effort required and reducing the potential for human error.
+
+Testable Components
+
+​​Transaction Times: The hypothesis can be tested by measuring the time taken to complete transactions before and after implementing the digital token system. A significant reduction in transaction times would support the hypothesis. 
+​​Error Rate: By comparing the frequency and types of errors in financial records before and after system implementation, the effectiveness of the digital ledger system in reducing errors can be assessed. 
+​​Security of Financial Records: The hypothesis includes an improvement in security, which can be evaluated by monitoring incidences of unauthorized changes, data breaches, or loss of financial records after the system is in place, compared to historical data from the manual system. 
+Secondary Hypothesis
+
+"The adoption of a ledger-based token system for petty cash will lead to higher levels of user satisfaction and trust due to increased transparency and ease of use."
+
+Explanation
+
+This secondary hypothesis posits that the system's transparency and user-friendly interface will enhance user satisfaction and trust among those who regularly engage with petty cash transactions. This aspect of the hypothesis emphasizes the system's impact on user experience, an important factor in the successful adoption of new technologies.
+
+Testable Components
+
+​​User Satisfaction: Through surveys and feedback mechanisms implemented before and after the introduction of the system, changes in user satisfaction levels can be quantified. 
+​​Trust: The degree of trust users have in the system can be assessed through direct queries about their comfort level with the security and accuracy of transactions and their willingness to rely on the system for everyday transactions. 
+Proposed tools
+​•​Python programming language for building the backend along with the web framework for communication with the front end 
+​•​Javascript for the use of nextjs and react to build the frontend which the users will be interacting with 
+​•​Mongodb as the database for storing the ledgers 
+​•​Chromastone, a python library used to send texts which will facilitate in the exchange of change and confirmation messages for security 
+ 
+Expected Results
+​​A Fully Functional Ledger-Based Token System: 
+​•​Expectation: To achieve a robust and scalable digital system capable of managing petty cash transactions securely and efficiently. This system will automate the process of issuing, tracking, and redeeming tokens, replacing traditional cash-based methods and manual ledger entries. 
+​​Increased Efficiency in Transaction Processing: 
+​•​Expectation: The system will significantly reduce the time required to process transactions. By digitizing the management of petty cash, we expect a streamlined process that allows for instant token transfers and immediate updates to ledger entries, thereby speeding up transaction times and reducing queues in transactional areas. 
+​​Enhanced Security and Reduction in Financial Discrepancies: 
+​•​Expectation: With the adoption of blockchain or similar secure ledger technologies, the system will minimize security risks associated with petty cash management, such as theft, loss, or fraudulent activities. The immutable nature of blockchain will ensure that all transactions are permanently recorded and easily auditable. 
+​​Improved Accuracy and Reduction of Human Error: 
+​•​Expectation: The system will automatically record and reconcile all transactions, which is expected to decrease the error rate significantly compared to manual record-keeping. This automation will help prevent common errors such as double entries, omissions, and transcription errors. 
+​​User Satisfaction and Acceptance: 
+​•​Expectation: By providing a user-friendly interface and simplifying the process of managing petty cash, the system is expected to enhance user satisfaction. Ease of use and increased trust due to transparent and secure transaction handling are anticipated to foster user acceptance and widespread adoption of the system. 
+​​Comprehensive Reporting and Analytics: 
+​•​Expectation: The system will include advanced reporting and analytics tools that will allow organizations to gain deeper insights into their financial transactions. These tools will help in better financial planning, auditing, and compliance reporting. 
+​​Environmental Benefits: 
+​•​Expectation: By reducing the need for paper-based records and physical cash management, the system will contribute to environmental sustainability efforts. This reduction in paper use and waste aligns with global environmental conservation goals. 
+​​A Research Paper and System Documentation: 
+​•​Expectation: A detailed research paper documenting the development process, system architecture, benefits, and findings from the implementation of the system will be compiled. This paper will be aimed at publication in a peer-reviewed journal to contribute to the academic and practical understanding of digital ledger technologies in financial management. 
+​​Submission of a Final Report for Academic Requirements: 
+​•​Expectation: A comprehensive final report will be compiled and submitted for the fulfillment of the requirements of the relevant degree program. This report will include methodologies, technology used, results, challenges, and future work recommendations. 
+​​ 
+Ethics Consideration
+For the Ledger-Based Token System for Petty Cash Solutions, considering the ethical implications is crucial, especially since the system involves financial transactions and handling of potentially sensitive personal data. Here are the key ethical considerations and steps for obtaining necessary clearances:
+
+Privacy and Data Protection:
+
+​•​Concern: The system will manage user data, including potentially sensitive financial information. It's essential to ensure that all personal data is handled in compliance with local and international data protection regulations such as the GDPR (General Data Protection Regulation) or other relevant frameworks. 
+​•​Action: Implement strong data encryption, secure data storage, and ensure that data handling procedures are transparent and compliant with legal requirements. Privacy by Design principles should be embedded into the development of the system. 
+Transparency:
+
+​•​Concern: Users must be fully informed about how their data is being used, what data is being collected, and for what purposes. 
+​•​Action: Develop clear user agreements and privacy policies that are easy to understand. Provide users with access to their data and the ability to review how it is being processed. 
+Security:
+
+​•​Concern: Ensuring the security of the system is paramount to protect against data breaches, unauthorized access, and other cyber threats. 
+​•​Action: Regularly update security protocols, conduct vulnerability assessments, and employ robust cybersecurity measures. Utilize blockchain's inherent security features effectively. 
+Inclusivity:
+
+​•​Concern: The system should be accessible to all users, including those with disabilities or those who are technologically less savvy. 
+​•​Action: Design the user interface to be intuitive and include accessibility features. Provide training or guidelines to ensure all potential users can comfortably use the system. 
+Ethical Approval Process:
+
+​•​Requirement: Depending on the jurisdiction and the nature of the project, formal ethical approval may be required, particularly because the project involves financial transactions and personal data. 
+​​Steps to Take: 
+​​Prepare a Detailed Research Proposal: Outline the project, its objectives, data handling procedures, and the measures taken to protect participants' data. 
+​​Submit to an Institutional Review Board (IRB): If part of an academic institution, submit the proposal to the IRB for review. The IRB will evaluate the ethical implications of the project, focusing on data protection and participant rights. 
+​​Adjustments Based on Feedback: Implement any changes or improvements suggested by the IRB. 
+​​Obtain Formal Approval: Once the IRB is satisfied that the project meets ethical standards, formal approval will be granted. 
+​​Continuous Monitoring: Regularly review and report on the project's compliance with ethical standards, updating procedures as necessary. 
+Post-Approval Monitoring:
+
+​•​Continued Oversight: Ensure continuous oversight through regular audits and updates to the ethical compliance of the project, adjusting practices as new ethical standards or technologies emerge. 
+Time Table​
+Draw the Gantt chart using the appropriate software
+ 
+Estimated Budget​
+Category
+Item
+Estimated Cost
+Description
+Personell
+Software Developers
+$5,000
+Salaries for developers to design, develop and test the system
+ 
+Project Manager
+$1,000
+Salary for project oversight and management
+ 
+Quality Assurance
+$1,500
+Salaries for QA staff to ensure the system’s reliability
+Hardware
+Servers and Infrastructure
+$5,000
+Hardware to host the system, including backup and security
+ 
+Workstations
+$5,000
+Computers and other equipment for development team
+Software
+Development Tools and Licences and API keys
+$3,000
+Software licenses for development tools and frameworks
+Operations
+Hosting
+$3,000 per year
+Server hosting, maintenance and related services
+ 
+Utilities
+$1,000 per year
+Electricity, Internet and other utilities for server hosting
+Testing and Launch
+Beta Testing
+$3,000
+Costs associated with recruiting testers and managing feedback
+ 
+Marketing and Launch Activities
+$2,000
+Promotional materials and activities for system launch
+Legal and Compliance
+Legal Fees
+$5,000
+Legal consultations to ensure compliance with data protection laws
+ 
+Compliance Certification
+$2,000
+Costs to obtain certifications or compliance checks
+Miscellaneous
+Contingency Fund
+$7,000
+Reserved for unforeseen expenses or overruns
+Total Estimated Budget
+ 
+$43,000
+ 
+ 
+ 
+ 
+References
+Use the IEEE referencing style to outline your references.
+Glossary
+Outline the terms used within the document, together with their meanings.
+ 
+NB: Table headings must be above the table and figure headings must be below the figure clearly captioned.
