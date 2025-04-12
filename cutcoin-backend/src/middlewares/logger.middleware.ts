@@ -1,8 +1,6 @@
 import type { Request, Response, NextFunction } from "express"
 import winston from "winston"
 import { AuditLog } from "../models/audit-log.model"
-import type { RequestWithUser } from "./auth.middleware"
-import type { RequestWithAdmin } from "./admin.middleware"
 
 // Create Winston logger
 const logger = winston.createLogger({
@@ -46,7 +44,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 
 // Audit logger middleware
 export const auditLogger = async (
-  req: RequestWithUser | RequestWithAdmin,
+  req: Request,
   entity: string,
   action: string,
   entityId?: number,
@@ -54,8 +52,8 @@ export const auditLogger = async (
   newValues?: any,
 ) => {
   try {
-    const userId = (req as RequestWithUser).user?.id
-    const adminId = (req as RequestWithAdmin).admin?.id
+    const userId = req.user?.id
+    const adminId = req.admin?.id
 
     await AuditLog.create({
       userId,

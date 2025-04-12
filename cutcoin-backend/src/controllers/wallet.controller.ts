@@ -1,11 +1,10 @@
 import type { Response, NextFunction } from "express"
 import { WalletService } from "../services/wallet.service"
-import type { RequestWithUser } from "../middlewares/auth.middleware"
 
 export class WalletController {
   private walletService = new WalletService()
 
-  public getWalletBalance = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public getWalletBalance = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const result = await this.walletService.getWalletBalance(userId)
@@ -15,7 +14,7 @@ export class WalletController {
     }
   }
 
-  public deposit = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public deposit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const { amount } = req.body
@@ -26,7 +25,7 @@ export class WalletController {
     }
   }
 
-  public withdraw = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public withdraw = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const { amount } = req.body
@@ -37,7 +36,7 @@ export class WalletController {
     }
   }
 
-  public confirmWithdrawal = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public confirmWithdrawal = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const result = await this.walletService.confirmWithdrawal(userId, req.body)
@@ -47,7 +46,7 @@ export class WalletController {
     }
   }
 
-  public transfer = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public transfer = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const result = await this.walletService.transfer(userId, req.body)
@@ -57,7 +56,7 @@ export class WalletController {
     }
   }
 
-  public confirmTransfer = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public confirmTransfer = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const result = await this.walletService.confirmTransfer(userId, req.body)
@@ -67,7 +66,7 @@ export class WalletController {
     }
   }
 
-  public getTransactionHistory = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public getTransactionHistory = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const result = await this.walletService.getTransactionHistory(userId, req.query)
@@ -77,7 +76,7 @@ export class WalletController {
     }
   }
 
-  public getTransactionDetails = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public getTransactionDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const transactionId = Number(req.params.id)

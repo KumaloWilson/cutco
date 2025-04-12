@@ -3,11 +3,9 @@ import jwt from "jsonwebtoken"
 import { HttpException } from "../exceptions/HttpException"
 import { User } from "../models/user.model"
 
-export interface RequestWithUser extends Request {
-  user: User
-}
 
-export const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const Authorization = req.header("Authorization")?.split("Bearer ")[1] || null
 

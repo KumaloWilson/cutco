@@ -1,13 +1,11 @@
 import type { Response, NextFunction } from "express"
 import { NotificationService } from "../services/notification.service"
-import type { RequestWithUser } from "../middlewares/auth.middleware"
-import type { RequestWithAdmin } from "../middlewares/admin.middleware"
 
 export class NotificationController {
   private notificationService = new NotificationService()
 
   // Admin endpoints
-  public sendSMS = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public sendSMS = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.notificationService.sendSMS(req.body)
       res.status(200).json(result)
@@ -16,7 +14,7 @@ export class NotificationController {
     }
   }
 
-  public bulkSendSMS = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public bulkSendSMS = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.notificationService.bulkSendSMS(req.body)
       res.status(200).json(result)
@@ -25,7 +23,7 @@ export class NotificationController {
     }
   }
 
-  public createNotification = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public createNotification = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.notificationService.createNotification(req.body)
       res.status(201).json(result)
@@ -35,7 +33,7 @@ export class NotificationController {
   }
 
   // User endpoints
-  public getUserNotifications = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public getUserNotifications = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const result = await this.notificationService.getUserNotifications(userId, req.query)
@@ -45,7 +43,7 @@ export class NotificationController {
     }
   }
 
-  public markNotificationAsRead = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public markNotificationAsRead = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const notificationId = Number(req.params.id)
@@ -56,7 +54,7 @@ export class NotificationController {
     }
   }
 
-  public markAllNotificationsAsRead = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public markAllNotificationsAsRead = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const result = await this.notificationService.markAllNotificationsAsRead(userId)
@@ -66,7 +64,7 @@ export class NotificationController {
     }
   }
 
-  public deleteNotification = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public deleteNotification = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.id
       const notificationId = Number(req.params.id)

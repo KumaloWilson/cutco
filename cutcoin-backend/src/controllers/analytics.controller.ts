@@ -1,11 +1,10 @@
 import type { Response, NextFunction } from "express"
 import { AnalyticsService } from "../services/analytics.service"
-import type { RequestWithAdmin } from "../middlewares/admin.middleware"
 
 export class AnalyticsController {
   private analyticsService = new AnalyticsService()
 
-  public getDashboardStats = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getDashboardStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.analyticsService.getDashboardStats()
       res.status(200).json(result)
@@ -14,7 +13,7 @@ export class AnalyticsController {
     }
   }
 
-  public getTransactionStats = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getTransactionStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.analyticsService.getTransactionStats(req.query)
       res.status(200).json(result)
@@ -23,7 +22,7 @@ export class AnalyticsController {
     }
   }
 
-  public getUserStats = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getUserStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.analyticsService.getUserStats(req.query)
       res.status(200).json(result)
@@ -32,7 +31,7 @@ export class AnalyticsController {
     }
   }
 
-  public getMerchantStats = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getMerchantStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.analyticsService.getMerchantStats(req.query)
       res.status(200).json(result)
@@ -41,7 +40,7 @@ export class AnalyticsController {
     }
   }
 
-  public getWalletStats = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getWalletStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.analyticsService.getWalletStats()
       res.status(200).json(result)

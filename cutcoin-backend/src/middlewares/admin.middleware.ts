@@ -1,13 +1,11 @@
-import type { Request, Response, NextFunction } from "express"
+import type { Request, Response, NextFunction, RequestHandler } from "express"
 import jwt from "jsonwebtoken"
 import { HttpException } from "../exceptions/HttpException"
 import { Admin } from "../models/admin.model"
 
-export interface RequestWithAdmin extends Request {
-  admin: Admin
-}
 
-export const adminMiddleware = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+
+export const adminMiddleware: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const Authorization = req.header("Authorization")?.split("Bearer ")[1] || null
 
@@ -40,7 +38,7 @@ export const adminMiddleware = async (req: RequestWithAdmin, res: Response, next
   }
 }
 
-export const superAdminMiddleware = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+export const superAdminMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.admin) {
       return next(new HttpException(401, "Authentication required"))
