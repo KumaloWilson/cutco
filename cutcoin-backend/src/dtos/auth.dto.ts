@@ -7,7 +7,7 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
-  @IsPhoneNumber(null)
+  @IsPhoneNumber(undefined)
   public phoneNumber!: string
 
   @IsString()
@@ -37,7 +37,7 @@ export class LoginDto {
 export class VerifyOtpDto {
   @IsString()
   @IsNotEmpty()
-  @IsPhoneNumber(null)
+  @IsPhoneNumber(undefined)
   public phoneNumber!: string
 
   @IsString()
@@ -66,7 +66,7 @@ export class RequestPasswordResetDto {
 
   @IsString()
   @IsNotEmpty()
-  @IsPhoneNumber(null)
+  @IsPhoneNumber(undefined)
   public phoneNumber!: string
 }
 

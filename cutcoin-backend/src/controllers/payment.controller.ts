@@ -1,15 +1,13 @@
-import type { Response, NextFunction } from "express"
+import type { Request, Response, NextFunction } from "express"
 import { PaymentService } from "../services/payment.service"
-import type { RequestWithUser } from "../middlewares/auth.middleware"
-import type { RequestWithAdmin } from "../middlewares/admin.middleware"
 
 export class PaymentController {
   private paymentService = new PaymentService()
 
   // User endpoints
-  public initiatePaynowPayment = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public initiatePaynowPayment = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const { amount } = req.body
       const result = await this.paymentService.initiatePaynowPayment(userId, amount)
       res.status(200).json(result)
@@ -18,7 +16,7 @@ export class PaymentController {
     }
   }
 
-  public verifyPaynowPayment = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public verifyPaynowPayment = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { reference } = req.params
       const result = await this.paymentService.verifyPaynowPayment(reference)
@@ -28,9 +26,9 @@ export class PaymentController {
     }
   }
 
-  public confirmCashDeposit = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public confirmCashDeposit = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const { reference } = req.params
       const result = await this.paymentService.confirmCashDeposit(userId, reference)
       res.status(200).json(result)
@@ -39,9 +37,9 @@ export class PaymentController {
     }
   }
 
-  public getStudentDeposits = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public getStudentDeposits = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const result = await this.paymentService.getStudentDeposits(userId, req.query)
       res.status(200).json(result)
     } catch (error) {
@@ -50,10 +48,10 @@ export class PaymentController {
   }
 
   // Merchant endpoints
-  public initiateCashDeposit = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public initiateCashDeposit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Get merchant ID from user's merchant profile
-      const merchant = await req.user.getMerchant()
+      const merchant = await req.user?.getMerchant()
       if (!merchant) {
         return res.status(403).json({ message: "User is not a merchant" })
       }
@@ -65,10 +63,10 @@ export class PaymentController {
     }
   }
 
-  public getMerchantDeposits = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public getMerchantDeposits = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Get merchant ID from user's merchant profile
-      const merchant = await req.user.getMerchant()
+      const merchant = await req.user?.getMerchant()
       if (!merchant) {
         return res.status(403).json({ message: "User is not a merchant" })
       }
@@ -80,10 +78,10 @@ export class PaymentController {
     }
   }
 
-  public getMerchantDepositDetails = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public getMerchantDepositDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Get merchant ID from user's merchant profile
-      const merchant = await req.user.getMerchant()
+      const merchant = await req.user?.getMerchant()
       if (!merchant) {
         return res.status(403).json({ message: "User is not a merchant" })
       }
@@ -97,9 +95,9 @@ export class PaymentController {
   }
 
   // Admin endpoints
-  public adminApproveCashDeposit = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public adminApproveCashDeposit = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const adminId = req.admin.id
+      const adminId = req.admin?.id
       const depositId = Number(req.params.id)
       const result = await this.paymentService.adminApproveCashDeposit(adminId, depositId)
       res.status(200).json(result)
@@ -108,7 +106,7 @@ export class PaymentController {
     }
   }
 
-  public getAllPayments = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getAllPayments = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.paymentService.getAllPayments(req.query)
       res.status(200).json(result)
@@ -117,7 +115,7 @@ export class PaymentController {
     }
   }
 
-  public getAllMerchantDeposits = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getAllMerchantDeposits = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.paymentService.getAllMerchantDeposits(req.query)
       res.status(200).json(result)
@@ -126,9 +124,9 @@ export class PaymentController {
     }
   }
 
-  public updateExchangeRate = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public updateExchangeRate = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const adminId = req.admin.id
+      const adminId = req.admin?.id
       const { rate } = req.body
       const result = await this.paymentService.updateExchangeRate(adminId, rate)
       res.status(200).json(result)
@@ -137,9 +135,9 @@ export class PaymentController {
     }
   }
 
-  public setMerchantDepositLimits = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public setMerchantDepositLimits = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const adminId = req.admin.id
+      const adminId = req.admin?.id
       const result = await this.paymentService.setMerchantDepositLimits(adminId, req.body)
       res.status(200).json(result)
     } catch (error) {

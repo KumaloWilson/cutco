@@ -205,7 +205,7 @@ export class AnalyticsService {
         ],
         [sequelize.fn("count", sequelize.col("id")), "count"],
       ],
-      group: [sequelize.literal("range")],
+      group: [sequelize.fn('', sequelize.literal("range"))],
       raw: true,
     })
 

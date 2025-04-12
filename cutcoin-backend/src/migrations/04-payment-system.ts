@@ -1,4 +1,4 @@
-import { type QueryInterface, DataTypes, type Sequelize } from "sequelize"
+import { type QueryInterface, DataTypes, type Sequelize, Op } from "sequelize"
 
 module.exports = {
   up: async (queryInterface: QueryInterface, sequelize: Sequelize) => {
@@ -202,7 +202,7 @@ module.exports = {
       "system_configs",
       {
         key: {
-          [sequelize.Op.in]: [
+          [Op.in]: [
             "paynow_integration_id",
             "paynow_integration_key",
             "paynow_return_url",

@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from "express"
 import { AdminService } from "../services/admin.service"
-import type { RequestWithAdmin } from "../middlewares/admin.middleware"
 
 export class AdminController {
   private adminService = new AdminService()
@@ -14,7 +13,7 @@ export class AdminController {
     }
   }
 
-  public createAdmin = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public createAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.adminService.createAdmin(req.body)
       res.status(201).json(result)
@@ -23,9 +22,9 @@ export class AdminController {
     }
   }
 
-  public getAdminProfile = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getAdminProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const adminId = req.admin.id
+      const adminId = req.admin?.id
       const result = await this.adminService.getAdminProfile(adminId)
       res.status(200).json(result)
     } catch (error) {
@@ -33,9 +32,9 @@ export class AdminController {
     }
   }
 
-  public updateAdminProfile = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public updateAdminProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const adminId = req.admin.id
+      const adminId = req.admin?.id
       const result = await this.adminService.updateAdminProfile(adminId, req.body)
       res.status(200).json(result)
     } catch (error) {
@@ -43,7 +42,7 @@ export class AdminController {
     }
   }
 
-  public getAllUsers = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.adminService.getAllUsers(req.query)
       res.status(200).json(result)
@@ -52,7 +51,7 @@ export class AdminController {
     }
   }
 
-  public getUserDetails = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getUserDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = Number(req.params.userId)
       const result = await this.adminService.getUserDetails(userId)
@@ -62,7 +61,7 @@ export class AdminController {
     }
   }
 
-  public updateUserStatus = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public updateUserStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = Number(req.params.userId)
       const result = await this.adminService.updateUserStatus(userId, req.body)
@@ -72,7 +71,7 @@ export class AdminController {
     }
   }
 
-  public getAllMerchants = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getAllMerchants = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.adminService.getAllMerchants(req.query)
       res.status(200).json(result)
@@ -81,7 +80,7 @@ export class AdminController {
     }
   }
 
-  public getMerchantDetails = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getMerchantDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const merchantId = Number(req.params.merchantId)
       const result = await this.adminService.getMerchantDetails(merchantId)
@@ -91,7 +90,7 @@ export class AdminController {
     }
   }
 
-  public updateMerchantStatus = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public updateMerchantStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const merchantId = Number(req.params.merchantId)
       const result = await this.adminService.updateMerchantStatus(merchantId, req.body)
@@ -101,7 +100,7 @@ export class AdminController {
     }
   }
 
-  public getSystemStats = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getSystemStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.adminService.getSystemStats()
       res.status(200).json(result)
@@ -110,7 +109,7 @@ export class AdminController {
     }
   }
 
-  public getSystemConfig = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getSystemConfig = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.adminService.getSystemConfig()
       res.status(200).json(result)
@@ -119,7 +118,7 @@ export class AdminController {
     }
   }
 
-  public updateSystemConfig = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public updateSystemConfig = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.adminService.updateSystemConfig(req.body)
       res.status(200).json(result)
@@ -128,7 +127,7 @@ export class AdminController {
     }
   }
 
-  public getAuditLogs = async (req: RequestWithAdmin, res: Response, next: NextFunction) => {
+  public getAuditLogs = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.adminService.getAuditLogs(req.query)
       res.status(200).json(result)

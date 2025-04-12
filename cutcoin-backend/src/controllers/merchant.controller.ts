@@ -1,13 +1,12 @@
 import type { Request, Response, NextFunction } from "express"
 import { MerchantService } from "../services/merchant.service"
-import type { RequestWithUser } from "../middlewares/auth.middleware"
 
 export class MerchantController {
   private merchantService = new MerchantService()
 
-  public registerMerchant = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public registerMerchant = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const result = await this.merchantService.registerMerchant(userId, req.body)
       res.status(201).json(result)
     } catch (error) {
@@ -15,9 +14,9 @@ export class MerchantController {
     }
   }
 
-  public getMerchantProfile = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public getMerchantProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const result = await this.merchantService.getMerchantProfile(userId)
       res.status(200).json(result)
     } catch (error) {
@@ -25,9 +24,9 @@ export class MerchantController {
     }
   }
 
-  public updateMerchantProfile = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public updateMerchantProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const result = await this.merchantService.updateMerchantProfile(userId, req.body)
       res.status(200).json(result)
     } catch (error) {
@@ -35,7 +34,7 @@ export class MerchantController {
     }
   }
 
-  public initiatePayment = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public initiatePayment = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const merchantId = Number(req.params.merchantId)
       const result = await this.merchantService.initiatePayment(merchantId, req.body)
@@ -54,7 +53,7 @@ export class MerchantController {
     }
   }
 
-  public getMerchantTransactions = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  public getMerchantTransactions = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const merchantId = Number(req.params.merchantId)
       const result = await this.merchantService.getMerchantTransactions(merchantId, req.query)
