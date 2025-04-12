@@ -1,3 +1,11 @@
-cutcoin/
-lab/
-.env
+node_modules
+frontend/node_modules
+cutcoin-backend/node_modules
+frontend/dist/
+extension/dist/
+cutcoin-backend/dist/
+frontend/.env
+extension/.env
+cutcoin-backend/.env
+cutcoin-backend/combined.log
+server/error.log
