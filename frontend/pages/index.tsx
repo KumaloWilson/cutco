@@ -55,7 +55,8 @@ export default function Home() {
       .join("");
 
     axios
-      .post("https://cutcoin.up.railway.app/tx", {
+      // .post("https://cutcoin.up.railway.app/tx", {
+      .post("http://localhost:5000/tx", {
         phone_number: "0" + phone_formatted,
         amount,
         transaction_type,

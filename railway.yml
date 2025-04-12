@@ -1,3 +1,0 @@
-name: cutcoin
-framework: python
-start: python app.py

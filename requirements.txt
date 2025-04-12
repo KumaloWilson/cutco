@@ -1,6 +1,0 @@
-flask
-flask-cors
-chromastone
-reportlab
-pymongo
-python-dotenv
