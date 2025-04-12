@@ -18,6 +18,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/types"],  // ✅ Add this line
   "exclude": ["node_modules", "dist"]
 }

@@ -1,4 +1,4 @@
-import type { Response, NextFunction } from "express"
+import type { Request, Response, NextFunction } from "express"
 import { NotificationService } from "../services/notification.service"
 
 export class NotificationController {
@@ -35,7 +35,7 @@ export class NotificationController {
   // User endpoints
   public getUserNotifications = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const result = await this.notificationService.getUserNotifications(userId, req.query)
       res.status(200).json(result)
     } catch (error) {
@@ -45,7 +45,7 @@ export class NotificationController {
 
   public markNotificationAsRead = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const notificationId = Number(req.params.id)
       const result = await this.notificationService.markNotificationAsRead(userId, notificationId)
       res.status(200).json(result)
@@ -56,7 +56,7 @@ export class NotificationController {
 
   public markAllNotificationsAsRead = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const result = await this.notificationService.markAllNotificationsAsRead(userId)
       res.status(200).json(result)
     } catch (error) {
@@ -66,7 +66,7 @@ export class NotificationController {
 
   public deleteNotification = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const notificationId = Number(req.params.id)
       const result = await this.notificationService.deleteNotification(userId, notificationId)
       res.status(200).json(result)

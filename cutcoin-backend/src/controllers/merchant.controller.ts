@@ -6,7 +6,7 @@ export class MerchantController {
 
   public registerMerchant = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const result = await this.merchantService.registerMerchant(userId, req.body)
       res.status(201).json(result)
     } catch (error) {
@@ -16,7 +16,7 @@ export class MerchantController {
 
   public getMerchantProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const result = await this.merchantService.getMerchantProfile(userId)
       res.status(200).json(result)
     } catch (error) {
@@ -26,7 +26,7 @@ export class MerchantController {
 
   public updateMerchantProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id
+      const userId = req.user?.id
       const result = await this.merchantService.updateMerchantProfile(userId, req.body)
       res.status(200).json(result)
     } catch (error) {

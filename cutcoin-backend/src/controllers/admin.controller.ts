@@ -24,7 +24,7 @@ export class AdminController {
 
   public getAdminProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const adminId = req.admin.id
+      const adminId = req.admin?.id
       const result = await this.adminService.getAdminProfile(adminId)
       res.status(200).json(result)
     } catch (error) {
@@ -34,7 +34,7 @@ export class AdminController {
 
   public updateAdminProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const adminId = req.admin.id
+      const adminId = req.admin?.id
       const result = await this.adminService.updateAdminProfile(adminId, req.body)
       res.status(200).json(result)
     } catch (error) {

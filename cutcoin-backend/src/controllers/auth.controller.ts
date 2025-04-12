@@ -61,7 +61,7 @@ export class AuthController {
 
   public completeKYC = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user.id // From auth middleware
+      const userId = req.user?.id // From auth middleware
       const result = await this.authService.completeKYC(userId, req.body)
       res.status(200).json(result)
     } catch (error) {
