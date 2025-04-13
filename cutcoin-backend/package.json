@@ -10,8 +10,7 @@
     "watch": "nodemon --exec ts-node src/server.ts",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-
-  "migrate": "sequelize-cli db:migrate",
+    "migrate": "sequelize-cli db:migrate",
     "migrate:undo": "sequelize-cli db:migrate:undo",
     "seed": "sequelize-cli db:seed:all",
     "seed:undo": "sequelize-cli db:seed:undo:all"
@@ -51,6 +50,7 @@
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.2",
     "sequelize-typescript": "^2.1.6",
+    "umzug": "^3.8.2",
     "winston": "^3.17.0"
   }
 }
