@@ -10,11 +10,7 @@
     "watch": "nodemon --exec ts-node src/server.ts",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-"migrate": "NODE_ENV=development npx sequelize-cli --options-path=.sequelizerc.js db:migrate",
-    "migrate:undo": "NODE_ENV=development npx sequelize-cli --options-path=.sequelizerc.js db:migrate:undo",
-    "seed": "NODE_ENV=development npx sequelize-cli --options-path=.sequelizerc.js db:seed:all",
-    "seed:undo": "NODE_ENV=development npx sequelize-cli --options-path=.sequelizerc.js db:seed:undo:all"
-
+       "migrate": "ts-node src/config/migrate.ts"
   },
   "keywords": [],
   "author": "",
