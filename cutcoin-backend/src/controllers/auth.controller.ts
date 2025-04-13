@@ -7,6 +7,7 @@ export class AuthController {
   public register = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userData = req.body
+
       const result = await this.authService.register(userData)
       res.status(201).json(result)
     } catch (error) {
@@ -62,6 +63,9 @@ export class AuthController {
   public completeKYC = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id // From auth middleware
+      if (!userId) {
+        return res.status(403).json({ message: "User not found" })
+      }
       const result = await this.authService.completeKYC(userId, req.body)
       res.status(200).json(result)
     } catch (error) {

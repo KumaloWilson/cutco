@@ -48,14 +48,15 @@ export class PaymentController {
   }
 
   // Merchant endpoints
-  public initiateCashDeposit = async (req: Request, res: Response, next: NextFunction) => {
+  public initiateCashDeposit = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Get merchant ID from user's merchant profile
       const merchant = await req.user?.getMerchant()
       if (!merchant) {
-        return res.status(403).json({ message: "User is not a merchant" })
+        res.status(403).json({ message: "User is not a merchant" })
+        return
       }
-
+  
       const result = await this.paymentService.initiateCashDeposit(merchant.id, req.body)
       res.status(200).json(result)
     } catch (error) {
@@ -63,14 +64,15 @@ export class PaymentController {
     }
   }
 
-  public getMerchantDeposits = async (req: Request, res: Response, next: NextFunction) => {
+  public getMerchantDeposits = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Get merchant ID from user's merchant profile
       const merchant = await req.user?.getMerchant()
       if (!merchant) {
-        return res.status(403).json({ message: "User is not a merchant" })
+        res.status(403).json({ message: "User is not a merchant" })
+        return
       }
-
+  
       const result = await this.paymentService.getMerchantDeposits(merchant.id, req.query)
       res.status(200).json(result)
     } catch (error) {
@@ -78,14 +80,15 @@ export class PaymentController {
     }
   }
 
-  public getMerchantDepositDetails = async (req: Request, res: Response, next: NextFunction) => {
+  public getMerchantDepositDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       // Get merchant ID from user's merchant profile
       const merchant = await req.user?.getMerchant()
       if (!merchant) {
-        return res.status(403).json({ message: "User is not a merchant" })
+        res.status(403).json({ message: "User is not a merchant" })
+        return
       }
-
+  
       const depositId = Number(req.params.id)
       const result = await this.paymentService.getMerchantDepositDetails(merchant.id, depositId)
       res.status(200).json(result)
