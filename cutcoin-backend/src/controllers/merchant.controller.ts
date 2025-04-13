@@ -7,6 +7,9 @@ export class MerchantController {
   public registerMerchant = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id
+      if (!userId) {
+        return res.status(403).json({ message: "User not authenticated" })
+      }
       const result = await this.merchantService.registerMerchant(userId, req.body)
       res.status(201).json(result)
     } catch (error) {
@@ -17,6 +20,9 @@ export class MerchantController {
   public getMerchantProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id
+      if (!userId) {
+        return res.status(403).json({ message: "User not authenticated" })
+      }
       const result = await this.merchantService.getMerchantProfile(userId)
       res.status(200).json(result)
     } catch (error) {
@@ -27,6 +33,9 @@ export class MerchantController {
   public updateMerchantProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.id
+      if (!userId) {
+        return res.status(403).json({ message: "User not authenticated" })
+      }
       const result = await this.merchantService.updateMerchantProfile(userId, req.body)
       res.status(200).json(result)
     } catch (error) {
@@ -37,6 +46,9 @@ export class MerchantController {
   public initiatePayment = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const merchantId = Number(req.params.merchantId)
+      if (!merchantId) {
+        return res.status(403).json({ message: "Merchant not found" })
+      }
       const result = await this.merchantService.initiatePayment(merchantId, req.body)
       res.status(200).json(result)
     } catch (error) {
