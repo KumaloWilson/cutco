@@ -7,5 +7,5 @@ cutcoin-backend/dist/
 frontend/.env
 extension/.env
 cutcoin-backend/.env
-cutcoin-backend/combined.log
-server/error.log
+cutcoin-backend/logs/combined.log
+cutcoin-backend/logs/error.log
