@@ -7,6 +7,10 @@ export class NotificationController {
   // Admin endpoints
   public sendSMS = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.admin) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
       const result = await this.notificationService.sendSMS(req.body)
       res.status(200).json(result)
     } catch (error) {
@@ -16,6 +20,10 @@ export class NotificationController {
 
   public bulkSendSMS = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.admin) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
       const result = await this.notificationService.bulkSendSMS(req.body)
       res.status(200).json(result)
     } catch (error) {
@@ -25,6 +33,10 @@ export class NotificationController {
 
   public createNotification = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.admin) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
       const result = await this.notificationService.createNotification(req.body)
       res.status(201).json(result)
     } catch (error) {
@@ -35,7 +47,11 @@ export class NotificationController {
   // User endpoints
   public getUserNotifications = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user?.id
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
+      const userId = req.user.id
       const result = await this.notificationService.getUserNotifications(userId, req.query)
       res.status(200).json(result)
     } catch (error) {
@@ -45,7 +61,11 @@ export class NotificationController {
 
   public markNotificationAsRead = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user?.id
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
+      const userId = req.user.id
       const notificationId = Number(req.params.id)
       const result = await this.notificationService.markNotificationAsRead(userId, notificationId)
       res.status(200).json(result)
@@ -56,7 +76,11 @@ export class NotificationController {
 
   public markAllNotificationsAsRead = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user?.id
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
+      const userId = req.user.id
       const result = await this.notificationService.markAllNotificationsAsRead(userId)
       res.status(200).json(result)
     } catch (error) {
@@ -66,7 +90,11 @@ export class NotificationController {
 
   public deleteNotification = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user?.id
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
+      const userId = req.user.id
       const notificationId = Number(req.params.id)
       const result = await this.notificationService.deleteNotification(userId, notificationId)
       res.status(200).json(result)

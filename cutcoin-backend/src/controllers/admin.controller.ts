@@ -15,6 +15,10 @@ export class AdminController {
 
   public createAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.admin) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
       const result = await this.adminService.createAdmin(req.body)
       res.status(201).json(result)
     } catch (error) {
@@ -24,12 +28,11 @@ export class AdminController {
 
   public getAdminProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const adminId = req.admin?.id
-
-      if (!adminId) {
-        return res.status(403).json({ message: "Admin not found" })
+      if (!req.admin || !req.admin.id) {
+        return res.status(401).json({ message: "Unauthorized" })
       }
 
+      const adminId = req.admin.id
       const result = await this.adminService.getAdminProfile(adminId)
       res.status(200).json(result)
     } catch (error) {
@@ -39,10 +42,11 @@ export class AdminController {
 
   public updateAdminProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const adminId = req.admin?.id
-      if (!adminId) {
-        return res.status(403).json({ message: "Admin not found" })
+      if (!req.admin || !req.admin.id) {
+        return res.status(401).json({ message: "Unauthorized" })
       }
+
+      const adminId = req.admin.id
       const result = await this.adminService.updateAdminProfile(adminId, req.body)
       res.status(200).json(result)
     } catch (error) {
@@ -62,9 +66,6 @@ export class AdminController {
   public getUserDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = Number(req.params.userId)
-      if (!userId) {
-        return res.status(400).json({ message: "Invalid user ID" })
-      }
       const result = await this.adminService.getUserDetails(userId)
       res.status(200).json(result)
     } catch (error) {
@@ -75,9 +76,6 @@ export class AdminController {
   public updateUserStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = Number(req.params.userId)
-      if (!userId) {
-        return res.status(400).json({ message: "Invalid user ID" })
-      }
       const result = await this.adminService.updateUserStatus(userId, req.body)
       res.status(200).json(result)
     } catch (error) {
@@ -97,9 +95,6 @@ export class AdminController {
   public getMerchantDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const merchantId = Number(req.params.merchantId)
-      if (!merchantId) {
-        return res.status(400).json({ message: "Invalid merchant ID" })
-      }
       const result = await this.adminService.getMerchantDetails(merchantId)
       res.status(200).json(result)
     } catch (error) {
@@ -110,9 +105,6 @@ export class AdminController {
   public updateMerchantStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const merchantId = Number(req.params.merchantId)
-      if (!merchantId) {
-        return res.status(400).json({ message: "Invalid merchant ID" })
-      }
       const result = await this.adminService.updateMerchantStatus(merchantId, req.body)
       res.status(200).json(result)
     } catch (error) {

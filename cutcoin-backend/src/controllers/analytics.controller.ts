@@ -6,6 +6,10 @@ export class AnalyticsController {
 
   public getDashboardStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.admin) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
       const result = await this.analyticsService.getDashboardStats()
       res.status(200).json(result)
     } catch (error) {
@@ -15,6 +19,10 @@ export class AnalyticsController {
 
   public getTransactionStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.admin) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
       const result = await this.analyticsService.getTransactionStats(req.query)
       res.status(200).json(result)
     } catch (error) {
@@ -24,6 +32,10 @@ export class AnalyticsController {
 
   public getUserStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.admin) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
       const result = await this.analyticsService.getUserStats(req.query)
       res.status(200).json(result)
     } catch (error) {
@@ -33,6 +45,10 @@ export class AnalyticsController {
 
   public getMerchantStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.admin) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
       const result = await this.analyticsService.getMerchantStats(req.query)
       res.status(200).json(result)
     } catch (error) {
@@ -42,6 +58,10 @@ export class AnalyticsController {
 
   public getWalletStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      if (!req.admin) {
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
       const result = await this.analyticsService.getWalletStats()
       res.status(200).json(result)
     } catch (error) {

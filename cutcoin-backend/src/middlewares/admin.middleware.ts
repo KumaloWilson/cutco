@@ -1,11 +1,13 @@
-import type { Request, Response, NextFunction, RequestHandler } from "express"
+import type { Request, Response, NextFunction } from "express"
 import jwt from "jsonwebtoken"
 import { HttpException } from "../exceptions/HttpException"
 import { Admin } from "../models/admin.model"
 
+export interface RequestWithAdmin extends Request {
+  admin: Admin
+}
 
-
-export const adminMiddleware: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+export const adminMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const Authorization = req.header("Authorization")?.split("Bearer ")[1] || null
 
@@ -30,8 +32,8 @@ export const adminMiddleware: RequestHandler = async (req: Request, res: Respons
     if (!admin.isActive) {
       return next(new HttpException(403, "Admin account is inactive"))
     }
-
-    req.admin = admin
+    // Cast req to RequestWithAdmin to add the admin property
+    ;(req as RequestWithAdmin).admin = admin
     next()
   } catch (error) {
     next(new HttpException(401, "Invalid authentication token"))
@@ -40,11 +42,11 @@ export const adminMiddleware: RequestHandler = async (req: Request, res: Respons
 
 export const superAdminMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.admin) {
+    if (!(req as RequestWithAdmin).admin) {
       return next(new HttpException(401, "Authentication required"))
     }
 
-    if (req.admin.role !== "super_admin") {
+    if ((req as RequestWithAdmin).admin.role !== "super_admin") {
       return next(new HttpException(403, "Unauthorized: Super admin access required"))
     }
 
