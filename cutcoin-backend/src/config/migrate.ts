@@ -70,7 +70,7 @@ async function runMigrations() {
 async function runSeeders() {
   try {
     // Display seeder order
-    displayFileOrder("Seeders", "seeders")
+    displayFileOrder("Seeders", "seeds")
 
     await seeder.up()
     console.log("Seeders executed successfully")

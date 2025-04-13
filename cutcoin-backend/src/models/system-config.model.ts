@@ -30,3 +30,5 @@ export class SystemConfig extends Model {
   })
   isActive!: boolean
 }
+
+export default SystemConfig

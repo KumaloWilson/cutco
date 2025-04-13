@@ -36,3 +36,5 @@ export class Wallet extends Model {
   @BelongsTo(() => User)
   user!: User
 }
+
+export default Wallet

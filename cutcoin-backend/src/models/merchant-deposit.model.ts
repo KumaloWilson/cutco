@@ -70,3 +70,5 @@ export class MerchantDeposit extends Model {
   @BelongsTo(() => User)
   student!: User
 }
+
+export default MerchantDeposit

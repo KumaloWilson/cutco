@@ -47,3 +47,5 @@ export class OTP extends Model {
   @BelongsTo(() => User)
   user!: User
 }
+
+export default OTP

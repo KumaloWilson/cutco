@@ -1,6 +1,5 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from "sequelize-typescript"
 import { User } from "./user.model"
-import { PaymentMetadata } from "@/types/paymentmetadata"
 
 @Table({
   tableName: "payments",
@@ -55,7 +54,7 @@ export class Payment extends Model {
     type: DataType.JSONB,
     allowNull: true,
   })
-  metadata!: PaymentMetadata
+  metadata!: object
 
   @Column({
     type: DataType.INTEGER,
@@ -66,3 +65,5 @@ export class Payment extends Model {
   @BelongsTo(() => User)
   user!: User
 }
+
+export default Payment

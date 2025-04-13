@@ -69,3 +69,5 @@ export class AuditLog extends Model {
   @BelongsTo(() => Admin)
   admin!: Admin
 }
+
+export default AuditLog

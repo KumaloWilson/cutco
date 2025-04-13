@@ -1,7 +1,7 @@
-import { type QueryInterface, DataTypes, type Sequelize } from "sequelize"
+import { type QueryInterface, DataTypes, Sequelize } from "sequelize"
 
-module.exports = {
-  up: async (queryInterface: QueryInterface, sequelize: Sequelize) => {
+export default {
+  up: async (queryInterface: QueryInterface): Promise<void> => {
     // Create merchants table
     await queryInterface.createTable("merchants", {
       id: {
