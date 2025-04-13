@@ -9,8 +9,7 @@ import { HttpException } from "../exceptions/HttpException"
 import { PaynowService } from "./paynow.service"
 import { NotificationService } from "./notification.service"
 import { generateTransactionReference } from "../utils/generators"
-
-import sequelize from "@/config/sequelize"
+import sequelize from "../config/sequelize"
 import type { Transaction as SequelizeTransaction } from "sequelize"
 import { Op } from "sequelize"
 
