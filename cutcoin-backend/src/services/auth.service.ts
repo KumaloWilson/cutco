@@ -6,7 +6,7 @@ import { sendSMS } from "../utils/sms"
 import jwt from "jsonwebtoken"
 import { HttpException } from "../exceptions/HttpException"
 import type { Transaction } from "sequelize"
-import { sequelize } from "../app"
+import sequelize from "../config/sequelize"
 
 export class AuthService {
   public async register(userData: {

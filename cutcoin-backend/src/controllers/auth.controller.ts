@@ -60,11 +60,12 @@ export class AuthController {
     }
   }
 
-  public completeKYC = async (req: Request, res: Response, next: NextFunction) => {
+  public completeKYC = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userId = req.user?.id // From auth middleware
+      const userId = req.user?.id
       if (!userId) {
-        return res.status(403).json({ message: "User not found" })
+        res.status(403).json({ message: "User not found" })
+        return
       }
       const result = await this.authService.completeKYC(userId, req.body)
       res.status(200).json(result)
