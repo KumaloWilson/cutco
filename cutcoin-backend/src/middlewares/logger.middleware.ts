@@ -44,7 +44,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 
 // Audit logger middleware
 export const auditLogger = async (
-  req: Request,
+  req: any,
   entity: string,
   action: string,
   entityId?: number,

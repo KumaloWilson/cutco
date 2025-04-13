@@ -59,17 +59,18 @@ export class AuthController {
     }
   }
 
-  public completeKYC = async (req: Request, res: Response, next: NextFunction) => {
+  public completeKYC = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" });
+        return; // Just return without the Response object
       }
-
-      const userId = req.user.id
-      const result = await this.authService.completeKYC(userId, req.body)
-      res.status(200).json(result)
+  
+      const userId = req.user.id;
+      const result = await this.authService.completeKYC(userId, req.body);
+      res.status(200).json(result);
     } catch (error) {
-      next(error)
+      next(error);
     }
   }
 }

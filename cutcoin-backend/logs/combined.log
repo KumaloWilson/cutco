@@ -1,0 +1,3 @@
+{"level":"info","message":{"duration":"99ms","ip":"::1","method":"POST","status":500,"url":"/api/auth/register","userAgent":"PostmanRuntime/7.43.2"},"service":"cutcoin-api","timestamp":"2025-04-13T06:40:56.867Z"}
+{"level":"info","message":{"duration":"15ms","ip":"::1","method":"POST","status":400,"url":"/api/auth/register","userAgent":"PostmanRuntime/7.43.2"},"service":"cutcoin-api","timestamp":"2025-04-13T06:41:24.972Z"}
+{"level":"info","message":{"duration":"19ms","ip":"::1","method":"POST","status":500,"url":"/api/auth/register","userAgent":"PostmanRuntime/7.43.2"},"service":"cutcoin-api","timestamp":"2025-04-13T06:41:36.691Z"}
