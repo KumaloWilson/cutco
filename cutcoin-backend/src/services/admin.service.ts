@@ -8,7 +8,7 @@ import { AuditLog } from "../models/audit-log.model"
 import { HttpException } from "../exceptions/HttpException"
 import jwt from "jsonwebtoken"
 import { Op } from "sequelize"
-import sequelize from "sequelize/types/sequelize"
+import sequelize from "../config/sequelize"
 
 export class AdminService {
   public async login(credentials: { username: string; password: string }) {

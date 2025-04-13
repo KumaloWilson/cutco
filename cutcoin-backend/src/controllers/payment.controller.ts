@@ -5,10 +5,11 @@ export class PaymentController {
   private paymentService = new PaymentService()
 
   // User endpoints
-  public initiatePaynowPayment = async (req: Request, res: Response, next: NextFunction) => {
+  public initiatePaynowPayment = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       const userId = req.user.id
@@ -30,10 +31,11 @@ export class PaymentController {
     }
   }
 
-  public confirmCashDeposit = async (req: Request, res: Response, next: NextFunction) => {
+  public confirmCashDeposit = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       const userId = req.user.id
@@ -45,10 +47,11 @@ export class PaymentController {
     }
   }
 
-  public getStudentDeposits = async (req: Request, res: Response, next: NextFunction) => {
+  public getStudentDeposits = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       const userId = req.user.id
@@ -60,16 +63,18 @@ export class PaymentController {
   }
 
   // Merchant endpoints
-  public initiateCashDeposit = async (req: Request, res: Response, next: NextFunction) => {
+  public initiateCashDeposit = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       // Get merchant ID from user's merchant profile
       const merchant = await req.user.getMerchant()
       if (!merchant) {
-        return res.status(403).json({ message: "User is not a merchant" })
+        res.status(403).json({ message: "User is not a merchant" })
+        return
       }
 
       const result = await this.paymentService.initiateCashDeposit(merchant.id, req.body)
@@ -79,16 +84,18 @@ export class PaymentController {
     }
   }
 
-  public getMerchantDeposits = async (req: Request, res: Response, next: NextFunction) => {
+  public getMerchantDeposits = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       // Get merchant ID from user's merchant profile
       const merchant = await req.user.getMerchant()
       if (!merchant) {
-        return res.status(403).json({ message: "User is not a merchant" })
+         res.status(403).json({ message: "User is not a merchant" })
+         return
       }
 
       const result = await this.paymentService.getMerchantDeposits(merchant.id, req.query)
@@ -98,16 +105,18 @@ export class PaymentController {
     }
   }
 
-  public getMerchantDepositDetails = async (req: Request, res: Response, next: NextFunction) => {
+  public getMerchantDepositDetails = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       // Get merchant ID from user's merchant profile
       const merchant = await req.user.getMerchant()
       if (!merchant) {
-        return res.status(403).json({ message: "User is not a merchant" })
+         res.status(403).json({ message: "User is not a merchant" })
+         return
       }
 
       const depositId = Number(req.params.id)
@@ -119,10 +128,11 @@ export class PaymentController {
   }
 
   // Admin endpoints
-  public adminApproveCashDeposit = async (req: Request, res: Response, next: NextFunction) => {
+  public adminApproveCashDeposit = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       const adminId = req.admin.id
@@ -152,10 +162,11 @@ export class PaymentController {
     }
   }
 
-  public updateExchangeRate = async (req: Request, res: Response, next: NextFunction) => {
+  public updateExchangeRate = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
-        return res.status(401).json({ message: "Unauthorized" })
+         res.status(401).json({ message: "Unauthorized" })
+         return
       }
 
       const adminId = req.admin.id
@@ -167,10 +178,11 @@ export class PaymentController {
     }
   }
 
-  public setMerchantDepositLimits = async (req: Request, res: Response, next: NextFunction) => {
+  public setMerchantDepositLimits = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
-        return res.status(401).json({ message: "Unauthorized" })
+         res.status(401).json({ message: "Unauthorized" })
+         return
       }
 
       const adminId = req.admin.id
