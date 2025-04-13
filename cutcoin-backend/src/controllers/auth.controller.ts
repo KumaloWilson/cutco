@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express"
 import { AuthService } from "../services/auth.service"
+import { Console } from "console"
 
 export class AuthController {
   private authService = new AuthService()
@@ -7,6 +8,10 @@ export class AuthController {
   public register = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userData = req.body
+
+      
+      console.log("User data:", userData);
+
       const result = await this.authService.register(userData)
       res.status(201).json(result)
     } catch (error) {

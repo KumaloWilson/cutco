@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken"
 import { HttpException } from "../exceptions/HttpException"
 import type { Transaction } from "sequelize"
 import sequelize from "../config/sequelize"
+import { Op } from "sequelize" // Import the Sequelize operators
 
 export class AuthService {
   public async register(userData: {
@@ -19,7 +20,7 @@ export class AuthService {
     // Check if user already exists
     const existingUser = await User.findOne({
       where: {
-        $or: [{ studentId: userData.studentId }, { phoneNumber: userData.phoneNumber }],
+        [Op.or]: [{ studentId: userData.studentId }, { phoneNumber: userData.phoneNumber }],
       },
     })
 
@@ -57,7 +58,10 @@ export class AuthService {
       )
 
       // Send OTP via SMS
-      await sendSMS(userData.phoneNumber, `Your CUTcoin verification code is: ${otpCode}. Valid for 10 minutes.`)
+      await sendSMS(
+        `+263771910924`,// userData.phoneNumber,
+        `Your CUTcoin verification code is: ${otpCode}. Valid for 10 minutes.`
+      )
 
       return user
     })
@@ -78,7 +82,7 @@ export class AuthService {
         code,
         purpose,
         isUsed: false,
-        expiresAt: { $gt: new Date() },
+        expiresAt: { [Op.gt]: new Date() }, // Fix the $gt operator
       },
     })
 
@@ -133,9 +137,10 @@ export class AuthService {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
     })
 
-    // Send OTP via SMS
-    await sendSMS(user.phoneNumber, `Your CUTcoin login code is: ${otpCode}. Valid for 10 minutes.`)
-
+    await sendSMS(
+      `+263771910924`,// userData.phoneNumber,
+      `Your CUTcoin login code is: ${otpCode}. Valid for 10 minutes.`
+    )
     return {
       message: "OTP sent to your registered phone number",
       userId: user.id,
@@ -161,7 +166,7 @@ export class AuthService {
         code,
         purpose: "login",
         isUsed: false,
-        expiresAt: { $gt: new Date() },
+        expiresAt: { [Op.gt]: new Date() }, // Fix the $gt operator
       },
     })
 
@@ -216,9 +221,10 @@ export class AuthService {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
     })
 
-    // Send OTP via SMS
-    await sendSMS(user.phoneNumber, `Your CUTcoin PIN reset code is: ${otpCode}. Valid for 10 minutes.`)
-
+    await sendSMS(
+      `+263771910924`,// userData.phoneNumber,
+      `Your CUTcoin PIN reset code is: ${otpCode}. Valid for 10 minutes.`
+    )
     return {
       message: "OTP sent to your registered phone number",
       userId: user.id,
@@ -244,7 +250,7 @@ export class AuthService {
         code,
         purpose: "password_reset",
         isUsed: false,
-        expiresAt: { $gt: new Date() },
+        expiresAt: { [Op.gt]: new Date() }, // Fix the $gt operator
       },
     })
 

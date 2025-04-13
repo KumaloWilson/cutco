@@ -57,10 +57,10 @@ class App {
       console.log("Database connection has been established successfully.")
 
       // Sync database in development mode
-      if (process.env.NODE_ENV === "development") {
-        await sequelize.sync({ alter: true })
-        console.log("Database synchronized")
-      }
+      // if (process.env.NODE_ENV === "development") {
+      //   await sequelize.sync({ alter: true })
+      //   console.log("Database synchronized")
+      // }
     } catch (error) {
       console.error("Unable to connect to the database:", error)
     }
