@@ -7,6 +7,7 @@ import { generateOTP, generateTransactionReference } from "../utils/generators"
 import { sendSMS } from "../utils/sms"
 import type { Transaction as SequelizeTransaction } from "sequelize"
 import sequelize from "../config/sequelize"
+import { Op } from "sequelize" // Import the Sequelize operators
 
 export class WalletService {
   public async getWalletBalance(userId: number) {
@@ -154,7 +155,7 @@ export class WalletService {
         code,
         purpose: "transaction",
         isUsed: false,
-        expiresAt: { $gt: new Date() },
+        expiresAt: { [Op.gt]: new Date() }, // Changed $gt to Op.gt
       },
     })
 
@@ -305,7 +306,7 @@ export class WalletService {
         code,
         purpose: "transaction",
         isUsed: false,
-        expiresAt: { $gt: new Date() },
+        expiresAt: { [Op.gt]: new Date() }, // Changed $gt to Op.gt
       },
     })
 
@@ -407,7 +408,7 @@ export class WalletService {
     const offset = (page - 1) * limit
 
     const whereClause: any = {
-      $or: [{ senderId: userId }, { receiverId: userId }],
+      [Op.or]: [{ senderId: userId }, { receiverId: userId }], // Changed $or to Op.or
     }
 
     if (query.type) {
@@ -496,7 +497,7 @@ export class WalletService {
     const transaction = await Transaction.findOne({
       where: {
         id: transactionId,
-        $or: [{ senderId: userId }, { receiverId: userId }],
+        [Op.or]: [{ senderId: userId }, { receiverId: userId }], // Changed $or to Op.or
       },
       include: [
         {
