@@ -5,10 +5,11 @@ export class NotificationController {
   private notificationService = new NotificationService()
 
   // Admin endpoints
-  public sendSMS = async (req: Request, res: Response, next: NextFunction) => {
+  public sendSMS = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.admin) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       const result = await this.notificationService.sendSMS(req.body)
