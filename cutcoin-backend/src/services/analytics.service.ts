@@ -3,7 +3,7 @@ import { Transaction } from "../models/transaction.model"
 import { Merchant } from "../models/merchant.model"
 import { Wallet } from "../models/wallet.model"
 import { Op } from "sequelize"
-import { sequelize } from "../app"
+import sequelize from "@/config/sequelize"
 
 export class AnalyticsService {
   public async getDashboardStats() {

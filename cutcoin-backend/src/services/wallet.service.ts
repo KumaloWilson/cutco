@@ -5,8 +5,8 @@ import { OTP } from "../models/otp.model"
 import { HttpException } from "../exceptions/HttpException"
 import { generateOTP, generateTransactionReference } from "../utils/generators"
 import { sendSMS } from "../utils/sms"
-import { sequelize } from "../app"
 import type { Transaction as SequelizeTransaction } from "sequelize"
+import sequelize from "@/config/sequelize"
 
 export class WalletService {
   public async getWalletBalance(userId: number) {

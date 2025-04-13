@@ -10,7 +10,7 @@
     "watch": "nodemon --exec ts-node src/server.ts",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-       "migrate": "ts-node src/config/migrate.ts"
+    "migrate": "ts-node src/config/migrate.ts"
   },
   "keywords": [],
   "author": "",

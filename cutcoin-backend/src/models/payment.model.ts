@@ -1,5 +1,6 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from "sequelize-typescript"
 import { User } from "./user.model"
+import { PaymentMetadata } from "@/types/paymentmetadata"
 
 @Table({
   tableName: "payments",
@@ -54,7 +55,7 @@ export class Payment extends Model {
     type: DataType.JSONB,
     allowNull: true,
   })
-  metadata!: object
+  metadata!: PaymentMetadata
 
   @Column({
     type: DataType.INTEGER,
