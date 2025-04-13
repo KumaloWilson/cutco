@@ -21,11 +21,11 @@ router.use("/auth/verify-login", authLimiter)
 
 // Register routes
 router.use("/auth", authRoutes)
-// router.use("/wallet", walletRoutes)
-// router.use("/merchant", merchantRoutes)
-// router.use("/admin", adminRoutes)
-// router.use("/analytics", analyticsRoutes)
-// router.use("/notifications", notificationRoutes)
-// router.use("/payments", paymentRoutes)
+router.use("/wallet", walletRoutes)
+router.use("/merchant", merchantRoutes)
+router.use("/admin", adminRoutes)
+router.use("/analytics", analyticsRoutes)
+router.use("/notifications", notificationRoutes)
+router.use("/payments", paymentRoutes)
 
 export default router
