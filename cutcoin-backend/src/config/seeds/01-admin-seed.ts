@@ -1,8 +1,9 @@
 import type { QueryInterface, Sequelize } from "sequelize"
 import bcrypt from "bcrypt"
 
-module.exports = {
-  up: async (queryInterface: QueryInterface, sequelize: Sequelize) => {
+
+export default {
+  up: async (queryInterface: QueryInterface): Promise<void> => {
     // Create default super admin
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash("admin123", salt)

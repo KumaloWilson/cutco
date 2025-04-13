@@ -59,3 +59,5 @@ export class Merchant extends Model {
   @BelongsTo(() => User)
   user!: User
 }
+
+export default Merchant

@@ -70,3 +70,5 @@ export class Admin extends Model {
     return bcrypt.compare(password, this.password)
   }
 }
+
+export default Admin

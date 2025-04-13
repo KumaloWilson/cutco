@@ -113,3 +113,5 @@ export class User extends Model {
     return Merchant.findOne({ where: { userId: this.id } })
   }
 }
+
+export default User

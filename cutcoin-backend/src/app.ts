@@ -6,7 +6,6 @@ import { Sequelize } from "sequelize-typescript"
 import dotenv from "dotenv"
 import routes from "./routes"
 import { errorHandler } from "./middlewares/errorHandler"
-import { dbConfig } from "./config/database"
 import { User } from "./models/user.model"
 import { Wallet } from "./models/wallet.model"
 import { OTP } from "./models/otp.model"
@@ -16,12 +15,11 @@ import { Admin } from "./models/admin.model"
 import { Notification } from "./models/notification.model"
 import { SystemConfig } from "./models/system-config.model"
 import { AuditLog } from "./models/audit-log.model"
+import sequelize from "./config/sequelize"
 
 // Load environment variables
 dotenv.config()
 
-// Export sequelize instance for use in services
-export const sequelize = new Sequelize(dbConfig)
 
 class App {
   public app: Application

@@ -52,3 +52,5 @@ export class Notification extends Model {
   @BelongsTo(() => User)
   user!: User
 }
+
+export default Notification

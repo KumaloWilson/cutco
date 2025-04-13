@@ -65,3 +65,5 @@ export class Transaction extends Model {
   @BelongsTo(() => User, "receiverId")
   receiver!: User
 }
+
+export default Transaction
