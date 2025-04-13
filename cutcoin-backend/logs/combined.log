@@ -27,3 +27,5 @@
 {"level":"info","message":{"duration":"2012ms","ip":"::1","method":"GET","status":200,"url":"/api/wallet/balance","userAgent":"PostmanRuntime/7.43.2"},"service":"cutcoin-api","timestamp":"2025-04-13T09:14:24.822Z"}
 {"level":"info","message":{"duration":"8328ms","ip":"::1","method":"POST","status":200,"url":"/api/wallet/withdraw","userAgent":"PostmanRuntime/7.43.2"},"service":"cutcoin-api","timestamp":"2025-04-13T09:15:20.185Z"}
 {"level":"info","message":{"duration":"7616ms","ip":"::1","method":"GET","status":500,"url":"/api/wallet/transactions","userAgent":"PostmanRuntime/7.43.2"},"service":"cutcoin-api","timestamp":"2025-04-13T09:22:09.397Z"}
+{"level":"info","message":{"duration":"2145ms","ip":"::1","method":"GET","status":200,"url":"/api/wallet/transactions","userAgent":"PostmanRuntime/7.43.2"},"service":"cutcoin-api","timestamp":"2025-04-13T09:26:53.730Z"}
+{"level":"info","message":{"duration":"1846ms","ip":"::1","method":"GET","status":200,"url":"/api/wallet/transactions/2","userAgent":"PostmanRuntime/7.43.2"},"service":"cutcoin-api","timestamp":"2025-04-13T09:28:18.479Z"}
