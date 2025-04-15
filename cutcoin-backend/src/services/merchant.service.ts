@@ -6,8 +6,7 @@ import { OTP } from "../models/otp.model"
 import { HttpException } from "../exceptions/HttpException"
 import { generateOTP, generateTransactionReference } from "../utils/generators"
 import { sendSMS } from "../utils/sms"
-
-import sequelize from "../config/sequelize"
+import { sequelize } from "../app"
 import type { Transaction as SequelizeTransaction } from "sequelize"
 
 export class MerchantService {
@@ -41,6 +40,7 @@ export class MerchantService {
     return {
       message: "Merchant registration successful. Pending approval.",
       merchantId: merchant.id,
+      merchantNumber: merchant.merchantNumber,
     }
   }
 
@@ -57,6 +57,24 @@ export class MerchantService {
 
     if (!merchant) {
       throw new HttpException(404, "Merchant profile not found")
+    }
+
+    return merchant
+  }
+
+  public async getMerchantByNumber(merchantNumber: string) {
+    const merchant = await Merchant.findOne({
+      where: { merchantNumber, status: "approved", isActive: true },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "studentId", "firstName", "lastName", "phoneNumber"],
+        },
+      ],
+    })
+
+    if (!merchant) {
+      throw new HttpException(404, "Merchant not found or not active")
     }
 
     return merchant
@@ -139,13 +157,14 @@ export class MerchantService {
     // Send OTP via SMS
     await sendSMS(
       customer.phoneNumber,
-      `Your CUTcoin payment verification code is: ${otpCode}. Amount: ${amount} CUTcoins to ${merchant.name}. Valid for 10 minutes.`,
+      `Your CUTcoin payment verification code is: ${otpCode}. Amount: ${amount} CUTcoins to ${merchant.name} (${merchant.merchantNumber}). Valid for 10 minutes.`,
     )
 
     return {
       message: "OTP sent for payment verification",
       paymentDetails: {
         merchantName: merchant.name,
+        merchantNumber: merchant.merchantNumber,
         amount,
         description,
       },
@@ -153,13 +172,19 @@ export class MerchantService {
   }
 
   public async confirmPayment(data: {
-    merchantId: number
+    merchantNumber: string
     customerStudentId: string
     amount: number
     code: string
     description: string
   }) {
-    const { merchantId, customerStudentId, amount, code, description } = data
+    const { merchantNumber, customerStudentId, amount, code, description } = data
+
+    // Find merchant by merchant number
+    const merchant = await this.getMerchantByNumber(merchantNumber)
+    if (!merchant) {
+      throw new HttpException(404, "Merchant not found or not active")
+    }
 
     // Find customer by student ID
     const customer = await User.findOne({
@@ -189,12 +214,6 @@ export class MerchantService {
     // Mark OTP as used
     otp.isUsed = true
     await otp.save()
-
-    // Find merchant
-    const merchant = await Merchant.findByPk(merchantId)
-    if (!merchant) {
-      throw new HttpException(404, "Merchant not found")
-    }
 
     // Find merchant user and wallet
     const merchantUser = await User.findByPk(merchant.userId, {
@@ -230,7 +249,7 @@ export class MerchantService {
           type: "payment",
           status: "completed",
           reference,
-          description: `Payment to ${merchant.name}: ${description}`,
+          description: `Payment to ${merchant.name} (${merchant.merchantNumber}): ${description}`,
           fee: 0,
         },
         { transaction: t },
@@ -242,7 +261,7 @@ export class MerchantService {
     // Send SMS notifications
     await sendSMS(
       customer.phoneNumber,
-      `Your payment of ${amount} CUTcoins to ${merchant.name} was successful. New balance: ${result.customerWallet.balance} CUTcoins.`,
+      `Your payment of ${amount} CUTcoins to ${merchant.name} (${merchant.merchantNumber}) was successful. New balance: ${result.customerWallet.balance} CUTcoins.`,
     )
 
     await sendSMS(

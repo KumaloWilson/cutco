@@ -4,11 +4,10 @@ import { WalletService } from "../services/wallet.service"
 export class WalletController {
   private walletService = new WalletService()
 
-  public getWalletBalance = async (req: any, res: Response, next: NextFunction) => {
+  public getWalletBalance = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-         res.status(401).json({ message: "Unauthorized" })
-         return
+        return res.status(401).json({ message: "Unauthorized" })
       }
 
       const userId = req.user.id
@@ -19,43 +18,52 @@ export class WalletController {
     }
   }
 
-  public deposit = async (req: any, res: Response, next: NextFunction) => {
+  public deposit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        res.status(401).json({ message: "Unauthorized" })
-        return 
+        return res.status(401).json({ message: "Unauthorized" })
       }
 
       const userId = req.user.id
-      const { amount } = req.body
-      const result = await this.walletService.deposit(userId, amount)
+      const result = await this.walletService.deposit(userId, req.body)
       res.status(200).json(result)
     } catch (error) {
       next(error)
     }
   }
 
-  public withdraw = async (req: any, res: Response, next: NextFunction) => {
+  public confirmDeposit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        res.status(401).json({ message: "Unauthorized" })
-        return 
+        return res.status(401).json({ message: "Unauthorized" })
       }
 
       const userId = req.user.id
-      const { amount } = req.body
-      const result = await this.walletService.withdraw(userId, amount)
+      const result = await this.walletService.confirmDeposit(userId, req.body)
       res.status(200).json(result)
     } catch (error) {
       next(error)
     }
   }
 
-  public confirmWithdrawal = async (req: any, res: Response, next: NextFunction) => {
+  public withdraw = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        res.status(401).json({ message: "Unauthorized" })
-        return 
+        return res.status(401).json({ message: "Unauthorized" })
+      }
+
+      const userId = req.user.id
+      const result = await this.walletService.withdraw(userId, req.body)
+      res.status(200).json(result)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  public confirmWithdrawal = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Unauthorized" })
       }
 
       const userId = req.user.id
@@ -66,11 +74,10 @@ export class WalletController {
     }
   }
 
-  public transfer = async (req: any, res: Response, next: NextFunction) => {
+  public transfer = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        res.status(401).json({ message: "Unauthorized" })
-        return 
+        return res.status(401).json({ message: "Unauthorized" })
       }
 
       const userId = req.user.id
@@ -81,11 +88,10 @@ export class WalletController {
     }
   }
 
-  public confirmTransfer = async (req: any, res: Response, next: NextFunction) => {
+  public confirmTransfer = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        res.status(401).json({ message: "Unauthorized" })
-        return 
+        return res.status(401).json({ message: "Unauthorized" })
       }
 
       const userId = req.user.id
@@ -96,11 +102,10 @@ export class WalletController {
     }
   }
 
-  public getTransactionHistory = async (req: any, res: Response, next: NextFunction) => {
+  public getTransactionHistory = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        res.status(401).json({ message: "Unauthorized" })
-        return 
+        return res.status(401).json({ message: "Unauthorized" })
       }
 
       const userId = req.user.id
@@ -111,11 +116,10 @@ export class WalletController {
     }
   }
 
-  public getTransactionDetails = async (req: any, res: Response, next: NextFunction) => {
+  public getTransactionDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        res.status(401).json({ message: "Unauthorized" })
-        return 
+        return res.status(401).json({ message: "Unauthorized" })
       }
 
       const userId = req.user.id

@@ -60,9 +60,9 @@ export class InitiatePaymentDto {
 }
 
 export class ConfirmPaymentDto {
-  @IsNumber()
+  @IsString()
   @IsNotEmpty()
-  public merchantId!: number
+  public merchantNumber!: string
 
   @IsString()
   @IsNotEmpty()
