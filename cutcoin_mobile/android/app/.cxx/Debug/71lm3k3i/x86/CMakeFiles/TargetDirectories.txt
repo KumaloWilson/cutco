@@ -1,0 +1,2 @@
+/home/watkay/StudioProjects/zinwa/android/app/.cxx/Debug/71lm3k3i/x86/CMakeFiles/edit_cache.dir
+/home/watkay/StudioProjects/zinwa/android/app/.cxx/Debug/71lm3k3i/x86/CMakeFiles/rebuild_cache.dir

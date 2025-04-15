@@ -1,0 +1,1 @@
+/home/watkay/ReactProjects/zinwa/zinwa_mobile/build/app/intermediates/cxx/Debug/1nb734w4/obj/arm64-v8a
