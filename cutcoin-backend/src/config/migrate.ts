@@ -1,68 +1,77 @@
-import { Umzug, SequelizeStorage } from "umzug"
-import sequelize from "./sequelize"
-import path from "path"
-import fs from "fs"
+import { Umzug } from 'umzug';
+import { SequelizeStorage } from 'umzug/lib/storage';
+import sequelize from "./sequelize";
+import path from "path";
+import fs from "fs";
+
+interface MigrationContext {
+  context: any;
+  name: string;
+  path?: string;
+}
 
 // Initialize Umzug for migrations
 const migrator = new Umzug({
   migrations: {
     glob: ["migrations/*.ts", { cwd: __dirname }],
-    resolve: ({ name, path, context }) => {
+    resolve: ({ name, path, context }: MigrationContext) => {
+      if (!path) throw new Error('Migration path is undefined');
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const migration = require(path!)
+      const migration = require(path);
       return {
         name,
         up: async () => migration.default.up(context),
         down: async () => migration.default.down(context),
-      }
+      };
     },
   },
   context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({ sequelize }),
   logger: console,
-})
+});
 
 // Initialize Umzug for seeders
 const seeder = new Umzug({
   migrations: {
     glob: ["seeds/*.ts", { cwd: __dirname }],
-    resolve: ({ name, path, context }) => {
+    resolve: ({ name, path, context }: MigrationContext) => {
+      if (!path) throw new Error('Seeder path is undefined');
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const seeder = require(path!)
+      const seeder = require(path);
       return {
         name,
         up: async () => seeder.default.up(context),
         down: async () => seeder.default.down(context),
-      }
+      };
     },
   },
   context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({ sequelize, tableName: "seeder_meta" }),
   logger: console,
-})
+});
 
 // Function to display migration/seeder order
 function displayFileOrder(type: string, directory: string) {
-  const files = fs.readdirSync(path.join(__dirname, directory)).sort()
-  console.log(`\n${type} will run in the following order:`)
+  const files = fs.readdirSync(path.join(__dirname, directory)).sort();
+  console.log(`\n${type} will run in the following order:`);
   files.forEach((file, index) => {
-    console.log(`${index + 1}. ${file}`)
-  })
-  console.log()
+    console.log(`${index + 1}. ${file}`);
+  });
+  console.log();
 }
 
 // Run migrations
 async function runMigrations() {
   try {
     // Display migration order
-    displayFileOrder("Migrations", "migrations")
+    displayFileOrder("Migrations", "migrations");
 
-    await migrator.up()
-    console.log("Migrations executed successfully")
-    return true
+    await migrator.up();
+    console.log("Migrations executed successfully");
+    return true;
   } catch (error) {
-    console.error("Error executing migrations:", error)
-    return false
+    console.error("Error executing migrations:", error);
+    return false;
   }
 }
 
@@ -70,27 +79,27 @@ async function runMigrations() {
 async function runSeeders() {
   try {
     // Display seeder order
-    displayFileOrder("Seeders", "seeds")
+    displayFileOrder("Seeders", "seeds");
 
-    await seeder.up()
-    console.log("Seeders executed successfully")
-    return true
+    await seeder.up();
+    console.log("Seeders executed successfully");
+    return true;
   } catch (error) {
-    console.error("Error executing seeders:", error)
-    return false
+    console.error("Error executing seeders:", error);
+    return false;
   }
 }
 
 // Main function to run migrations and seeders
 async function migrate() {
   try {
-    const migrationsSuccess = await runMigrations()
+    const migrationsSuccess = await runMigrations();
     if (migrationsSuccess) {
-      await runSeeders()
+      await runSeeders();
     }
   } catch (error) {
-    console.error("Error executing migrations or seeders:", error)
-    process.exit(1)
+    console.error("Error executing migrations or seeders:", error);
+    process.exit(1);
   }
 }
 
@@ -98,14 +107,13 @@ async function migrate() {
 if (require.main === module) {
   migrate()
     .then(() => {
-      console.log("Migration process completed")
-      process.exit(0)
+      console.log("Migration process completed");
+      process.exit(0);
     })
     .catch((error) => {
-      console.error("Migration process failed:", error)
-      process.exit(1)
-    })
+      console.error("Migration process failed:", error);
+      process.exit(1);
+    });
 }
 
-export { migrate, runMigrations, runSeeders }
-
+export { migrate, runMigrations, runSeeders };
