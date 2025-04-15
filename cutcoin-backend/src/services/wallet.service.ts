@@ -6,7 +6,7 @@ import { Merchant } from "../models/merchant.model"
 import { HttpException } from "../exceptions/HttpException"
 import { generateOTP, generateTransactionReference } from "../utils/generators"
 import { sendSMS } from "../utils/sms"
-import { sequelize } from "../app"
+import sequelize  from "../config/sequelize"
 import type { Transaction as SequelizeTransaction } from "sequelize"
 
 export class WalletService {
