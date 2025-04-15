@@ -1,4 +1,5 @@
 import crypto from "crypto"
+import { Merchant } from "../models/merchant.model"
 
 export const generateOTP = (length = 6): string => {
   const digits = "0123456789"
@@ -24,4 +25,24 @@ export const generateTransactionReference = (): string => {
     .toString()
     .padStart(6, "0")
   return `TXN${timestamp}${random}`
+}
+
+export const generateMerchantNumber = async (): Promise<string> => {
+  // Generate a unique merchant number with MERCH prefix
+  // Format: MERCH-XXXXX (where X is a digit)
+  let isUnique = false
+  let merchantNumber = ""
+
+  while (!isUnique) {
+    const random = Math.floor(10000 + Math.random() * 90000).toString() // 5-digit number
+    merchantNumber = `MERCH-${random}`
+
+    // Check if this merchant number already exists
+    const existingMerchant = await Merchant.findOne({ where: { merchantNumber } })
+    if (!existingMerchant) {
+      isUnique = true
+    }
+  }
+
+  return merchantNumber
 }

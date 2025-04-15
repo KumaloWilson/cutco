@@ -5,6 +5,25 @@ export class DepositDto {
   @IsNotEmpty()
   @Min(1)
   public amount!: number
+
+  @IsString()
+  @IsNotEmpty()
+  public merchantNumber!: string
+}
+
+export class ConfirmDepositDto {
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  public amount!: number
+
+  @IsString()
+  @IsNotEmpty()
+  public merchantNumber!: string
+
+  @IsString()
+  @IsNotEmpty()
+  public code!: string
 }
 
 export class WithdrawDto {
@@ -12,6 +31,10 @@ export class WithdrawDto {
   @IsNotEmpty()
   @Min(1)
   public amount!: number
+
+  @IsString()
+  @IsNotEmpty()
+  public merchantNumber!: string
 }
 
 export class ConfirmWithdrawalDto {
@@ -19,6 +42,10 @@ export class ConfirmWithdrawalDto {
   @IsNotEmpty()
   @Min(1)
   public amount!: number
+
+  @IsString()
+  @IsNotEmpty()
+  public merchantNumber!: string
 
   @IsString()
   @IsNotEmpty()

@@ -2,7 +2,14 @@ import { Router } from "express"
 import { WalletController } from "../controllers/wallet.controller"
 import { authMiddleware } from "../middlewares/auth.middleware"
 import { validationMiddleware } from "../middlewares/validation.middleware"
-import { DepositDto, WithdrawDto, ConfirmWithdrawalDto, TransferDto, ConfirmTransferDto } from "../dtos/wallet.dto"
+import {
+  DepositDto,
+  ConfirmDepositDto,
+  WithdrawDto,
+  ConfirmWithdrawalDto,
+  TransferDto,
+  ConfirmTransferDto,
+} from "../dtos/wallet.dto"
 
 const router = Router()
 const walletController = new WalletController()
@@ -15,6 +22,7 @@ router.get("/balance", walletController.getWalletBalance)
 
 // Deposit
 router.post("/deposit", validationMiddleware(DepositDto), walletController.deposit)
+router.post("/deposit/confirm", validationMiddleware(ConfirmDepositDto), walletController.confirmDeposit)
 
 // Withdrawal
 router.post("/withdraw", validationMiddleware(WithdrawDto), walletController.withdraw)

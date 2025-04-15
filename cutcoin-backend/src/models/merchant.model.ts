@@ -1,5 +1,6 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from "sequelize-typescript"
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, BeforeCreate } from "sequelize-typescript"
 import { User } from "./user.model"
+import { generateMerchantNumber } from "../utils/generators"
 
 @Table({
   tableName: "merchants",
@@ -12,6 +13,13 @@ export class Merchant extends Model {
     allowNull: false,
   })
   userId!: number
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+    unique: true,
+  })
+  merchantNumber!: string
 
   @Column({
     type: DataType.STRING,
@@ -58,6 +66,13 @@ export class Merchant extends Model {
 
   @BelongsTo(() => User)
   user!: User
+
+  @BeforeCreate
+  static async generateMerchantNumber(instance: Merchant) {
+    if (!instance.merchantNumber) {
+      instance.merchantNumber = await generateMerchantNumber()
+    }
+  }
 }
 
 export default Merchant

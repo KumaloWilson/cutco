@@ -7,8 +7,8 @@ export class WalletController {
   public getWalletBalance = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-         res.status(401).json({ message: "Unauthorized" })
-         return
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       const userId = req.user.id
@@ -27,8 +27,22 @@ export class WalletController {
       }
 
       const userId = req.user.id
-      const { amount } = req.body
-      const result = await this.walletService.deposit(userId, amount)
+      const result = await this.walletService.deposit(userId, req.body)
+      res.status(200).json(result)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  public confirmDeposit = async (req: any, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user || !req.user.id) {
+        res.status(401).json({ message: "Unauthorized" })
+        return 
+      }
+
+      const userId = req.user.id
+      const result = await this.walletService.confirmDeposit(userId, req.body)
       res.status(200).json(result)
     } catch (error) {
       next(error)
@@ -43,8 +57,7 @@ export class WalletController {
       }
 
       const userId = req.user.id
-      const { amount } = req.body
-      const result = await this.walletService.withdraw(userId, amount)
+      const result = await this.walletService.withdraw(userId, req.body)
       res.status(200).json(result)
     } catch (error) {
       next(error)

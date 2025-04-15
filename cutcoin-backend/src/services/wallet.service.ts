@@ -2,12 +2,12 @@ import { User } from "../models/user.model"
 import { Wallet } from "../models/wallet.model"
 import { Transaction } from "../models/transaction.model"
 import { OTP } from "../models/otp.model"
+import { Merchant } from "../models/merchant.model"
 import { HttpException } from "../exceptions/HttpException"
 import { generateOTP, generateTransactionReference } from "../utils/generators"
 import { sendSMS } from "../utils/sms"
+import sequelize  from "../config/sequelize"
 import type { Transaction as SequelizeTransaction } from "sequelize"
-import sequelize from "../config/sequelize"
-import { Op } from "sequelize" // Import the Sequelize operators
 
 export class WalletService {
   public async getWalletBalance(userId: number) {
@@ -32,9 +32,98 @@ export class WalletService {
     }
   }
 
-  public async deposit(userId: number, amount: number) {
+  public async deposit(userId: number, data: { amount: number; merchantNumber: string }) {
+    const { amount, merchantNumber } = data
+
     if (amount <= 0) {
       throw new HttpException(400, "Deposit amount must be greater than zero")
+    }
+
+    // Find merchant by merchant number
+    const merchant = await Merchant.findOne({
+      where: { merchantNumber, status: "approved", isActive: true },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "studentId", "firstName", "lastName", "phoneNumber"],
+        },
+      ],
+    })
+
+    if (!merchant) {
+      throw new HttpException(404, "Merchant not found or not active")
+    }
+
+    // Find user wallet
+    const wallet = await Wallet.findOne({ where: { userId } })
+    if (!wallet) {
+      throw new HttpException(404, "Wallet not found")
+    }
+
+    // Generate OTP for deposit verification
+    const user = await User.findByPk(userId)
+    if (!user) {
+      throw new HttpException(404, "User not found")
+    }
+
+    const otpCode = generateOTP()
+    await OTP.create({
+      userId,
+      phoneNumber: user.phoneNumber,
+      code: otpCode,
+      purpose: "transaction",
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+    })
+
+    // Send OTP via SMS
+    await sendSMS(
+      user.phoneNumber,
+      `Your CUTcoin deposit verification code is: ${otpCode}. Amount: ${amount} CUTcoins via merchant ${merchant.name} (${merchant.merchantNumber}). Valid for 10 minutes.`,
+    )
+
+    return {
+      message: "OTP sent for deposit verification",
+      amount,
+      merchantName: merchant.name,
+      merchantNumber: merchant.merchantNumber,
+    }
+  }
+
+  public async confirmDeposit(userId: number, data: { amount: number; merchantNumber: string; code: string }) {
+    const { amount, merchantNumber, code } = data
+
+    // Verify OTP
+    const otp = await OTP.findOne({
+      where: {
+        userId,
+        code,
+        purpose: "transaction",
+        isUsed: false,
+        expiresAt: { $gt: new Date() },
+      },
+    })
+
+    if (!otp) {
+      throw new HttpException(400, "Invalid or expired OTP")
+    }
+
+    // Mark OTP as used
+    otp.isUsed = true
+    await otp.save()
+
+    // Find merchant by merchant number
+    const merchant = await Merchant.findOne({
+      where: { merchantNumber, status: "approved", isActive: true },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "studentId", "firstName", "lastName", "phoneNumber"],
+        },
+      ],
+    })
+
+    if (!merchant) {
+      throw new HttpException(404, "Merchant not found or not active")
     }
 
     // Find user wallet
@@ -59,12 +148,11 @@ export class WalletService {
           type: "deposit",
           status: "completed",
           reference,
-          description: "Deposit to wallet",
+          description: `Deposit to wallet via merchant ${merchant.name} (${merchant.merchantNumber})`,
           fee: 0,
         },
         { transaction: t },
       )
-      
 
       return { wallet, transaction }
     })
@@ -74,9 +162,15 @@ export class WalletService {
     if (user) {
       await sendSMS(
         user.phoneNumber,
-        `Your CUTcoin wallet has been credited with ${amount} CUTcoins. New balance: ${result.wallet.balance} CUTcoins.`,
+        `Your CUTcoin wallet has been credited with ${amount} CUTcoins via merchant ${merchant.name}. New balance: ${result.wallet.balance} CUTcoins.`,
       )
     }
+
+    // Notify merchant
+    await sendSMS(
+      merchant.user.phoneNumber,
+      `A deposit of ${amount} CUTcoins has been processed for student ${user?.firstName} ${user?.lastName} (${user?.studentId}).`,
+    )
 
     return {
       message: "Deposit successful",
@@ -92,9 +186,26 @@ export class WalletService {
     }
   }
 
-  public async withdraw(userId: number, amount: number) {
+  public async withdraw(userId: number, data: { amount: number; merchantNumber: string }) {
+    const { amount, merchantNumber } = data
+
     if (amount <= 0) {
       throw new HttpException(400, "Withdrawal amount must be greater than zero")
+    }
+
+    // Find merchant by merchant number
+    const merchant = await Merchant.findOne({
+      where: { merchantNumber, status: "approved", isActive: true },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "studentId", "firstName", "lastName", "phoneNumber"],
+        },
+      ],
+    })
+
+    if (!merchant) {
+      throw new HttpException(404, "Merchant not found or not active")
     }
 
     // Find user wallet
@@ -134,7 +245,7 @@ export class WalletService {
     // Send OTP via SMS
     await sendSMS(
       user.phoneNumber,
-      `Your CUTcoin withdrawal verification code is: ${otpCode}. Amount: ${amount} CUTcoins. Valid for 10 minutes.`,
+      `Your CUTcoin withdrawal verification code is: ${otpCode}. Amount: ${amount} CUTcoins via merchant ${merchant.name} (${merchant.merchantNumber}). Fee: ${fee} CUTcoins. Valid for 10 minutes.`,
     )
 
     return {
@@ -142,11 +253,13 @@ export class WalletService {
       amount,
       fee,
       totalAmount,
+      merchantName: merchant.name,
+      merchantNumber: merchant.merchantNumber,
     }
   }
 
-  public async confirmWithdrawal(userId: number, data: { amount: number; code: string }) {
-    const { amount, code } = data
+  public async confirmWithdrawal(userId: number, data: { amount: number; merchantNumber: string; code: string }) {
+    const { amount, merchantNumber, code } = data
 
     // Verify OTP
     const otp = await OTP.findOne({
@@ -155,7 +268,7 @@ export class WalletService {
         code,
         purpose: "transaction",
         isUsed: false,
-        expiresAt: { [Op.gt]: new Date() }, // Changed $gt to Op.gt
+        expiresAt: { $gt: new Date() },
       },
     })
 
@@ -166,6 +279,21 @@ export class WalletService {
     // Mark OTP as used
     otp.isUsed = true
     await otp.save()
+
+    // Find merchant by merchant number
+    const merchant = await Merchant.findOne({
+      where: { merchantNumber, status: "approved", isActive: true },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "studentId", "firstName", "lastName", "phoneNumber"],
+        },
+      ],
+    })
+
+    if (!merchant) {
+      throw new HttpException(404, "Merchant not found or not active")
+    }
 
     // Find user wallet
     const wallet = await Wallet.findOne({ where: { userId } })
@@ -193,12 +321,12 @@ export class WalletService {
       const transaction = await Transaction.create(
         {
           senderId: userId,
-          receiverId: null,
+          receiverId: merchant.user.id, // Merchant receives the withdrawal
           amount,
           type: "withdrawal",
           status: "completed",
           reference,
-          description: "Withdrawal from wallet",
+          description: `Withdrawal from wallet via merchant ${merchant.name} (${merchant.merchantNumber})`,
           fee,
         },
         { transaction: t },
@@ -212,9 +340,15 @@ export class WalletService {
     if (user) {
       await sendSMS(
         user.phoneNumber,
-        `Your withdrawal of ${amount} CUTcoins has been processed. Fee: ${fee} CUTcoins. New balance: ${result.wallet.balance} CUTcoins.`,
+        `Your withdrawal of ${amount} CUTcoins via merchant ${merchant.name} has been processed. Fee: ${fee} CUTcoins. New balance: ${result.wallet.balance} CUTcoins.`,
       )
     }
+
+    // Notify merchant
+    await sendSMS(
+      merchant.user.phoneNumber,
+      `A withdrawal of ${amount} CUTcoins has been requested by student ${user?.firstName} ${user?.lastName} (${user?.studentId}). Please provide the cash equivalent.`,
+    )
 
     return {
       message: "Withdrawal successful",
@@ -281,7 +415,7 @@ export class WalletService {
     // Send OTP via SMS
     await sendSMS(
       sender.phoneNumber,
-      `Your CUTcoin transfer verification code is: ${otpCode}. Amount: ${amount} CUTcoins to ${recipientUser.firstName} ${recipientUser.lastName}. Valid for 10 minutes.`,
+      `Your CUTcoin transfer verification code is: ${otpCode}. Amount: ${amount} CUTcoins to ${recipientUser.firstName} ${recipientUser.lastName} (${recipientUser.studentId}). Valid for 10 minutes.`,
     )
 
     return {
@@ -306,7 +440,7 @@ export class WalletService {
         code,
         purpose: "transaction",
         isUsed: false,
-        expiresAt: { [Op.gt]: new Date() }, // Changed $gt to Op.gt
+        expiresAt: { $gt: new Date() },
       },
     })
 
@@ -363,7 +497,7 @@ export class WalletService {
           type: "transfer",
           status: "completed",
           reference,
-          description: `Transfer to ${recipientUser.firstName} ${recipientUser.lastName}`,
+          description: `Transfer to ${recipientUser.firstName} ${recipientUser.lastName} (${recipientUser.studentId})`,
           fee,
         },
         { transaction: t },
@@ -408,7 +542,7 @@ export class WalletService {
     const offset = (page - 1) * limit
 
     const whereClause: any = {
-      [Op.or]: [{ senderId: userId }, { receiverId: userId }], // Changed $or to Op.or
+      $or: [{ senderId: userId }, { receiverId: userId }],
     }
 
     if (query.type) {
@@ -497,7 +631,7 @@ export class WalletService {
     const transaction = await Transaction.findOne({
       where: {
         id: transactionId,
-        [Op.or]: [{ senderId: userId }, { receiverId: userId }], // Changed $or to Op.or
+        $or: [{ senderId: userId }, { receiverId: userId }],
       },
       include: [
         {
