@@ -9,7 +9,7 @@ import { HttpException } from "../exceptions/HttpException"
 import { PaynowService } from "./paynow.service"
 import { NotificationService } from "./notification.service"
 import { generateTransactionReference } from "../utils/generators"
-import sequelize from "../config/sequelize"
+import sequelize  from "../config/sequelize"
 import type { Transaction as SequelizeTransaction } from "sequelize"
 import { Op } from "sequelize"
 
@@ -207,6 +207,179 @@ export class PaymentService {
     })
 
     return result
+  }
+
+  // Merchant deposits funds to their wallet
+  public async merchantDepositFunds(merchantUserId: number, data: { amount: number; paymentMethod: string }) {
+    const { amount, paymentMethod } = data
+
+    // Validate amount
+    if (amount <= 0) {
+      throw new HttpException(400, "Amount must be greater than zero")
+    }
+
+    // Find merchant
+    const merchant = await Merchant.findOne({
+      where: { userId: merchantUserId, status: "approved", isActive: true },
+    })
+
+    if (!merchant) {
+      throw new HttpException(404, "Merchant not found or not active")
+    }
+
+    // Find merchant user
+    const merchantUser = await User.findByPk(merchantUserId, {
+      include: [{ model: Wallet }],
+    })
+
+    if (!merchantUser || !merchantUser.wallet) {
+      throw new HttpException(404, "Merchant wallet not found")
+    }
+
+    // Calculate CUTcoin amount
+    const cutcoinAmount = await this.calculateCutcoinAmount(amount)
+
+    // Generate reference
+    const reference = generateTransactionReference()
+
+    // Create payment record
+    const payment = await Payment.create({
+      userId: merchantUserId,
+      paymentMethod,
+      amount,
+      cutcoinAmount,
+      reference,
+      status: "pending",
+      metadata: {
+        isMerchantDeposit: true,
+      },
+    })
+
+    // If payment method is paynow, initiate paynow payment
+    if (paymentMethod === "paynow") {
+      const paymentResult = await this.paynowService.createPayment(
+        reference,
+        merchantUser.email || `${merchantUser.studentId}@cutcoin.ac.zw`,
+        amount,
+        `Merchant float deposit: ${cutcoinAmount} CUTcoins`,
+      )
+
+      if (!paymentResult.success) {
+        // Update payment status to failed
+        await payment.update({
+          status: "failed",
+          metadata: { ...payment.metadata, error: paymentResult.error },
+        })
+
+        throw new HttpException(500, paymentResult.error || "Payment initialization failed")
+      }
+
+      // Update payment with Paynow details
+      await payment.update({
+        metadata: {
+          ...payment.metadata,
+          pollUrl: paymentResult.pollUrl,
+          redirectUrl: paymentResult.redirectUrl,
+        },
+      })
+
+      return {
+        paymentId: payment.id,
+        reference: payment.reference,
+        amount,
+        cutcoinAmount,
+        redirectUrl: paymentResult.redirectUrl,
+      }
+    } else if (paymentMethod === "cash") {
+      // For cash deposits, admin needs to approve
+      return {
+        paymentId: payment.id,
+        reference: payment.reference,
+        amount,
+        cutcoinAmount,
+        message: "Cash deposit request submitted. Waiting for admin approval.",
+      }
+    }
+
+    throw new HttpException(400, "Invalid payment method")
+  }
+
+  // Admin approves merchant cash deposit
+  public async adminApproveMerchantDeposit(adminId: number, paymentId: number) {
+    // Find payment
+    const payment = await Payment.findByPk(paymentId, {
+      include: [{ model: User }],
+    })
+
+    if (!payment) {
+      throw new HttpException(404, "Payment not found")
+    }
+
+    if (payment.status !== "pending") {
+      throw new HttpException(400, `Payment already ${payment.status}`)
+    }
+
+    // Verify this is a merchant deposit
+    if (!payment.metadata?.isMerchantDeposit) {
+      throw new HttpException(400, "This is not a merchant deposit")
+    }
+
+    // Process in transaction
+    const result = await sequelize.transaction(async (t: SequelizeTransaction) => {
+      // Find merchant wallet
+      const wallet = await Wallet.findOne({
+        where: { userId: payment.userId },
+        transaction: t,
+      })
+
+      if (!wallet) {
+        throw new HttpException(404, "Wallet not found")
+      }
+
+      // Update wallet balance
+      wallet.balance = Number(wallet.balance) + Number(payment.cutcoinAmount)
+      await wallet.save({ transaction: t })
+
+      // Create transaction record
+      const transaction = await Transaction.create(
+        {
+          senderId: payment.userId, // Self-deposit
+          receiverId: payment.userId,
+          amount: payment.cutcoinAmount,
+          type: "deposit",
+          status: "completed",
+          reference: payment.reference,
+          description: `Merchant float deposit via ${payment.paymentMethod}`,
+          fee: 0,
+        },
+        { transaction: t },
+      )
+
+      // Update payment status
+      payment.status = "completed"
+      await payment.save({ transaction: t })
+
+      return { wallet, transaction, payment }
+    })
+
+    // Find merchant
+    const merchant = await Merchant.findOne({
+      where: { userId: payment.userId },
+    })
+
+    // Send notification
+    await this.notificationService.sendSMS({
+      userId: payment.userId,
+      message: `Your merchant float deposit of ${payment.cutcoinAmount} CUTcoins has been processed. New balance: ${result.wallet.balance} CUTcoins.`,
+    })
+
+    return {
+      success: true,
+      message: "Merchant deposit approved successfully",
+      merchantName: merchant ? merchant.name : "Unknown",
+      amount: payment.cutcoinAmount,
+      transaction: result.transaction,
+    }
   }
 
   // Merchant initiates cash deposit for student

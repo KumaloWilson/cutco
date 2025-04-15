@@ -85,3 +85,6 @@
 {"level":"info","message":{"duration":"4177ms","ip":"::1","method":"POST","status":200,"url":"/api/auth/login","userAgent":"PostmanRuntime/7.43.3"},"service":"cutcoin-api","timestamp":"2025-04-15T18:24:17.507Z"}
 {"level":"info","message":{"duration":"8030ms","ip":"::1","method":"POST","status":200,"url":"/api/auth/verify-login","userAgent":"PostmanRuntime/7.43.3"},"service":"cutcoin-api","timestamp":"2025-04-15T18:25:03.596Z"}
 {"level":"info","message":{"duration":"5440ms","ip":"::1","method":"GET","status":200,"url":"/api/wallet/balance","userAgent":"PostmanRuntime/7.43.3"},"service":"cutcoin-api","timestamp":"2025-04-15T18:26:22.045Z"}
+{"level":"info","message":{"duration":"9004ms","ip":"::1","method":"POST","status":404,"url":"/api/wallet/deposit","userAgent":"PostmanRuntime/7.43.3"},"service":"cutcoin-api","timestamp":"2025-04-15T19:15:02.914Z"}
+{"level":"info","message":{"duration":"9209ms","ip":"::1","method":"POST","status":200,"url":"/api/wallet/deposit/initiate","userAgent":"PostmanRuntime/7.43.3"},"service":"cutcoin-api","timestamp":"2025-04-15T19:15:41.981Z"}
+{"level":"info","message":{"duration":"26321ms","ip":"::1","method":"POST","status":200,"url":"/api/wallet/deposit/merchant-confirm","userAgent":"PostmanRuntime/7.43.3"},"service":"cutcoin-api","timestamp":"2025-04-15T19:19:30.415Z"}

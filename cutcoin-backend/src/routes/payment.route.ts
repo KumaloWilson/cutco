@@ -9,6 +9,7 @@ import {
   UpdateExchangeRateDto,
   MerchantDepositLimitsDto,
 } from "../dtos/payment.dto"
+import { MerchantDepositFundsDto } from "../dtos/payment.dto"
 
 const router = Router()
 const paymentController = new PaymentController()
@@ -27,12 +28,18 @@ router.post(
   validationMiddleware(InitiateCashDepositDto),
   paymentController.initiateCashDeposit,
 )
+router.post(
+  "/merchant/deposit-funds",
+  validationMiddleware(MerchantDepositFundsDto),
+  paymentController.merchantDepositFunds,
+)
 router.get("/merchant/deposits", paymentController.getMerchantDeposits)
 router.get("/merchant/deposits/:id", paymentController.getMerchantDepositDetails)
 
 // Admin routes
 router.use("/admin", adminMiddleware)
 router.post("/admin/deposits/:id/approve", paymentController.adminApproveCashDeposit)
+router.post("/admin/merchant-deposits/:id/approve", paymentController.adminApproveMerchantDeposit)
 router.get("/admin/payments", paymentController.getAllPayments)
 router.get("/admin/deposits", paymentController.getAllMerchantDeposits)
 router.put("/admin/exchange-rate", validationMiddleware(UpdateExchangeRateDto), paymentController.updateExchangeRate)

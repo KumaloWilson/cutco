@@ -23,6 +23,7 @@ router.get("/balance", walletController.getWalletBalance)
 
 // Deposit
 router.post("/deposit/initiate", validationMiddleware(InitiateDepositDto), walletController.initiateDeposit)
+
 router.post(
   "/deposit/merchant-confirm",
   validationMiddleware(MerchantConfirmTransactionDto),
