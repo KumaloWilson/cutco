@@ -1,13 +1,16 @@
-import { Umzug } from 'umzug';
-import { SequelizeStorage } from 'umzug/lib/storage/sequelize';
+import { Umzug as UmzugType } from 'umzug';
 import sequelize from "./sequelize";
 import path from "path";
 import fs from "fs";
 
+// Import the actual implementations
+const { Umzug } = require('umzug');
+const { SequelizeStorage } = require('umzug/lib/storage');
+
 // Defined types for migration/seeder resolution
 interface MigrationContext {
   name: string;
-  path?: string;
+  path: string;
   context: any;
 }
 
@@ -16,7 +19,7 @@ const migrator = new Umzug({
   migrations: {
     glob: ["migrations/*.ts", { cwd: __dirname }],
     resolve: ({ name, path, context }: MigrationContext) => {
-      const migration = require(path || "");
+      const migration = require(path);
       return {
         name,
         up: async () => migration.default.up(context),
@@ -34,7 +37,7 @@ const seeder = new Umzug({
   migrations: {
     glob: ["seeds/*.ts", { cwd: __dirname }],
     resolve: ({ name, path, context }: MigrationContext) => {
-      const seeder = require(path || "");
+      const seeder = require(path);
       return {
         name,
         up: async () => seeder.default.up(context),
