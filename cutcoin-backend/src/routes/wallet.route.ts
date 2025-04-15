@@ -3,10 +3,11 @@ import { WalletController } from "../controllers/wallet.controller"
 import { authMiddleware } from "../middlewares/auth.middleware"
 import { validationMiddleware } from "../middlewares/validation.middleware"
 import {
-  DepositDto,
-  ConfirmDepositDto,
-  WithdrawDto,
-  ConfirmWithdrawalDto,
+  InitiateDepositDto,
+  MerchantConfirmTransactionDto,
+  CancelTransactionDto,
+  InitiateWithdrawalDto,
+  ConfirmWithdrawalOtpDto,
   TransferDto,
   ConfirmTransferDto,
 } from "../dtos/wallet.dto"
@@ -21,12 +22,36 @@ router.use(authMiddleware)
 router.get("/balance", walletController.getWalletBalance)
 
 // Deposit
-router.post("/deposit", validationMiddleware(DepositDto), walletController.deposit)
-router.post("/deposit/confirm", validationMiddleware(ConfirmDepositDto), walletController.confirmDeposit)
+router.post("/deposit/initiate", validationMiddleware(InitiateDepositDto), walletController.initiateDeposit)
+router.post(
+  "/deposit/merchant-confirm",
+  validationMiddleware(MerchantConfirmTransactionDto),
+  walletController.merchantConfirmDeposit,
+)
 
 // Withdrawal
-router.post("/withdraw", validationMiddleware(WithdrawDto), walletController.withdraw)
-router.post("/withdraw/confirm", validationMiddleware(ConfirmWithdrawalDto), walletController.confirmWithdrawal)
+router.post("/withdraw/initiate", validationMiddleware(InitiateWithdrawalDto), walletController.initiateWithdrawal)
+router.post(
+  "/withdraw/confirm-otp",
+  validationMiddleware(ConfirmWithdrawalOtpDto),
+  walletController.confirmWithdrawalOTP,
+)
+router.post(
+  "/withdraw/merchant-confirm",
+  validationMiddleware(MerchantConfirmTransactionDto),
+  walletController.merchantConfirmWithdrawal,
+)
+
+// Cancel transaction
+router.post(
+  "/transaction/cancel",
+  validationMiddleware(CancelTransactionDto),
+  walletController.cancelMerchantTransaction,
+)
+
+// Pending transactions
+router.get("/merchant/pending-transactions", walletController.getMerchantPendingTransactions)
+router.get("/pending-transactions", walletController.getUserPendingTransactions)
 
 // Transfer
 router.post("/transfer", validationMiddleware(TransferDto), walletController.transfer)

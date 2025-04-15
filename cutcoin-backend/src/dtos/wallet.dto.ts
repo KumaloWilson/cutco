@@ -1,6 +1,6 @@
 import { IsNumber, IsString, IsNotEmpty, Min } from "class-validator"
 
-export class DepositDto {
+export class InitiateDepositDto {
   @IsNumber()
   @IsNotEmpty()
   @Min(1)
@@ -11,22 +11,19 @@ export class DepositDto {
   public merchantNumber!: string
 }
 
-export class ConfirmDepositDto {
-  @IsNumber()
-  @IsNotEmpty()
-  @Min(1)
-  public amount!: number
-
+export class MerchantConfirmTransactionDto {
   @IsString()
   @IsNotEmpty()
-  public merchantNumber!: string
-
-  @IsString()
-  @IsNotEmpty()
-  public code!: string
+  public reference!: string
 }
 
-export class WithdrawDto {
+export class CancelTransactionDto {
+  @IsString()
+  @IsNotEmpty()
+  public reference!: string
+}
+
+export class InitiateWithdrawalDto {
   @IsNumber()
   @IsNotEmpty()
   @Min(1)
@@ -37,7 +34,7 @@ export class WithdrawDto {
   public merchantNumber!: string
 }
 
-export class ConfirmWithdrawalDto {
+export class ConfirmWithdrawalOtpDto {
   @IsNumber()
   @IsNotEmpty()
   @Min(1)
