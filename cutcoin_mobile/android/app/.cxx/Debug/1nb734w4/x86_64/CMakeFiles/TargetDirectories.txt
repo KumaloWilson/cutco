@@ -1,0 +1,2 @@
+/home/watkay/ReactProjects/zinwa/zinwa_mobile/android/app/.cxx/Debug/1nb734w4/x86_64/CMakeFiles/edit_cache.dir
+/home/watkay/ReactProjects/zinwa/zinwa_mobile/android/app/.cxx/Debug/1nb734w4/x86_64/CMakeFiles/rebuild_cache.dir
