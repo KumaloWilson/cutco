@@ -40,3 +40,14 @@ export class MerchantDepositLimitsDto {
   @Min(1)
   public monthly!: number
 }
+
+export class MerchantDepositFundsDto {
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  public amount!: number
+
+  @IsString()
+  @IsNotEmpty()
+  public paymentMethod!: string
+}

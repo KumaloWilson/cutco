@@ -135,6 +135,20 @@ export class WalletService {
       throw new HttpException(404, "Deposit transaction not found or already processed")
     }
 
+    // Find merchant's wallet
+    const merchantWallet = await Wallet.findOne({
+      where: { userId: merchantUserId },
+    })
+
+    if (!merchantWallet) {
+      throw new HttpException(404, "Merchant wallet not found")
+    }
+
+    // Check if merchant has sufficient balance
+    if (Number(merchantWallet.balance) < Number(merchantTransaction.amount)) {
+      throw new HttpException(400, "Insufficient merchant balance to complete this deposit")
+    }
+
     // Process the deposit in a transaction
     const result = await sequelize.transaction(async (t: SequelizeTransaction) => {
       // Update merchant transaction status
@@ -143,16 +157,20 @@ export class WalletService {
       merchantTransaction.completedAt = new Date()
       await merchantTransaction.save({ transaction: t })
 
-      // Update user wallet balance
+      // Update user wallet balance (add to student)
       const wallet = merchantTransaction.user.wallet
       wallet.balance = Number(wallet.balance) + Number(merchantTransaction.amount)
       await wallet.save({ transaction: t })
 
+      // Update merchant wallet balance (subtract from merchant)
+      merchantWallet.balance = Number(merchantWallet.balance) - Number(merchantTransaction.amount)
+      await merchantWallet.save({ transaction: t })
+
       // Create transaction record
       const transaction = await Transaction.create(
         {
-          senderId: merchantTransaction.userId,
-          receiverId: merchantTransaction.userId, // Self-deposit
+          senderId: merchantUserId, // Merchant is the sender in a deposit
+          receiverId: merchantTransaction.userId, // Student is the receiver
           amount: merchantTransaction.amount,
           type: "deposit",
           status: "completed",
@@ -163,13 +181,19 @@ export class WalletService {
         { transaction: t },
       )
 
-      return { wallet, transaction, merchantTransaction }
+      return { wallet, merchantWallet, transaction, merchantTransaction }
     })
 
     // Send notifications
     await sendSMS(
       merchantTransaction.user.phoneNumber,
       `Your deposit of ${merchantTransaction.amount} CUTcoins has been confirmed by merchant ${merchant.name}. New balance: ${result.wallet.balance} CUTcoins.`,
+    )
+
+    // Notify merchant of their new balance
+    await sendSMS(
+      merchant.user.phoneNumber,
+      `You have confirmed a deposit of ${merchantTransaction.amount} CUTcoins to ${merchantTransaction.user.firstName} ${merchantTransaction.user.lastName}. Your new balance: ${result.merchantWallet.balance} CUTcoins.`,
     )
 
     return {
@@ -383,6 +407,15 @@ export class WalletService {
       throw new HttpException(404, "Withdrawal transaction not found or already processed")
     }
 
+    // Find merchant's wallet
+    const merchantWallet = await Wallet.findOne({
+      where: { userId: merchantUserId },
+    })
+
+    if (!merchantWallet) {
+      throw new HttpException(404, "Merchant wallet not found")
+    }
+
     // Process the withdrawal in a transaction
     const result = await sequelize.transaction(async (t: SequelizeTransaction) => {
       // Update merchant transaction status
@@ -391,11 +424,15 @@ export class WalletService {
       merchantTransaction.completedAt = new Date()
       await merchantTransaction.save({ transaction: t })
 
+      // Update merchant wallet balance (add to merchant)
+      merchantWallet.balance = Number(merchantWallet.balance) + Number(merchantTransaction.amount)
+      await merchantWallet.save({ transaction: t })
+
       // Create transaction record
       const transaction = await Transaction.create(
         {
-          senderId: merchantTransaction.userId,
-          receiverId: merchant.userId, // Merchant receives the withdrawal
+          senderId: merchantTransaction.userId, // Student is the sender
+          receiverId: merchantUserId, // Merchant is the receiver
           amount: merchantTransaction.amount,
           type: "withdrawal",
           status: "completed",
@@ -406,13 +443,19 @@ export class WalletService {
         { transaction: t },
       )
 
-      return { transaction, merchantTransaction }
+      return { merchantWallet, transaction, merchantTransaction }
     })
 
     // Send notifications
     await sendSMS(
       merchantTransaction.user.phoneNumber,
       `Your withdrawal of ${merchantTransaction.amount} CUTcoins has been confirmed by merchant ${merchant.name}. Fee: ${merchantTransaction.fee || 0} CUTcoins.`,
+    )
+
+    // Notify merchant of their new balance
+    await sendSMS(
+      merchant.user.phoneNumber,
+      `You have confirmed a withdrawal of ${merchantTransaction.amount} CUTcoins from ${merchantTransaction.user.firstName} ${merchantTransaction.user.lastName}. Your new balance: ${result.merchantWallet.balance} CUTcoins.`,
     )
 
     return {
@@ -445,7 +488,7 @@ export class WalletService {
           include: [
             {
               model: User,
-              attributes: ["phoneNumber"],
+              attributes: ["phoneNumber", "id"],
             },
           ],
         },
