@@ -5,15 +5,15 @@ import 'package:cutcoin_mobile/app/core/utils/logger.dart';
 
 class DioClient {
   late Dio _dio;
-  final baseUrl = 'http://localhost:3000/api';
+  final baseUrl = 'https://api-cutcoin.onrender.com/api';
   final StorageService _storageService = Get.find<StorageService>();
   
   DioClient() {
     _dio = Dio(
       BaseOptions(
         baseUrl: baseUrl,
-        connectTimeout: const Duration(seconds: 15),
-        receiveTimeout: const Duration(seconds: 15),
+        connectTimeout: const Duration(seconds: 60),
+        receiveTimeout: const Duration(seconds: 60),
         responseType: ResponseType.json,
       ),
     );
