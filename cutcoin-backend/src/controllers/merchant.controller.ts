@@ -59,7 +59,8 @@ export class MerchantController {
       // Get merchant ID from user's merchant profile
       const merchant = await req.user.getMerchant()
       if (!merchant) {
-        return res.status(403).json({ message: "User is not a merchant" })
+        res.status(403).json({ message: "User is not a merchant" })
+        return
       }
 
       const result = await this.merchantService.initiatePayment(merchant.id, req.body)
@@ -88,7 +89,8 @@ export class MerchantController {
       // Get merchant ID from user's merchant profile
       const merchant = await req.user.getMerchant()
       if (!merchant) {
-        return res.status(403).json({ message: "User is not a merchant" })
+        res.status(403).json({ message: "User is not a merchant" })
+        return 
       }
 
       const result = await this.merchantService.getMerchantTransactions(merchant.id, req.query)
