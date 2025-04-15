@@ -4,10 +4,11 @@ import { MerchantService } from "../services/merchant.service"
 export class MerchantController {
   private merchantService = new MerchantService()
 
-  public registerMerchant = async (req: Request, res: Response, next: NextFunction) => {
+  public registerMerchant = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       const userId = req.user.id
@@ -18,10 +19,11 @@ export class MerchantController {
     }
   }
 
-  public getMerchantProfile = async (req: Request, res: Response, next: NextFunction) => {
+  public getMerchantProfile = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       const userId = req.user.id
@@ -32,10 +34,11 @@ export class MerchantController {
     }
   }
 
-  public updateMerchantProfile = async (req: Request, res: Response, next: NextFunction) => {
+  public updateMerchantProfile = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       const userId = req.user.id
@@ -46,10 +49,11 @@ export class MerchantController {
     }
   }
 
-  public initiatePayment = async (req: Request, res: Response, next: NextFunction) => {
+  public initiatePayment = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       // Get merchant ID from user's merchant profile
@@ -74,10 +78,11 @@ export class MerchantController {
     }
   }
 
-  public getMerchantTransactions = async (req: Request, res: Response, next: NextFunction) => {
+  public getMerchantTransactions = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" })
+        res.status(401).json({ message: "Unauthorized" })
+        return 
       }
 
       // Get merchant ID from user's merchant profile
