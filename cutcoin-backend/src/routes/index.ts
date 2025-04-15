@@ -6,6 +6,7 @@ import adminRoutes from "./admin.route"
 import analyticsRoutes from "./analytics.route"
 import notificationRoutes from "./notification.route"
 import paymentRoutes from "./payment.route"
+import userRoutes from "./user.route"
 import { apiLimiter, authLimiter } from "../middlewares/rate-limiter.middleware"
 import { requestLogger } from "../middlewares/logger.middleware"
 
@@ -27,5 +28,6 @@ router.use("/admin", adminRoutes)
 router.use("/analytics", analyticsRoutes)
 router.use("/notifications", notificationRoutes)
 router.use("/payments", paymentRoutes)
+router.use("/users", userRoutes)
 
 export default router

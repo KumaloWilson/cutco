@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:cutcoin_mobile/app/routes/app_pages.dart';
@@ -11,8 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Load environment variables
-  // await dotenv.load(fileName: '.env');
-  //
+
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -36,10 +34,10 @@ void configureEasyLoading() {
     ..indicatorSize = 45.0
     ..radius = 10.0
     ..progressColor = Colors.white
-    ..backgroundColor = Colors.black.withOpacity(0.8)
+    ..backgroundColor = Colors.black.withValues(alpha: 0.8)
     ..indicatorColor = Colors.white
     ..textColor = Colors.white
-    ..maskColor = Colors.black.withOpacity(0.5)
+    ..maskColor = Colors.black.withValues(alpha: 0.5)
     ..userInteractions = false
     ..dismissOnTap = false;
 }
