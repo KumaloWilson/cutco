@@ -7,7 +7,7 @@ import { MerchantTransaction } from "../models/merchant-transaction.model"
 import { HttpException } from "../exceptions/HttpException"
 import { generateOTP, generateTransactionReference } from "../utils/generators"
 import { sendSMS } from "../utils/sms"
-import sequelize  from "../config/sequelize"
+import sequelize from "../config/sequelize"
 import type { Transaction as SequelizeTransaction } from "sequelize"
 import { Op } from "sequelize"
 
@@ -284,7 +284,7 @@ export class WalletService {
         code,
         purpose: "withdrawal",
         isUsed: false,
-        expiresAt: { $gt: new Date() },
+        expiresAt: { [Op.gt]: new Date() },
       },
     })
 
@@ -702,7 +702,7 @@ export class WalletService {
         code,
         purpose: "transfer",
         isUsed: false,
-        expiresAt: { $gt: new Date() },
+        expiresAt: { [Op.gt]: new Date() },
       },
     })
 
@@ -870,94 +870,102 @@ export class WalletService {
     }
   }
 
-  public async getTransactionHistory(userId: number, query: { page?: number; limit?: number; type?: string }) {
-    const page = query.page || 1
-    const limit = query.limit || 10
-    const offset = (page - 1) * limit
+  public async getTransactionHistory(
+    userId: number,
+    query: { page?: string | number; limit?: string | number; type?: string },
+  ) {
+    try {
+      const page = Number(query.page) || 1
+      const limit = Number(query.limit) || 10
+      const offset = (page - 1) * limit
 
-    const whereClause: any = {
-      $or: [{ senderId: userId }, { receiverId: userId }],
-    }
-
-    if (query.type) {
-      whereClause.type = query.type
-    }
-
-    const { count, rows } = await Transaction.findAndCountAll({
-      where: whereClause,
-      limit,
-      offset,
-      order: [["createdAt", "DESC"]],
-      include: [
-        {
-          model: User,
-          as: "sender",
-          attributes: ["studentId", "firstName", "lastName"],
-        },
-        {
-          model: User,
-          as: "receiver",
-          attributes: ["studentId", "firstName", "lastName"],
-        },
-      ],
-    })
-
-    // Format transactions for better readability
-    const transactions = rows.map((transaction) => {
-      const isSender = transaction.senderId === userId
-      const isReceiver = transaction.receiverId === userId
-      const isDeposit = transaction.type === "deposit"
-      const isWithdrawal = transaction.type === "withdrawal"
-
-      let description = transaction.description
-      let amount = Number(transaction.amount)
-
-      if (transaction.type === "transfer") {
-        if (isSender) {
-          description = `Transfer to ${transaction.receiver?.firstName} ${transaction.receiver?.lastName}`
-          amount = -amount // Negative for outgoing
-        } else if (isReceiver) {
-          description = `Transfer from ${transaction.sender?.firstName} ${transaction.sender?.lastName}`
-        }
-      } else if (isDeposit) {
-        description = "Deposit to wallet"
-      } else if (isWithdrawal) {
-        description = "Withdrawal from wallet"
-        amount = -amount // Negative for outgoing
+      const whereClause: any = {
+        [Op.or]: [{ senderId: userId }, { receiverId: userId }],
       }
+
+      if (query.type && typeof query.type === "string") {
+        whereClause.type = query.type
+      }
+
+      const { count, rows } = await Transaction.findAndCountAll({
+        where: whereClause,
+        limit,
+        offset,
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: User,
+            as: "sender",
+            attributes: ["studentId", "firstName", "lastName"],
+          },
+          {
+            model: User,
+            as: "receiver",
+            attributes: ["studentId", "firstName", "lastName"],
+          },
+        ],
+      })
+
+      // Format transactions for better readability
+      const transactions = rows.map((transaction) => {
+        const isSender = transaction.senderId === userId
+        const isReceiver = transaction.receiverId === userId
+        const isDeposit = transaction.type === "deposit"
+        const isWithdrawal = transaction.type === "withdrawal"
+
+        let description = transaction.description || ""
+        let amount = Number(transaction.amount)
+
+        if (transaction.type === "transfer") {
+          if (isSender) {
+            description = `Transfer to ${transaction.receiver?.firstName || ""} ${transaction.receiver?.lastName || ""}`
+            amount = -amount // Negative for outgoing
+          } else if (isReceiver) {
+            description = `Transfer from ${transaction.sender?.firstName || ""} ${transaction.sender?.lastName || ""}`
+          }
+        } else if (isDeposit) {
+          description = "Deposit to wallet"
+        } else if (isWithdrawal) {
+          description = "Withdrawal from wallet"
+          amount = -amount // Negative for outgoing
+        }
+
+        return {
+          id: transaction.id,
+          reference: transaction.reference,
+          amount,
+          fee: Number(transaction.fee || 0),
+          type: transaction.type,
+          status: transaction.status,
+          description,
+          createdAt: transaction.createdAt,
+          sender: transaction.sender
+            ? {
+                studentId: transaction.sender.studentId,
+                name: `${transaction.sender.firstName} ${transaction.sender.lastName}`,
+              }
+            : null,
+          receiver: transaction.receiver
+            ? {
+                studentId: transaction.receiver.studentId,
+                name: `${transaction.receiver.firstName} ${transaction.receiver.lastName}`,
+              }
+            : null,
+        }
+      })
 
       return {
-        id: transaction.id,
-        reference: transaction.reference,
-        amount,
-        fee: Number(transaction.fee),
-        type: transaction.type,
-        status: transaction.status,
-        description,
-        createdAt: transaction.createdAt,
-        sender: transaction.sender
-          ? {
-              studentId: transaction.sender.studentId,
-              name: `${transaction.sender.firstName} ${transaction.sender.lastName}`,
-            }
-          : null,
-        receiver: transaction.receiver
-          ? {
-              studentId: transaction.receiver.studentId,
-              name: `${transaction.receiver.firstName} ${transaction.receiver.lastName}`,
-            }
-          : null,
+        transactions,
+        pagination: {
+          total: count,
+          page,
+          limit,
+          pages: Math.ceil(count / limit),
+        },
       }
-    })
-
-    return {
-      transactions,
-      pagination: {
-        total: count,
-        page,
-        limit,
-        pages: Math.ceil(count / limit),
-      },
+    } catch (error) {
+      console.error("Error fetching transaction history:", error)
+      throw new HttpException(500, "Failed to fetch transaction history")
     }
   }
 
@@ -965,7 +973,7 @@ export class WalletService {
     const transaction = await Transaction.findOne({
       where: {
         id: transactionId,
-        $or: [{ senderId: userId }, { receiverId: userId }],
+        [Op.or]: [{ senderId: userId }, { receiverId: userId }],
       },
       include: [
         {
@@ -989,7 +997,7 @@ export class WalletService {
       id: transaction.id,
       reference: transaction.reference,
       amount: Number(transaction.amount),
-      fee: Number(transaction.fee),
+      fee: Number(transaction.fee || 0),
       type: transaction.type,
       status: transaction.status,
       description: transaction.description,

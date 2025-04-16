@@ -186,11 +186,6 @@ class ProfileView extends GetView<ProfileController> {
           title: 'Email',
           value: controller.user.value?.email ?? 'Not set',
         ),
-        _buildInfoCard(
-          icon: Icons.calendar_today,
-          title: 'Joined',
-          value: controller.user.value?.createdAt.toString().split(' ')[0] ?? '',
-        ),
       ],
     );
   }

@@ -116,7 +116,7 @@ class UserRepository {
   Future<User> getUserProfile() async {
     try {
       final response = await _apiProvider.getUserProfile();
-      return User.fromJson(response.data['user']);
+      return User.fromJson(response.data);
     } on DioException catch (e) {
       LoggerService.e('Get user profile repository error', e);
       if (e.response != null) {
