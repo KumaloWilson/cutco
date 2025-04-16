@@ -252,7 +252,7 @@ class ApiProvider {
   // User profile endpoints
   Future<Response> getUserProfile() async {
     try {
-      final response = await _dioClient.dio.get('/user/profile');
+      final response = await _dioClient.dio.get('/users/profile');
       return response;
     } catch (e) {
       LoggerService.e('Get user profile error', e);
@@ -263,7 +263,7 @@ class ApiProvider {
   Future<Response> updateUserProfile(Map<String, dynamic> userData) async {
     try {
       final response = await _dioClient.dio.put(
-        '/user/profile',
+        '/users/profile',
         data: userData,
       );
       return response;

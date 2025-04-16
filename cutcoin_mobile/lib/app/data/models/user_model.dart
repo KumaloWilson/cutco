@@ -5,8 +5,9 @@ class User {
   final String lastName;
   final String phoneNumber;
   final String? email;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
+  final String kycStatus;
+  final UserWallet? wallet;
+
 
   User({
     required this.id,
@@ -14,9 +15,9 @@ class User {
     required this.firstName,
     required this.lastName,
     required this.phoneNumber,
+    required this.kycStatus,
+    required this.wallet,
     this.email,
-    required this.createdAt,
-    this.updatedAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -27,21 +28,25 @@ class User {
       lastName: json['lastName'],
       phoneNumber: json['phoneNumber'],
       email: json['email'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      kycStatus: json['kycStatus'],
+      wallet: json['wallet'] != null ? UserWallet.fromJson(json['wallet']) : null,
     );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'studentId': studentId,
-      'firstName': firstName,
-      'lastName': lastName,
-      'phoneNumber': phoneNumber,
-      'email': email,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-    };
+class UserWallet{
+  String? walletAddress;
+  String? balance;
+
+  UserWallet({
+    this.walletAddress,
+    this.balance,
+  });
+
+  factory UserWallet.fromJson(Map<String, dynamic> json) {
+    return UserWallet(
+      walletAddress: json['walletAddress'],
+      balance: json['balance'],
+    );
   }
 }
