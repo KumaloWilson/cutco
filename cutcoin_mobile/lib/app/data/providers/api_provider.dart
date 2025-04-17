@@ -290,6 +290,7 @@ class ApiProvider {
       rethrow;
     }
   }
+  
 
   Future<Response> markNotificationAsRead(int notificationId) async {
     try {
