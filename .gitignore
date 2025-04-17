@@ -1,10 +1,10 @@
 node_modules
-frontend/node_modules
+merchant-panel/node_modules
 cutcoin-backend/node_modules
-frontend/dist/
+merchant-panel/dist/
 extension/dist/
 cutcoin-backend/dist/
-frontend/.env
+merchant-panel/.env
 extension/.env
 cutcoin-backend/.env
 cutcoin-backend/logs/combined.log
