@@ -4,12 +4,12 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/components/ui/use-toast"
 import { fetchApi } from "@/lib/api"
 import { useAuth } from "@/contexts/auth-context"
 import { ArrowUpRight, ArrowDownRight, Wallet, Users, RefreshCw } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import PendingTransactionsTable from "@/components/pending-transactions-table"
+import { toast } from "sonner"
 
 interface WalletData {
   balance: number
@@ -37,7 +37,6 @@ export default function DashboardPage() {
   const [pendingTransactions, setPendingTransactions] = useState<PendingTransaction[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const { toast } = useToast()
   const { user } = useAuth()
 
   const fetchData = async () => {
@@ -54,10 +53,7 @@ export default function DashboardPage() {
       )
       setPendingTransactions(pendingData.pendingTransactions)
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load dashboard data",
+      toast( "Error",{        description: error instanceof Error ? error.message : "Failed to load dashboard data",
       })
     } finally {
       setIsLoading(false)
