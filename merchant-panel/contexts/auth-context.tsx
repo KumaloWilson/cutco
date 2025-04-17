@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
-import { useToast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 
 interface User {
   id: number
@@ -27,7 +27,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
-  const { toast } = useToast()
 
   useEffect(() => {
     // Check if user is logged in
@@ -68,16 +67,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(data.token)
       setUser(data.user)
 
-      toast({
-        title: "Login successful",
+      toast( "Login successful",{
         description: `Welcome back, ${data.user.merchantName}!`,
       })
 
       router.push("/dashboard")
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Login failed",
+      toast("Login failed",{
         description: error instanceof Error ? error.message : "An error occurred",
       })
     } finally {
