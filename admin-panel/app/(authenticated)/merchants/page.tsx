@@ -35,7 +35,7 @@ export default function MerchantsPage() {
     const fetchMerchants = async () => {
       try {
         setIsLoading(true)
-        const response = await api.get("/api/admin/merchants")
+        const response = await api.get("/admin/merchants")
         setMerchants(response.data.merchants || [])
       } catch (error) {
         console.error("Failed to fetch merchants:", error)
