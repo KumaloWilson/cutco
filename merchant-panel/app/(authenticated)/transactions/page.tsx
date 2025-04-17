@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/components/ui/use-toast"
 import { fetchApi } from "@/lib/api"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { ArrowDownRight, ArrowUpRight, RefreshCw, Search } from "lucide-react"
-import { toast } from "sonner"
 
 interface Transaction {
   id: number
@@ -55,6 +55,7 @@ export default function TransactionsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [filter, setFilter] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
+  const { toast } = useToast()
 
   const fetchTransactions = async (page = 1, type?: string) => {
     try {
@@ -69,8 +70,9 @@ export default function TransactionsPage() {
       setTransactions(data.transactions)
       setPagination(data.pagination)
     } catch (error) {
-      toast(
-        "Error",{
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: error instanceof Error ? error.message : "Failed to load transactions",
       })
     } finally {
@@ -92,7 +94,8 @@ export default function TransactionsPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     // Implement search functionality here
-    toast("Search",{
+    toast({
+      title: "Search",
       description: `Searching for: ${searchQuery}`,
     })
   }

@@ -12,10 +12,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import { useToast } from "@/components/ui/use-toast"
 import { fetchApi } from "@/lib/api"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { ArrowDownRight, ArrowUpRight, Check, X } from "lucide-react"
-import { toast } from "sonner"
 
 interface PendingTransaction {
   id: number
@@ -46,7 +46,7 @@ export default function PendingTransactionsTable({
 }: PendingTransactionsTableProps) {
   const [selectedTransaction, setSelectedTransaction] = useState<PendingTransaction | null>(null)
   const [isConfirming, setIsConfirming] = useState(false)
-
+  const { toast } = useToast()
 
   const handleConfirm = async () => {
     if (!selectedTransaction) return
@@ -63,7 +63,8 @@ export default function PendingTransactionsTable({
         body: { reference: selectedTransaction.reference },
       })
 
-      toast("Transaction confirmed",{
+      toast({
+        title: "Transaction confirmed",
         description: `The ${selectedTransaction.type} has been successfully confirmed.`,
       })
 
@@ -71,7 +72,9 @@ export default function PendingTransactionsTable({
       setSelectedTransaction(null)
       onRefresh()
     } catch (error) {
-      toast("Confirmation failed",{
+      toast({
+        variant: "destructive",
+        title: "Confirmation failed",
         description: error instanceof Error ? error.message : "An error occurred",
       })
     } finally {

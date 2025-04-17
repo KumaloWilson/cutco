@@ -8,22 +8,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useToast } from "@/components/ui/use-toast"
 import { fetchApi } from "@/lib/api"
 import PendingTransactionsTable from "@/components/pending-transactions-table"
 import { ArrowDownRight } from "lucide-react"
-import { toast } from "sonner"
 
 export default function DepositsPage() {
   const [activeTab, setActiveTab] = useState("pending")
   const [studentId, setStudentId] = useState("")
   const [amount, setAmount] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { toast } = useToast()
 
   const handleInitiateDeposit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!studentId || !amount) {
-      toast( "Error",{
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: "Please fill in all fields",
       })
       return
@@ -31,7 +34,9 @@ export default function DepositsPage() {
 
     const amountValue = Number.parseFloat(amount)
     if (isNaN(amountValue) || amountValue <= 0) {
-      toast( "Error",{
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: "Please enter a valid amount",
       })
       return
@@ -48,7 +53,8 @@ export default function DepositsPage() {
         },
       })
 
-      toast("Deposit initiated",{
+      toast({
+        title: "Deposit initiated",
         description: `Deposit of ${amountValue} for student ${studentId} has been initiated.`,
       })
 
@@ -59,7 +65,9 @@ export default function DepositsPage() {
       // Switch to pending tab
       setActiveTab("pending")
     } catch (error) {
-      toast("Error",{
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: error instanceof Error ? error.message : "Failed to initiate deposit",
       })
     } finally {
@@ -88,7 +96,7 @@ export default function DepositsPage() {
               <PendingTransactionsTable
                 transactions={[]} // This would be fetched from the API
                 isLoading={false}
-                onRefresh={async () => {}} // This would refresh the data
+                onRefresh={() => {}} // This would refresh the data
               />
             </CardContent>
           </Card>

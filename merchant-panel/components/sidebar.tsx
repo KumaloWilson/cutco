@@ -2,17 +2,36 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { LayoutDashboard, Wallet, History, Download, Settings, LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { LayoutDashboard, Wallet, ArrowDownUp, History, Settings, LogOut } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/wallet", label: "Wallet", icon: Wallet },
-  { href: "/transactions", label: "Transactions", icon: History },
-  { href: "/deposits", label: "Deposits", icon: ArrowDownUp },
-  { href: "/settings", label: "Settings", icon: Settings },
+  {
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Wallet",
+    href: "/wallet",
+    icon: Wallet,
+  },
+  {
+    title: "Transactions",
+    href: "/transactions",
+    icon: History,
+  },
+  {
+    title: "Deposits",
+    href: "/deposits",
+    icon: Download,
+  },
+  {
+    title: "Settings",
+    href: "/settings",
+    icon: Settings,
+  },
 ]
 
 export default function Sidebar() {
@@ -20,39 +39,42 @@ export default function Sidebar() {
   const { logout, user } = useAuth()
 
   return (
-    <div className="hidden md:flex md:flex-col md:w-64 md:bg-card md:border-r">
-      <div className="flex items-center justify-center h-16 border-b">
-        <h1 className="text-xl font-bold">CUTcoin Merchant</h1>
-      </div>
-
-      <div className="flex flex-col justify-between flex-1 px-4 py-6">
-        <div className="space-y-1">
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href}>
-              <Button
-                variant={pathname === item.href ? "default" : "ghost"}
+    <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
+      <div className="flex flex-col flex-grow border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-y-auto">
+        <div className="flex items-center flex-shrink-0 px-4 h-16 border-b border-gray-200 dark:border-gray-800">
+          <h1 className="text-xl font-bold">CUTcoin Merchant</h1>
+        </div>
+        <div className="flex flex-col flex-grow px-4 pt-5 pb-4">
+          <div className="mb-5 px-4">
+            <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Merchant</div>
+            <div className="text-base font-semibold truncate">{user?.merchantName}</div>
+          </div>
+          <nav className="flex-1 space-y-1">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
                 className={cn(
-                  "w-full justify-start",
-                  pathname === item.href ? "bg-primary text-primary-foreground" : "",
+                  "group flex items-center px-4 py-2 text-sm font-medium rounded-md",
+                  pathname === item.href
+                    ? "bg-primary text-primary-foreground"
+                    : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800",
                 )}
               >
-                <item.icon className="mr-2 h-5 w-5" />
-                {item.label}
-              </Button>
-            </Link>
-          ))}
+                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                {item.title}
+              </Link>
+            ))}
+          </nav>
         </div>
-
-        <div className="space-y-4">
-          <div className="px-3 py-2">
-            <p className="text-xs font-medium text-muted-foreground">MERCHANT</p>
-            <p className="text-sm font-medium truncate">{user?.merchantName}</p>
-          </div>
-
-          <Button variant="outline" className="w-full justify-start" onClick={logout}>
-            <LogOut className="mr-2 h-5 w-5" />
+        <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-800 p-4">
+          <button
+            onClick={logout}
+            className="flex items-center text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+          >
+            <LogOut className="mr-3 h-5 w-5 flex-shrink-0" />
             Logout
-          </Button>
+          </button>
         </div>
       </div>
     </div>

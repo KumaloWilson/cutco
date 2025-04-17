@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import { useToast } from "@/components/ui/use-toast"
 
 interface User {
   id: number
@@ -27,18 +27,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const { toast } = useToast()
 
   useEffect(() => {
     // Check if user is logged in
-    const storedToken = localStorage.getItem("token")
-    const storedUser = localStorage.getItem("user")
+    // Only run on client side
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("token")
+      const storedUser = localStorage.getItem("user")
 
-    if (storedToken && storedUser) {
-      setToken(storedToken)
-      setUser(JSON.parse(storedUser))
+      if (storedToken && storedUser) {
+        setToken(storedToken)
+        try {
+          setUser(JSON.parse(storedUser))
+        } catch (e) {
+          console.error("Failed to parse user data", e)
+          localStorage.removeItem("user")
+          localStorage.removeItem("token")
+        }
+      }
+
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }, [])
 
   const login = async (username: string, password: string) => {
@@ -67,13 +77,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(data.token)
       setUser(data.user)
 
-      toast( "Login successful",{
+      toast({
+        title: "Login successful",
         description: `Welcome back, ${data.user.merchantName}!`,
       })
 
       router.push("/dashboard")
     } catch (error) {
-      toast("Login failed",{
+      toast({
+        variant: "destructive",
+        title: "Login failed",
         description: error instanceof Error ? error.message : "An error occurred",
       })
     } finally {

@@ -9,12 +9,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
+import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { fetchApi } from "@/lib/api"
-import { toast } from "sonner"
 
 export default function SettingsPage() {
   const { user, logout } = useAuth()
+  const { toast } = useToast()
 
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
@@ -29,14 +30,18 @@ export default function SettingsPage() {
     e.preventDefault()
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast("Error",{
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: "Please fill in all password fields",
       })
       return
     }
 
     if (newPassword !== confirmPassword) {
-      toast("Error",{
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: "New passwords do not match",
       })
       return
@@ -52,7 +57,8 @@ export default function SettingsPage() {
         },
       })
 
-      toast("Password changed",{
+      toast({
+        title: "Password changed",
         description: "Your password has been successfully updated",
       })
 
@@ -61,7 +67,9 @@ export default function SettingsPage() {
       setNewPassword("")
       setConfirmPassword("")
     } catch (error) {
-      toast( "Error",{
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: error instanceof Error ? error.message : "Failed to change password",
       })
     } finally {
@@ -80,11 +88,14 @@ export default function SettingsPage() {
         },
       })
 
-      toast("Preferences saved",{
+      toast({
+        title: "Preferences saved",
         description: "Your notification preferences have been updated",
       })
     } catch (error) {
-      toast("Error",{
+      toast({
+        variant: "destructive",
+        title: "Error",
         description: error instanceof Error ? error.message : "Failed to save preferences",
       })
     } finally {

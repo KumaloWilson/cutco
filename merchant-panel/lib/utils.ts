@@ -8,24 +8,29 @@ export function cn(...inputs: ClassValue[]) {
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "CUT",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    currency: "USD",
   }).format(amount)
 }
 
-export function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat("en-US", {
+export function formatDate(date: string | Date): string {
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  })
+}
+
+export function formatDateTime(date: string | Date): string {
+  return new Date(date).toLocaleString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(date)
+  })
 }
 
-export function truncateString(str: string, length: number): string {
-  if (str.length <= length) return str
-  return str.slice(0, length) + "..."
+export function truncateAddress(address: string, chars = 4): string {
+  if (!address) return ""
+  return `${address.substring(0, chars)}...${address.substring(address.length - chars)}`
 }
