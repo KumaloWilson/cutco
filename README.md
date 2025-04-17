@@ -9,7 +9,7 @@ The Cutcoin Tuckshop Token System is designed to facilitate the distribution and
 - Notify technicians for tuckshop maintenance
 - Check available tokens
 
-## Prerequisites
+## Prerequisitess
 
 - Python 3.9+
 - MongoDB

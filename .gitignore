@@ -1,105 +1,121 @@
-node_modules
-merchant-panel/node_modules
-cutcoin-backend/node_modules
-merchant-panel/dist/
-extension/dist/
-cutcoin-backend/dist/
-merchant-panel/.env
-extension/.env
-cutcoin-backend/.env
-cutcoin-backend/logs/combined.log
-cutcoin-backend/logs/error.log
+# ========================
+# General Ignored Files
+# ========================
+.env
+.env.*
+/.env
+/.env.*
 
 *.log
-
-
-# Miscellaneous
 *.class
-*.log
 *.pyc
 *.swp
 .DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+Thumbs.db
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
+# Logs
+cutcoin-backend/logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# ========================
+# Node.js
+# ========================
+node_modules/
+merchant-panel/node_modules/
+cutcoin-backend/node_modules/
+merchant-panel/.pnp
+merchant-panel/.pnp.*
+merchant-panel/.yarn/*
+!merchant-panel/.yarn/patches
+!merchant-panel/.yarn/plugins
+!merchant-panel/.yarn/releases
+!merchant-panel/.yarn/versions
 
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+
+/merchant-panel/node_modules/
+/cutcoin-backend/node_modules/
+/merchant-panel/.pnp
+/merchant-panel/.pnp.*
+/merchant-panel/.yarn/*
+
+
+# ========================
+# Next.js / Frontend
+# ========================
+merchant-panel/.next/
+merchant-panel/out/
+merchant-panel/build/
+merchant-panel/.env*
+merchant-panel/coverage/
+merchant-panel/next-env.d.ts
+merchant-panel/.vercel
+
+/merchant-panel/.next/
+/merchant-panel/out/
+/merchant-panel/build/
+/merchant-panel/.env*
+/merchant-panel/coverage/
+/merchant-panel/next-env.d.ts
+/merchant-panel/.vercel
+
+# ========================
+# Extension
+# ========================
+extension/dist/
+extension/.env
+
+# ========================
+# Backend
+# ========================
+cutcoin-backend/dist/
+cutcoin-backend/logs/combined.log
+cutcoin-backend/logs/error.log
+
+# ========================
+# Flutter / Dart / Android
+# ========================
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+
+# Android build outputs
+cutcoin_mobile/build/
+cutcoin_mobile/android/app/debug/
+cutcoin_mobile/android/app/profile/
+cutcoin_mobile/android/app/release/
+cutcoin_mobile/android/app/.cxx/
+
 /cutcoin_mobile/build/
+/cutcoin_mobile/android/app/debug/
+/cutcoin_mobile/android/app/profile/
+/cutcoin_mobile/android/app/release/
+/cutcoin_mobile/android/app/.cxx/
 
-# Symbolication related
+# Obfuscation / Symbolication
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/cutcoin_mobile/android/app/debug
-/cutcoin_mobile/android/app/profile
-/cutcoin_mobile/android/app/release
-cutcoin_mobile/android/app/.cxx
+# ========================
+# IDEs / Editors
+# ========================
+.idea/
+*.iml
+*.ipr
+*.iws
+.atom/
+.history
+.build/
+.buildlog/
+.svn/
+.swiftpm/
+migrate_working_dir/
 
-
-
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/merchant-panel//node_modules
-/merchant-panel//.pnp
-merchant-panel/.pnp.*
-merchant-panel/.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/merchant-panel//coverage
-
-# next.js
-/merchant-panel//.next/
-/merchant-panel//out/
-
-# production
-merchant-panel//build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-merchant-panel/yarn-debug.log*
-merchant-panel/yarn-error.log*
-merchant-panel/.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-merchant-panel/.env*
-
-# vercel
-merchant-panel/.vercel
-
-# typescript
-*.tsbuildinfo
-merchant-panel/next-env.d.ts
+# Uncomment to ignore VSCode settings
+# .vscode/
