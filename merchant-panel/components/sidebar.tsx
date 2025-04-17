@@ -47,7 +47,7 @@ export default function Sidebar() {
         <div className="flex flex-col flex-grow px-4 pt-5 pb-4">
           <div className="mb-5 px-4">
             <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Merchant</div>
-            <div className="text-base font-semibold truncate">{user?.merchantName}</div>
+            <div className="text-base font-semibold truncate">{user?.name}</div>
           </div>
           <nav className="flex-1 space-y-1">
             {navItems.map((item) => (
