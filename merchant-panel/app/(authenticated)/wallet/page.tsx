@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
 import { fetchApi } from "@/lib/api"
 import { Copy, RefreshCw, WalletIcon } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
+import { toast } from "sonner"
 
 interface WalletData {
   balance: number
@@ -22,7 +22,7 @@ export default function WalletPage() {
   const [wallet, setWallet] = useState<WalletData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const { toast } = useToast()
+
 
   const fetchWallet = async () => {
     try {
@@ -30,9 +30,8 @@ export default function WalletPage() {
       const data = await fetchApi<WalletData>("/wallet/balance")
       setWallet(data)
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
+      toast(
+        "Error",{
         description: error instanceof Error ? error.message : "Failed to load wallet data",
       })
     } finally {
@@ -48,8 +47,7 @@ export default function WalletPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    toast({
-      title: "Copied to clipboard",
+    toast("Copied to clipboard",{
       description: "Wallet address has been copied to clipboard",
     })
   }
