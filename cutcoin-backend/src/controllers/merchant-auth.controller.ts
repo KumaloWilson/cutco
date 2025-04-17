@@ -1,5 +1,5 @@
-import type { Request, Response, NextFunction } from "express"
 import { MerchantAuthService } from "../services/merchant-auth.service"
+import type { Request, Response, NextFunction } from "express"
 
 export class MerchantAuthController {
   private merchantAuthService = new MerchantAuthService()

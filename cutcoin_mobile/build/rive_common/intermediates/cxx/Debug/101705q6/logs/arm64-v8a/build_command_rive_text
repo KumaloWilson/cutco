@@ -1,0 +1,4 @@
+/home/watkay/Android/Sdk/cmake/3.22.1/bin/ninja \
+  -C \
+  /home/watkay/.pub-cache/hosted/pub.dev/rive_common-0.4.15/android/.cxx/Debug/101705q6/arm64-v8a \
+  rive_text

@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer"
-import { logger } from "./logger"
 
 export const sendEmail = async (to: string, subject: string, text: string): Promise<void> => {
   try {
@@ -24,14 +23,14 @@ export const sendEmail = async (to: string, subject: string, text: string): Prom
       text,
     })
 
-    logger.info(`Email sent: ${info.messageId}`)
+    console.log(`Email sent: ${info.messageId}`)
 
     // Log URL for ethereal emails (development only)
     if (process.env.NODE_ENV !== "production") {
-      logger.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`)
+        console.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`)
     }
   } catch (error) {
-    logger.error(`Error sending email: ${error}`)
+    console.error(`Error sending email: ${error}`)
     throw error
   }
 }

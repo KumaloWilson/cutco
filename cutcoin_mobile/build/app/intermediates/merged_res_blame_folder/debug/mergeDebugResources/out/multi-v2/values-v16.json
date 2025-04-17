@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "ai.cpredictions.mobile.app-mergeDebugResources-45:/values-v16/values-v16.xml",
+            "map": [
+                {
+                    "source": "/home/watkay/.gradle/caches/8.10.2/transforms/569f68eae55d072fbc5f453e3069f463/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "5",
+                        "endColumns": "12",
+                        "endOffsets": "223"
+                    }
+                }
+            ]
+        }
+    ]
+}

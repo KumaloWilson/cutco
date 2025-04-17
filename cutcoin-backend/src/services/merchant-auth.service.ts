@@ -2,9 +2,9 @@ import { Merchant } from "../models/merchant.model"
 import { OTP } from "../models/otp.model"
 import { generateOTP } from "../utils/generators"
 import { HttpException } from "../exceptions/HttpException"
-import jwt from "jsonwebtoken"
-import { sendEmail } from "../utils/email"
+import jwt, { SignOptions } from "jsonwebtoken"
 import { Op } from "sequelize"
+import { sendEmail } from "../utils/email"
 
 export class MerchantAuthService {
   public async register(merchantData: {
@@ -229,7 +229,7 @@ export class MerchantAuthService {
         type: "merchant",
       },
       secretKey,
-      { expiresIn },
+      { expiresIn } as SignOptions
     )
   }
 }

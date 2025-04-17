@@ -1,0 +1,28 @@
+{
+    "logs": [
+        {
+            "outputFile": "ai.cpredictions.mobile.app-mergeDebugResources-45:/values-v31/values-v31.xml",
+            "map": [
+                {
+                    "source": "/home/watkay/ReactProjects/cutco-main/cutcoin_mobile/android/app/src/main/res/values-v31/styles.xml",
+                    "from": {
+                        "startLines": "3,17",
+                        "startColumns": "4,4",
+                        "startOffsets": "173,1045",
+                        "endLines": "10,19",
+                        "endColumns": "12,12",
+                        "endOffsets": "694,1209"
+                    },
+                    "to": {
+                        "startLines": "2,10",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,581",
+                        "endLines": "9,12",
+                        "endColumns": "12,12",
+                        "endOffsets": "576,745"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -12,6 +12,7 @@ export class Merchant extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: true, // Changed to allow null for direct merchant registration
+    field: "userId", // Explicitly specify the field name
   })
   userId!: number
 
@@ -81,6 +82,7 @@ export class Merchant extends Model {
   @Column({
     type: DataType.DATE,
     allowNull: true,
+    field: "last_login", // Explicitly specify the field name
   })
   lastLogin!: Date
 
