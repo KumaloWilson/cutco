@@ -1,2 +1,0 @@
-io.flutter.plugins.imagepicker
-xml flutter_image_picker_file_paths
