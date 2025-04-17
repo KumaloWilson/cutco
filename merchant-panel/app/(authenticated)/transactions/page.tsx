@@ -6,13 +6,13 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/components/ui/use-toast"
 import { fetchApi } from "@/lib/api"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { ArrowDownRight, ArrowUpRight, RefreshCw, Search } from "lucide-react"
+import { ArrowDownRight, ArrowUpRight, RefreshCw, Search, Table } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface Transaction {
   id: number

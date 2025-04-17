@@ -96,7 +96,7 @@ export default function DepositsPage() {
               <PendingTransactionsTable
                 transactions={[]} // This would be fetched from the API
                 isLoading={false}
-                onRefresh={() => {}} // This would refresh the data
+                onRefresh={async () => Promise.resolve()} // This would refresh the data
               />
             </CardContent>
           </Card>

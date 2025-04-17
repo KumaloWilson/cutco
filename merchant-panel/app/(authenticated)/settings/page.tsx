@@ -117,11 +117,11 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>Merchant Name</Label>
-                <p className="text-sm mt-1">{user?.merchantName}</p>
+                <p className="text-sm mt-1">{user?.name}</p>
               </div>
               <div>
-                <Label>Merchant ID</Label>
-                <p className="text-sm mt-1">{user?.username}</p>
+                <Label>Merchant Number</Label>
+                <p className="text-sm mt-1">{user?.merchantNumber}</p>
               </div>
             </div>
           </CardContent>

@@ -1,7 +1,7 @@
 import { type QueryInterface, QueryTypes } from "sequelize"
 
 export default {
-    up: async (queryInterface: QueryInterface): Promise<void> => {
+  up: async (queryInterface: QueryInterface): Promise<void> => {
     // Check which column exists
     const columns = await queryInterface.sequelize.query(
       `SELECT column_name FROM information_schema.columns 

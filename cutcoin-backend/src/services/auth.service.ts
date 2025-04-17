@@ -59,7 +59,7 @@ export class AuthService {
 
       // Send OTP via SMS
       await sendSMS(
-        `+263771910924`,// userData.phoneNumber,
+        userData.phoneNumber,
         `Your CUTcoin verification code is: ${otpCode}. Valid for 10 minutes.`
       )
 
@@ -138,7 +138,7 @@ export class AuthService {
     })
 
     await sendSMS(
-      `+263771910924`,// userData.phoneNumber,
+      user.phoneNumber,
       `Your CUTcoin login code is: ${otpCode}. Valid for 10 minutes.`
     )
     return {
@@ -222,7 +222,7 @@ export class AuthService {
     })
 
     await sendSMS(
-      `+263771910924`,// userData.phoneNumber,
+      user.phoneNumber,
       `Your CUTcoin PIN reset code is: ${otpCode}. Valid for 10 minutes.`
     )
     return {
