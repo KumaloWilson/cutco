@@ -1,5 +1,6 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from "sequelize-typescript"
 import { User } from "./user.model"
+import { Merchant } from "./merchant.model"
 
 @Table({
   tableName: "otps",
@@ -13,11 +14,24 @@ export class OTP extends Model {
   })
   userId!: number
 
+  @ForeignKey(() => Merchant)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  merchantId!: number
+
   @Column({
     type: DataType.STRING,
-    allowNull: false,
+    allowNull: true,
   })
   phoneNumber!: string
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  email!: string
 
   @Column({
     type: DataType.STRING,
@@ -27,7 +41,14 @@ export class OTP extends Model {
 
   @Column({
     type: DataType.ENUM,
-    values: ["registration", "login", "transaction", "password_reset"],
+    values: [
+      "registration",
+      "login",
+      "password_reset",
+      "withdrawal",
+      "merchant_registration",
+      "merchant_password_reset",
+    ],
     allowNull: false,
   })
   purpose!: string
@@ -46,6 +67,9 @@ export class OTP extends Model {
 
   @BelongsTo(() => User)
   user!: User
+
+  @BelongsTo(() => Merchant)
+  merchant!: Merchant
 }
 
 export default OTP

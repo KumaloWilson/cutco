@@ -1,33 +1,24 @@
 import { Router } from "express"
-import authRoutes from "./auth.route"
-import walletRoutes from "./wallet.route"
-import merchantRoutes from "./merchant.route"
-import adminRoutes from "./admin.route"
-import analyticsRoutes from "./analytics.route"
-import notificationRoutes from "./notification.route"
-import paymentRoutes from "./payment.route"
-import userRoutes from "./user.route"
-import { apiLimiter, authLimiter } from "../middlewares/rate-limiter.middleware"
-import { requestLogger } from "../middlewares/logger.middleware"
+import authRoute from "./auth.route"
+import userRoute from "./user.route"
+import walletRoute from "./wallet.route"
+import adminRoute from "./admin.route"
+import analyticsRoute from "./analytics.route"
+import notificationRoute from "./notification.route"
+import merchantRoute from "./merchant.route"
+import paymentRoute from "./payment.route"
+import merchantAuthRoute from "./merchant-auth.route"
 
 const router = Router()
 
-// Apply global middlewares
-router.use(requestLogger)
-router.use(apiLimiter)
-
-// Apply specific rate limiters
-router.use("/auth/login", authLimiter)
-router.use("/auth/verify-login", authLimiter)
-
-// Register routes
-router.use("/auth", authRoutes)
-router.use("/wallet", walletRoutes)
-router.use("/merchant", merchantRoutes)
-router.use("/admin", adminRoutes)
-router.use("/analytics", analyticsRoutes)
-router.use("/notifications", notificationRoutes)
-router.use("/payments", paymentRoutes)
-router.use("/users", userRoutes)
+router.use("/auth", authRoute)
+router.use("/users", userRoute)
+router.use("/wallets", walletRoute)
+router.use("/admin", adminRoute)
+router.use("/analytics", analyticsRoute)
+router.use("/notifications", notificationRoute)
+router.use("/merchants", merchantRoute)
+router.use("/payments", paymentRoute)
+router.use("/merchant-auth", merchantAuthRoute)
 
 export default router
