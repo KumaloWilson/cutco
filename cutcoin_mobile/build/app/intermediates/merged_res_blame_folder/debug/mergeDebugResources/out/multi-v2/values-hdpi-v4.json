@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "ai.cpredictions.mobile.app-mergeDebugResources-45:/values-hdpi-v4/values-hdpi-v4.xml",
+            "map": [
+                {
+                    "source": "/home/watkay/.gradle/caches/8.10.2/transforms/569f68eae55d072fbc5f453e3069f463/transformed/appcompat-1.6.1/res/values-hdpi-v4/values-hdpi-v4.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "6",
+                        "endColumns": "13",
+                        "endOffsets": "327"
+                    }
+                }
+            ]
+        }
+    ]
+}

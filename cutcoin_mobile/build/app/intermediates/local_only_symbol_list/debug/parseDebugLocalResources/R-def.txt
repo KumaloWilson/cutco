@@ -1,0 +1,11 @@
+R_DEF: Internal format may change without notice
+local
+drawable android12splash
+drawable background
+drawable ic_launcher_background
+drawable ic_launcher_foreground
+drawable launch_background
+drawable splash
+mipmap ic_launcher
+style LaunchTheme
+style NormalTheme

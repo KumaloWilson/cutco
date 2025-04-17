@@ -1,6 +1,7 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, BeforeCreate } from "sequelize-typescript"
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, BeforeCreate, BeforeSave } from "sequelize-typescript"
 import { User } from "./user.model"
 import { generateMerchantNumber } from "../utils/generators"
+import bcrypt from "bcrypt"
 
 @Table({
   tableName: "merchants",
@@ -10,7 +11,8 @@ export class Merchant extends Model {
   @ForeignKey(() => User)
   @Column({
     type: DataType.INTEGER,
-    allowNull: false,
+    allowNull: true, // Changed to allow null for direct merchant registration
+    field: "userId", // Explicitly specify the field name
   })
   userId!: number
 
@@ -52,6 +54,19 @@ export class Merchant extends Model {
   contactPhone!: string
 
   @Column({
+    type: DataType.STRING,
+    allowNull: false,
+    unique: true,
+  })
+  email!: string
+
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  password!: string
+
+  @Column({
     type: DataType.ENUM,
     values: ["pending", "approved", "rejected", "suspended"],
     defaultValue: "pending",
@@ -64,6 +79,13 @@ export class Merchant extends Model {
   })
   isActive!: boolean
 
+  @Column({
+    type: DataType.DATE,
+    allowNull: true,
+    field: "last_login", // Explicitly specify the field name
+  })
+  lastLogin!: Date
+
   @BelongsTo(() => User)
   user!: User
 
@@ -72,6 +94,19 @@ export class Merchant extends Model {
     if (!instance.merchantNumber) {
       instance.merchantNumber = await generateMerchantNumber()
     }
+  }
+
+  @BeforeSave
+  static async hashPassword(instance: Merchant) {
+    // Only hash the password if it's changed
+    if (instance.changed("password")) {
+      const saltRounds = Number.parseInt(process.env.BCRYPT_SALT_ROUNDS || "10")
+      instance.password = await bcrypt.hash(instance.password, saltRounds)
+    }
+  }
+
+  async validatePassword(password: string): Promise<boolean> {
+    return bcrypt.compare(password, this.password)
   }
 }
 
