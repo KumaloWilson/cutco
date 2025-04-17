@@ -11,6 +11,7 @@ class WalletRepository {
   Future<Wallet> getWalletBalance() async {
     try {
       final response = await _apiProvider.getWalletBalance();
+
       return Wallet.fromJson(response.data);
     } on DioException catch (e) {
       LoggerService.e('Get wallet balance repository error', e);

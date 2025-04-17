@@ -106,7 +106,8 @@ class ApiProvider {
   // Wallet endpoints
   Future<Response> getWalletBalance() async {
     try {
-      final response = await _dioClient.dio.get('/wallet/balance');
+      final response = await _dioClient.dio.get('/wallets/balance');
+
       return response;
     } catch (e) {
       LoggerService.e('Get wallet balance error', e);
@@ -117,7 +118,7 @@ class ApiProvider {
   Future<Response> initiateDeposit(double amount, String merchantNumber) async {
     try {
       final response = await _dioClient.dio.post(
-        '/wallet/deposit/initiate',
+        '/wallets/deposit/initiate',
         data: {
           'amount': amount,
           'merchantNumber': merchantNumber,
@@ -133,7 +134,7 @@ class ApiProvider {
   Future<Response> initiateWithdrawal(double amount, String merchantNumber) async {
     try {
       final response = await _dioClient.dio.post(
-        '/wallet/withdraw/initiate',
+        '/wallets/withdraw/initiate',
         data: {
           'amount': amount,
           'merchantNumber': merchantNumber,
@@ -149,7 +150,7 @@ class ApiProvider {
   Future<Response> confirmWithdrawalOTP(double amount, String merchantNumber, String code) async {
     try {
       final response = await _dioClient.dio.post(
-        '/wallet/withdraw/confirm-otp',
+        '/wallets/withdraw/confirm-otp',
         data: {
           'amount': amount,
           'merchantNumber': merchantNumber,
@@ -166,7 +167,7 @@ class ApiProvider {
   Future<Response> transfer(String recipientId, double amount) async {
     try {
       final response = await _dioClient.dio.post(
-        '/wallet/transfer',
+        '/wallets/transfer',
         data: {
           'recipientId': recipientId,
           'amount': amount,
@@ -182,7 +183,7 @@ class ApiProvider {
   Future<Response> confirmTransfer(String recipientId, double amount, String code) async {
     try {
       final response = await _dioClient.dio.post(
-        '/wallet/transfer/confirm',
+        '/wallets/transfer/confirm',
         data: {
           'recipientId': recipientId,
           'amount': amount,
@@ -200,7 +201,7 @@ class ApiProvider {
   Future<Response> getTransactionHistory({int? page, int? limit, String? type}) async {
     try {
       final response = await _dioClient.dio.get(
-        '/wallet/transactions',
+        '/wallets/transactions',
         queryParameters: {
           'page': page,
           'limit': limit,
@@ -216,7 +217,7 @@ class ApiProvider {
 
   Future<Response> getTransactionDetails(int transactionId) async {
     try {
-      final response = await _dioClient.dio.get('/wallet/transactions/$transactionId');
+      final response = await _dioClient.dio.get('/wallets/transactions/$transactionId');
       return response;
     } catch (e) {
       LoggerService.e('Get transaction details error', e);
@@ -226,7 +227,7 @@ class ApiProvider {
 
   Future<Response> getPendingTransactions() async {
     try {
-      final response = await _dioClient.dio.get('/wallet/pending-transactions');
+      final response = await _dioClient.dio.get('/wallets/pending-transactions');
       return response;
     } catch (e) {
       LoggerService.e('Get pending transactions error', e);
@@ -237,7 +238,7 @@ class ApiProvider {
   Future<Response> cancelTransaction(String reference) async {
     try {
       final response = await _dioClient.dio.post(
-        '/wallet/transaction/cancel',
+        '/wallets/transaction/cancel',
         data: {
           'reference': reference,
         },
