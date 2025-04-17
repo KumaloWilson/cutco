@@ -14,11 +14,14 @@ import { Eye, Search, UserPlus } from "lucide-react"
 
 interface User {
   id: number
-  fullName: string
+  firstName: string
+  lastName: string
   phoneNumber: string
-  email: string
-  status: string
+  email: string | null
+  isActive: boolean
   createdAt: string
+  studentId: string
+  kycStatus: string
 }
 
 export default function UsersPage() {
@@ -50,9 +53,10 @@ export default function UsersPage() {
 
   const filteredUsers = users.filter(
     (user) =>
-      user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.phoneNumber.includes(searchQuery) ||
-      (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())),
+      (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      user.studentId.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   return (
@@ -98,6 +102,7 @@ export default function UsersPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead>Student ID</TableHead>
                     <TableHead>Phone Number</TableHead>
                     <TableHead className="hidden md:table-cell">Email</TableHead>
                     <TableHead>Status</TableHead>
@@ -108,20 +113,19 @@ export default function UsersPage() {
                 <TableBody>
                   {filteredUsers.map((user) => (
                     <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.fullName}</TableCell>
+                      <TableCell className="font-medium">{`${user.firstName} ${user.lastName}`}</TableCell>
+                      <TableCell>{user.studentId}</TableCell>
                       <TableCell>{user.phoneNumber}</TableCell>
                       <TableCell className="hidden md:table-cell">{user.email || "N/A"}</TableCell>
                       <TableCell>
                         <Badge
                           variant={
-                            user.status === "active"
+                            user.isActive
                               ? "default"
-                              : user.status === "inactive"
-                                ? "outline"
-                                : "destructive"
+                              : "destructive"
                           }
                         >
-                          {user.status}
+                          {user.isActive ? "active" : "inactive"}
                         </Badge>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">{formatDate(user.createdAt)}</TableCell>
