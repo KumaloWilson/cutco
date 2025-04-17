@@ -59,7 +59,8 @@ router.post("/transfer", validationMiddleware(TransferDto), walletController.tra
 router.post("/transfer/confirm", validationMiddleware(ConfirmTransferDto), walletController.confirmTransfer)
 
 // Transaction history
-router.get("/transactions", walletController.getTransactionHistory)
+router.get("/transactions", walletController.getUserTransactionHistory)
+router.get("/all/transactions", walletController.getUserTransactionHistory)
 router.get("/transactions/:id", walletController.getTransactionDetails)
 
 export default router
