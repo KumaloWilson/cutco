@@ -11,13 +11,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2 } from "lucide-react"
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("")
+  const [merchantNumber, setMerchantNumber] = useState("")
   const [password, setPassword] = useState("")
   const { login, isLoading } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await login(username, password)
+    await login(merchantNumber, password)
   }
 
   return (
@@ -30,13 +30,13 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="merchantNumber">Merchant Number</Label>
               <Input
-                id="username"
+                id="merchantNumber"
                 type="text"
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your Merchant Number"
+                value={merchantNumber}
+                onChange={(e) => setMerchantNumber(e.target.value)}
                 required
               />
             </div>

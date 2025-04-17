@@ -6,17 +6,20 @@ import { useToast } from "@/components/ui/use-toast"
 
 interface User {
   id: number
-  username: string
-  merchantId: number
-  merchantName: string
-  walletAddress: string
+  merchantNumber: string
+  name: string
+  location: string
+  contactPerson: string
+  contactPhone: string
+  email: string
+  status: string
 }
 
 interface AuthContextType {
   user: User | null
   token: string | null
   isLoading: boolean
-  login: (username: string, password: string) => Promise<void>
+  login: (merchantNumber: string, password: string) => Promise<void>
   logout: () => void
 }
 
@@ -51,16 +54,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const login = async (username: string, password: string) => {
+  const login = async (merchantNumber: string, password: string) => {
     setIsLoading(true)
     try {
       // Call the login API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/merchant/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/merchant-auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ merchantNumber, password }),
       })
 
       if (!response.ok) {
@@ -72,14 +75,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Save token and user data
       localStorage.setItem("token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.user))
+      localStorage.setItem("user", JSON.stringify(data.merchant))
 
       setToken(data.token)
-      setUser(data.user)
+      setUser(data.merchant)
 
       toast({
         title: "Login successful",
-        description: `Welcome back, ${data.user.merchantName}!`,
+        description: `Welcome back, ${data.merchant.name}!`,
       })
 
       router.push("/dashboard")
