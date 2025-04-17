@@ -2,7 +2,26 @@ import { type QueryInterface, DataTypes } from "sequelize"
 
 export default {
   up: async (queryInterface: QueryInterface): Promise<void> => {
+    await queryInterface.addColumn("merchants", "email", {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+      defaultValue: "placeholder@example.com", // Temporary default for existing records
+    })
 
+    await queryInterface.addColumn("merchants", "password", {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "placeholder", // Temporary default for existing records
+    })
+
+    await queryInterface.addColumn("merchants", "last_login", {
+      type: DataTypes.DATE,
+      allowNull: true,
+    })
+
+    // Make userId nullable for direct merchant registration
+    // First, check if the column exists with snake_case naming
     try {
       // Try with snake_case (user_id)
       await queryInterface.changeColumn("merchants", "user_id", {

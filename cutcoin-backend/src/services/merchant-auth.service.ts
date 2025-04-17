@@ -22,14 +22,20 @@ export class MerchantAuthService {
         email: merchantData.email,
       },
     })
-
+  
     if (existingMerchant) {
       throw new HttpException(409, "Merchant with this email already exists")
     }
-
-    // Create merchant
-    const merchant = await Merchant.create(merchantData)
-
+  
+    // Generate a unique merchant number (you can customize this format)
+    const merchantNumber = `MERCH-${Date.now().toString().slice(-8)}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`
+    
+    // Create merchant with the generated merchant number
+    const merchant = await Merchant.create({
+      ...merchantData,
+      merchantNumber,
+    })
+  
     // Generate and send OTP
     const otpCode = generateOTP()
     await OTP.create({
@@ -41,14 +47,14 @@ export class MerchantAuthService {
       purpose: "merchant_registration",
       expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
     })
-
+  
     // Send OTP via Email
     await sendEmail(
       merchantData.email,
       "CUTcoin Merchant Verification",
       `Your CUTcoin merchant verification code is: ${otpCode}. Valid for 10 minutes.`,
     )
-
+  
     return {
       message: "Registration successful. Please verify your email with the OTP sent.",
       merchantId: merchant.id,
