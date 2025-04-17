@@ -16,9 +16,13 @@ interface Merchant {
   id: number
   name: string
   email: string
-  phoneNumber: string
+  contactPhone: string
+  merchantNumber: string
   status: string
+  isActive: boolean
   createdAt: string
+  location: string
+  contactPerson: string
 }
 
 export default function MerchantsPage() {
@@ -51,8 +55,10 @@ export default function MerchantsPage() {
   const filteredMerchants = merchants.filter(
     (merchant) =>
       merchant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      merchant.phoneNumber.includes(searchQuery) ||
-      (merchant.email && merchant.email.toLowerCase().includes(searchQuery.toLowerCase())),
+      merchant.contactPhone.includes(searchQuery) ||
+      (merchant.email && merchant.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      merchant.merchantNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (merchant.contactPerson && merchant.contactPerson.toLowerCase().includes(searchQuery.toLowerCase()))
   )
 
   return (
@@ -98,6 +104,8 @@ export default function MerchantsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead>Merchant ID</TableHead>
+                    <TableHead>Contact Person</TableHead>
                     <TableHead>Phone Number</TableHead>
                     <TableHead className="hidden md:table-cell">Email</TableHead>
                     <TableHead>Status</TableHead>
@@ -109,14 +117,16 @@ export default function MerchantsPage() {
                   {filteredMerchants.map((merchant) => (
                     <TableRow key={merchant.id}>
                       <TableCell className="font-medium">{merchant.name}</TableCell>
-                      <TableCell>{merchant.phoneNumber}</TableCell>
+                      <TableCell>{merchant.merchantNumber}</TableCell>
+                      <TableCell>{merchant.contactPerson}</TableCell>
+                      <TableCell>{merchant.contactPhone}</TableCell>
                       <TableCell className="hidden md:table-cell">{merchant.email || "N/A"}</TableCell>
                       <TableCell>
                         <Badge
                           variant={
-                            merchant.status === "active"
+                            merchant.isActive && merchant.status === "approved"
                               ? "default"
-                              : merchant.status === "inactive"
+                              : merchant.status === "pending"
                                 ? "outline"
                                 : "destructive"
                           }
