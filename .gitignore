@@ -61,5 +61,6 @@ app.*.map.json
 cutcoin_mobile/android/app/.cxx
 cutcoin_mobile/.dart_tool/
 /cutcoin_mobile/.idea/
-/cutcoin_mobile/.dart_tool/
+/cutcoin_mobile/build/
+/cutcoin_mobile/build
 
