@@ -870,7 +870,7 @@ export class WalletService {
     }
   }
 
-  public async getTransactionHistory(
+  public async getUserTransactionHistory(
     userId: number,
     query: { page?: string | number; limit?: string | number; type?: string },
   ) {
@@ -968,6 +968,93 @@ export class WalletService {
       throw new HttpException(500, "Failed to fetch transaction history")
     }
   }
+
+
+  public async getAllTransactions(
+    query: { page?: string | number; limit?: string | number; type?: string },
+  ) {
+    try {
+      const page = Number(query.page) || 1;
+      const limit = Number(query.limit) || 10;
+      const offset = (page - 1) * limit;
+  
+      const whereClause: any = {};
+  
+      if (query.type && typeof query.type === "string") {
+        whereClause.type = query.type;
+      }
+  
+      const { count, rows } = await Transaction.findAndCountAll({
+        where: whereClause,
+        limit,
+        offset,
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: User,
+            as: "sender",
+            attributes: ["studentId", "firstName", "lastName"],
+          },
+          {
+            model: User,
+            as: "receiver",
+            attributes: ["studentId", "firstName", "lastName"],
+          },
+        ],
+      });
+  
+      // Format transactions for better readability
+      const transactions = rows.map((transaction) => {
+        let description = transaction.description || "";
+        let amount = Number(transaction.amount);
+  
+        if (transaction.type === "transfer") {
+          description = `Transfer from ${transaction.sender?.firstName || ""} ${transaction.sender?.lastName || ""} to ${transaction.receiver?.firstName || ""} ${transaction.receiver?.lastName || ""}`;
+        } else if (transaction.type === "deposit") {
+          description = `Deposit to ${transaction.receiver?.firstName || ""} ${transaction.receiver?.lastName || ""}'s wallet`;
+        } else if (transaction.type === "withdrawal") {
+          description = `Withdrawal from ${transaction.sender?.firstName || ""} ${transaction.sender?.lastName || ""}'s wallet`;
+        }
+  
+        return {
+          id: transaction.id,
+          reference: transaction.reference,
+          amount,
+          fee: Number(transaction.fee || 0),
+          type: transaction.type,
+          status: transaction.status,
+          description,
+          createdAt: transaction.createdAt,
+          sender: transaction.sender
+            ? {
+                studentId: transaction.sender.studentId,
+                name: `${transaction.sender.firstName} ${transaction.sender.lastName}`,
+              }
+            : null,
+          receiver: transaction.receiver
+            ? {
+                studentId: transaction.receiver.studentId,
+                name: `${transaction.receiver.firstName} ${transaction.receiver.lastName}`,
+              }
+            : null,
+        };
+      });
+  
+      return {
+        transactions,
+        pagination: {
+          total: count,
+          page,
+          limit,
+          pages: Math.ceil(count / limit),
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching all transactions:", error);
+      throw new HttpException(500, "Failed to fetch all transactions");
+    }
+  }
+
 
   public async getTransactionDetails(userId: number, transactionId: number) {
     const transaction = await Transaction.findOne({

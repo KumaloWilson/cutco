@@ -169,7 +169,7 @@ export class WalletController {
     }
   }
 
-  public getTransactionHistory = async (req: any, res: Response, next: NextFunction) => {
+  public getUserTransactionHistory = async (req: any, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
          res.status(401).json({ message: "Unauthorized" })
@@ -177,12 +177,28 @@ export class WalletController {
       }
 
       const userId = req.user.id
-      const result = await this.walletService.getTransactionHistory(userId, req.query)
+      const result = await this.walletService.getUserTransactionHistory(userId, req.query)
       res.status(200).json(result)
     } catch (error) {
       next(error)
     }
   }
+
+  public getAllTransactions = async (req: any, res: Response, next: NextFunction) => {
+    try {
+      if (!req.admin || !req.admin.id) {
+         res.status(401).json({ message: "Unauthorized" })
+         return
+      }
+
+      const result = await this.walletService.getAllTransactions(req.query)
+      res.status(200).json(result)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+
 
   public getTransactionDetails = async (req: any, res: Response, next: NextFunction) => {
     try {
