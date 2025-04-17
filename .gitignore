@@ -3,6 +3,9 @@
 # ========================
 .env
 .env.*
+/.env
+/.env.*
+
 *.log
 *.class
 *.pyc
@@ -31,6 +34,14 @@ merchant-panel/.yarn/*
 !merchant-panel/.yarn/releases
 !merchant-panel/.yarn/versions
 
+
+/merchant-panel/node_modules/
+/cutcoin-backend/node_modules/
+/merchant-panel/.pnp
+/merchant-panel/.pnp.*
+/merchant-panel/.yarn/*
+
+
 # ========================
 # Next.js / Frontend
 # ========================
@@ -41,6 +52,14 @@ merchant-panel/.env*
 merchant-panel/coverage/
 merchant-panel/next-env.d.ts
 merchant-panel/.vercel
+
+/merchant-panel/.next/
+/merchant-panel/out/
+/merchant-panel/build/
+/merchant-panel/.env*
+/merchant-panel/coverage/
+/merchant-panel/next-env.d.ts
+/merchant-panel/.vercel
 
 # ========================
 # Extension
@@ -72,6 +91,12 @@ cutcoin_mobile/android/app/debug/
 cutcoin_mobile/android/app/profile/
 cutcoin_mobile/android/app/release/
 cutcoin_mobile/android/app/.cxx/
+
+/cutcoin_mobile/build/
+/cutcoin_mobile/android/app/debug/
+/cutcoin_mobile/android/app/profile/
+/cutcoin_mobile/android/app/release/
+/cutcoin_mobile/android/app/.cxx/
 
 # Obfuscation / Symbolication
 app.*.symbols
