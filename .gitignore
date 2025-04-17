@@ -59,8 +59,47 @@ app.*.map.json
 /cutcoin_mobile/android/app/profile
 /cutcoin_mobile/android/app/release
 cutcoin_mobile/android/app/.cxx
-cutcoin_mobile/.dart_tool/
-/cutcoin_mobile/.idea/
-/cutcoin_mobile/build/
-/cutcoin_mobile/build
 
+
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/merchant-panel//node_modules
+/merchant-panel//.pnp
+merchant-panel/.pnp.*
+merchant-panel/.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/merchant-panel//coverage
+
+# next.js
+/merchant-panel//.next/
+/merchant-panel//out/
+
+# production
+merchant-panel//build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+merchant-panel/yarn-debug.log*
+merchant-panel/yarn-error.log*
+merchant-panel/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+merchant-panel/.env*
+
+# vercel
+merchant-panel/.vercel
+
+# typescript
+*.tsbuildinfo
+merchant-panel/next-env.d.ts
