@@ -29,3 +29,43 @@ export async function fetchApi<T>(endpoint: string, options: ApiOptions = {}): P
 
   return response.json()
 }
+
+export const fetchMerchantDashboardStats = async () => {
+  try {
+    const response = await fetchApi("/merchant/dashboard/stats")
+    return response
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error)
+    throw error
+  }
+}
+
+export const fetchMerchantRecentTransactions = async (limit = 5) => {
+  try {
+    const response = await fetchApi(`/merchant/dashboard/transactions/recent?limit=${limit}`)
+    return response
+  } catch (error) {
+    console.error("Error fetching recent transactions:", error)
+    throw error
+  }
+}
+
+export const fetchMerchantTransactionStats = async (period = "week") => {
+  try {
+    const response = await fetchApi(`/merchant/dashboard/transactions/stats?period=${period}`)
+    return response
+  } catch (error) {
+    console.error("Error fetching transaction stats:", error)
+    throw error
+  }
+}
+
+export const fetchMerchantDepositStats = async (period = "week") => {
+  try {
+    const response = await fetchApi(`/merchant/dashboard/deposits/stats?period=${period}`)
+    return response
+  } catch (error) {
+    console.error("Error fetching deposit stats:", error)
+    throw error
+  }
+}

@@ -19,7 +19,5 @@ router.put("/profile", validationMiddleware(UpdateMerchantDto), merchantControll
 router.post("/payment/initiate", validationMiddleware(InitiatePaymentDto), merchantController.initiatePayment)
 router.post("/payment/confirm", validationMiddleware(ConfirmPaymentDto), merchantController.confirmPayment)
 
-// Transaction history
-router.get("/transactions", merchantController.getMerchantTransactions)
 
 export default router

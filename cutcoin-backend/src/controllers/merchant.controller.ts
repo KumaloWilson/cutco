@@ -78,25 +78,4 @@ export class MerchantController {
       next(error)
     }
   }
-
-  public getMerchantTransactions = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!req.user) {
-        res.status(401).json({ message: "Unauthorized" })
-        return 
-      }
-
-      // Get merchant ID from user's merchant profile
-      const merchant = await req.user.getMerchant()
-      if (!merchant) {
-        res.status(403).json({ message: "User is not a merchant" })
-        return 
-      }
-
-      const result = await this.merchantService.getMerchantTransactions(merchant.id, req.query)
-      res.status(200).json(result)
-    } catch (error) {
-      next(error)
-    }
-  }
 }

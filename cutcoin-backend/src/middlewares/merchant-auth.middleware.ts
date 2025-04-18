@@ -3,9 +3,13 @@ import jwt from "jsonwebtoken"
 import { HttpException } from "../exceptions/HttpException"
 import { Merchant } from "../models/merchant.model"
 
+export interface RequestWithMerchant extends Request {
+  merchant: Merchant
+}
+
 export const merchantAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const Authorization = req.cookies["Authorization"] || req.header("Authorization")?.split("Bearer ")[1] || null
+    const Authorization = req.header("Authorization")?.split("Bearer ")[1] || null
 
     if (!Authorization) {
       return next(new HttpException(401, "Authentication token missing"))
@@ -34,7 +38,8 @@ export const merchantAuthMiddleware = async (req: Request, res: Response, next: 
       return next(new HttpException(403, "Merchant account is not active"))
     }
 
-    req.merchant = findMerchant
+    // Cast req to RequestWithMerchant to add the merchant property
+    (req as RequestWithMerchant).merchant = findMerchant
     next()
   } catch (error) {
     next(new HttpException(401, "Invalid authentication token"))

@@ -144,6 +144,7 @@ export class MerchantAuthService {
         contactPhone: merchant.contactPhone,
         email: merchant.email,
         status: merchant.status,
+        userId: merchant.userId,
       },
     }
   }

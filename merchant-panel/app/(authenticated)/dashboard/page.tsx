@@ -2,155 +2,123 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAuth } from "@/contexts/auth-context"
-import { formatCurrency } from "@/lib/utils"
+import { fetchMerchantDashboardStats, fetchMerchantRecentTransactions } from "@/lib/api"
+import { useToast } from "@/components/ui/use-toast"
+import { formatCurrency, formatNumber } from "@/lib/utils"
+import { TransactionChart } from "@/components/transaction-chart"
+import { PendingTransactionsTable } from "@/components/pending-transactions-table"
+import { Wallet, CreditCard, ArrowDownToLine, ArrowUpToLine } from "lucide-react"
 
 interface DashboardStats {
-  balance: number
   totalTransactions: number
-  pendingDeposits: number
-  pendingWithdrawals: number
+  transactionVolume: number
+  pendingTransactions: number
+  totalDeposits: number
+  currentBalance: number
 }
 
 export default function DashboardPage() {
-  const { token } = useAuth()
-  const [stats, setStats] = useState<DashboardStats>({
-    balance: 0,
-    totalTransactions: 0,
-    pendingDeposits: 0,
-    pendingWithdrawals: 0,
-  })
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [recentTransactions, setRecentTransactions] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const { toast } = useToast()
 
   useEffect(() => {
-    const fetchDashboardStats = async () => {
+    const fetchDashboardData = async () => {
       try {
-        // This would be a real API call in production
-        // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/merchant/dashboard`, {
-        //   headers: {
-        //     Authorization: `Bearer ${token}`
-        //   }
-        // })
-        // const data = await response.json()
+        setIsLoading(true)
+        const [statsData, transactionsData] = await Promise.all([
+          fetchMerchantDashboardStats(),
+          fetchMerchantRecentTransactions(5),
+        ])
 
-        // For demo purposes, we'll use mock data
-        setTimeout(() => {
-          setStats({
-            balance: 5280.75,
-            totalTransactions: 128,
-            pendingDeposits: 3,
-            pendingWithdrawals: 2,
-          })
-          setIsLoading(false)
-        }, 1000)
+        setStats(statsData)
+        setRecentTransactions(transactionsData)
       } catch (error) {
-        console.error("Error fetching dashboard stats:", error)
+        console.error("Error fetching dashboard data:", error)
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
         setIsLoading(false)
       }
     }
 
-    fetchDashboardStats()
-  }, [token])
+    fetchDashboardData()
+  }, [toast])
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+          <span className="text-muted-foreground">Loading dashboard data...</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Overview of your merchant account</p>
+        <h1 className="text-3xl font-bold tracking-tight">Merchant Dashboard</h1>
+        <p className="text-muted-foreground">Overview of your merchant account and transactions</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Wallet Balance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? (
-                <div className="h-8 w-24 animate-pulse rounded bg-muted"></div>
-              ) : (
-                formatCurrency(stats.balance)
-              )}
+          <CardContent className="flex flex-col items-center justify-between p-6">
+            <Wallet className="h-8 w-8 text-primary" />
+            <div className="mt-3 text-center">
+              <p className="text-sm font-medium text-muted-foreground">Current Balance</p>
+              <h3 className="mt-1 text-2xl font-bold">{formatCurrency(stats?.currentBalance || 0)}</h3>
             </div>
-            <p className="text-xs text-muted-foreground">Available for withdrawals</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <div className="h-8 w-16 animate-pulse rounded bg-muted"></div> : stats.totalTransactions}
+          <CardContent className="flex flex-col items-center justify-between p-6">
+            <CreditCard className="h-8 w-8 text-primary" />
+            <div className="mt-3 text-center">
+              <p className="text-sm font-medium text-muted-foreground">Total Transactions</p>
+              <h3 className="mt-1 text-2xl font-bold">{formatNumber(stats?.totalTransactions || 0)}</h3>
             </div>
-            <p className="text-xs text-muted-foreground">Lifetime transactions</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Deposits</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <div className="h-8 w-8 animate-pulse rounded bg-muted"></div> : stats.pendingDeposits}
+          <CardContent className="flex flex-col items-center justify-between p-6">
+            <ArrowDownToLine className="h-8 w-8 text-primary" />
+            <div className="mt-3 text-center">
+              <p className="text-sm font-medium text-muted-foreground">Transaction Volume</p>
+              <h3 className="mt-1 text-2xl font-bold">{formatCurrency(stats?.transactionVolume || 0)}</h3>
             </div>
-            <p className="text-xs text-muted-foreground">Awaiting confirmation</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Withdrawals</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <div className="h-8 w-8 animate-pulse rounded bg-muted"></div> : stats.pendingWithdrawals}
+          <CardContent className="flex flex-col items-center justify-between p-6">
+            <ArrowUpToLine className="h-8 w-8 text-primary" />
+            <div className="mt-3 text-center">
+              <p className="text-sm font-medium text-muted-foreground">Total Deposits</p>
+              <h3 className="mt-1 text-2xl font-bold">{formatCurrency(stats?.totalDeposits || 0)}</h3>
             </div>
-            <p className="text-xs text-muted-foreground">Awaiting processing</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>Your most recent transactions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-2">
-                {Array(5)
-                  .fill(0)
-                  .map((_, i) => (
-                    <div key={i} className="h-12 animate-pulse rounded bg-muted"></div>
-                  ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">Transaction history will appear here</div>
-            )}
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-2">
+        <TransactionChart />
 
-        <Card className="col-span-3">
+        <Card>
           <CardHeader>
-            <CardTitle>Pending Actions</CardTitle>
-            <CardDescription>Transactions requiring your attention</CardDescription>
+            <CardTitle>Pending Transactions</CardTitle>
+            <CardDescription>You have {stats?.pendingTransactions || 0} pending transactions</CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <div className="space-y-2">
-                {Array(3)
-                  .fill(0)
-                  .map((_, i) => (
-                    <div key={i} className="h-12 animate-pulse rounded bg-muted"></div>
-                  ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">Pending actions will appear here</div>
-            )}
+            <PendingTransactionsTable limit={5} />
           </CardContent>
         </Card>
       </div>
