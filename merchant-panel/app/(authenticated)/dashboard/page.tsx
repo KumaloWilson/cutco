@@ -32,7 +32,7 @@ export default function DashboardPage() {
           fetchMerchantRecentTransactions(5),
         ])
 
-        setStats(statsData)
+        setStats(statsData as DashboardStats)
         setRecentTransactions(transactionsData)
       } catch (error) {
         console.error("Error fetching dashboard data:", error)

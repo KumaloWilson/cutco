@@ -16,7 +16,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { fetchApi } from "@/lib/api"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { ArrowDownRight, ArrowUpRight, Check, X } from "lucide-react"
-import { api } from "@/lib/axios"
+
 
 interface PendingTransaction {
   id: number
@@ -63,8 +63,11 @@ export function PendingTransactionsTable({
   const fetchPendingTransactions = async () => {
     try {
       setIsLoading(true)
-      const response = await api.get(`/merchant/transactions/pending${limit ? `?limit=${limit}` : ""}`)
-      setPendingTransactions(response.data.transactions || [])
+      const response = await fetchApi(`/merchant/transactions/pending${limit ? `?limit=${limit}` : ""}`) as {
+        pendingTransactions: PendingTransaction[]
+      }
+
+      setPendingTransactions(response.pendingTransactions || [])
     } catch (error) {
       console.error("Failed to fetch pending transactions:", error)
       toast({
@@ -100,7 +103,7 @@ export function PendingTransactionsTable({
       // Close dialog and refresh data
       setSelectedTransaction(null)
       fetchPendingTransactions()
-      setOnRefresh && onRefresh()
+      onRefresh?.()
     } catch (error) {
       toast({
         variant: "destructive",

@@ -13,6 +13,14 @@ interface ChartData {
   volume: number
 }
 
+interface TransactionStats {
+    dailyStats: Array<{
+      date: string
+      count: string
+      volume: string
+    }>
+  }
+
 export function TransactionChart() {
   const [chartData, setChartData] = useState<ChartData[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -23,7 +31,7 @@ export function TransactionChart() {
     const fetchData = async () => {
       try {
         setIsLoading(true)
-        const data = await fetchMerchantTransactionStats(period)
+        const data = await fetchMerchantTransactionStats(period) as TransactionStats
 
         // Format the data for the chart
         const formattedData = data.dailyStats.map((item: any) => ({
