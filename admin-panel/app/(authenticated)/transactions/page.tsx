@@ -32,7 +32,7 @@ export default function TransactionsPage() {
     const fetchTransactions = async () => {
       try {
         setIsLoading(true)
-        const response = await api.get("/admin/transactions")
+        const response = await api.get("/all/transactions")
         setTransactions(response.data.transactions || [])
       } catch (error) {
         console.error("Failed to fetch transactions:", error)
