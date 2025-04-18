@@ -38,6 +38,10 @@ router.put(
   adminController.updateMerchantStatus,
 )
 
+// Transaction management
+router.get("/all/transactions", adminController.getAllTransactions)
+
+
 // System stats and configuration
 router.get("/stats", adminController.getSystemStats)
 router.get("/config", adminController.getSystemConfig)
