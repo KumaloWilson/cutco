@@ -8,6 +8,7 @@ import { generateOTP, generateTransactionReference } from "../utils/generators"
 import { sendSMS } from "../utils/sms"
 import type { Transaction as SequelizeTransaction } from "sequelize"
 import sequelize from "../config/sequelize"
+import MerchantTransaction from "@/models/merchant-transaction.model"
 
 export class MerchantService {
   public async registerMerchant(
@@ -283,33 +284,97 @@ export class MerchantService {
     }
   }
 
-  public async getMerchantTransactions(merchantId: number, query: { page?: number; limit?: number; status?: string }) {
-    const page = query.page || 1
-    const limit = query.limit || 10
-    const offset = (page - 1) * limit
-
+  public async getPendingMerchantTransactions(merchantId: number, query: { page?: number; limit?: number; type?: string }) {
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const offset = (page - 1) * limit;
+  
     // Find merchant
-    const merchant = await Merchant.findByPk(merchantId)
+    const merchant = await Merchant.findByPk(merchantId);
     if (!merchant) {
-      throw new HttpException(404, "Merchant not found")
+      throw new HttpException(404, "Merchant not found");
     }
-
-    // Find merchant user
-    const merchantUser = await User.findByPk(merchant.userId)
-    if (!merchantUser) {
-      throw new HttpException(404, "Merchant user not found")
-    }
-
+  
     const whereClause: any = {
-      receiverId: merchantUser.id,
-      type: "payment",
+      merchantId: merchantId,
+      status: "pending" // Always filter for pending status
+    };
+  
+    // Add type filter if provided
+    if (query.type) {
+      whereClause.type = query.type;
     }
+  
+    const { count, rows } = await MerchantTransaction.findAndCountAll({
+      where: whereClause,
+      limit,
+      offset,
+      order: [["createdAt", "ASC"]], // Oldest pending transactions first
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["studentId", "firstName", "lastName"],
+        },
+      ],
+    });
+  
+    // Format transactions for better readability
+    const pendingTransactions = rows.map((transaction) => {
+      return {
+        id: transaction.id,
+        reference: transaction.reference,
+        amount: Number(transaction.amount),
+        type: transaction.type,
+        description: transaction.description,
+        createdAt: transaction.createdAt,
+        waitingTime: this.calculateWaitingTime(transaction.createdAt),
+        customer: transaction.user
+          ? {
+              studentId: transaction.user.studentId,
+              name: `${transaction.user.firstName} ${transaction.user.lastName}`,
+            }
+          : null,
+        studentConfirmed: transaction.studentConfirmed,
+        merchantConfirmed: transaction.merchantConfirmed
+      };
+    });
+  
+    return {
+      pendingTransactions,
+      pagination: {
+        total: count,
+        page,
+        limit,
+        pages: Math.ceil(count / limit),
+      },
+    };
+  }
 
+  public async getMerchantTransactions(merchantId: number, query: { page?: number; limit?: number; status?: string; type?: string }) {
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const offset = (page - 1) * limit;
+  
+    // Find merchant
+    const merchant = await Merchant.findByPk(merchantId);
+    if (!merchant) {
+      throw new HttpException(404, "Merchant not found");
+    }
+  
+    const whereClause: any = {
+      merchantId: merchantId
+    };
+  
     if (query.status) {
-      whereClause.status = query.status
+      whereClause.status = query.status;
     }
-
-    const { count, rows } = await Transaction.findAndCountAll({
+  
+    if (query.type) {
+      whereClause.type = query.type;
+    }
+  
+    const { count, rows } = await MerchantTransaction.findAndCountAll({
       where: whereClause,
       limit,
       offset,
@@ -317,12 +382,12 @@ export class MerchantService {
       include: [
         {
           model: User,
-          as: "sender",
+          as: "user", // Changed from "sender" to match the model relationship
           attributes: ["studentId", "firstName", "lastName"],
         },
       ],
-    })
-
+    });
+  
     // Format transactions for better readability
     const transactions = rows.map((transaction) => {
       return {
@@ -332,15 +397,15 @@ export class MerchantService {
         status: transaction.status,
         description: transaction.description,
         createdAt: transaction.createdAt,
-        customer: transaction.sender
+        customer: transaction.user
           ? {
-              studentId: transaction.sender.studentId,
-              name: `${transaction.sender.firstName} ${transaction.sender.lastName}`,
+              studentId: transaction.user.studentId,
+              name: `${transaction.user.firstName} ${transaction.user.lastName}`,
             }
           : null,
-      }
-    })
-
+      };
+    });
+  
     return {
       transactions,
       pagination: {
@@ -349,6 +414,6 @@ export class MerchantService {
         limit,
         pages: Math.ceil(count / limit),
       },
-    }
+    };
   }
 }
