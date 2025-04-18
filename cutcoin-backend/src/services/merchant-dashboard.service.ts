@@ -4,12 +4,13 @@ import { User } from "../models/user.model"
 import { Wallet } from "../models/wallet.model"
 import sequelize from "../config/sequelize"
 import { Op } from "sequelize"
+import Merchant from "../models/merchant.model"
 
 export class MerchantDashboardService {
-  public async getDashboardStats(merchantId: number) {
+  public async getDashboardStats(merchant: Merchant) {
     // Get merchant's wallet
     const user = await User.findOne({
-      where: { merchantId },
+      where: { id: merchant.userId },
       include: [{ model: Wallet }],
     })
 
@@ -19,25 +20,25 @@ export class MerchantDashboardService {
 
     // Get total transactions count
     const totalTransactions = await MerchantTransaction.count({
-      where: { merchantId },
+      where: { merchantId: merchant.id },
     })
 
     // Get total transaction volume
     const transactionVolume = await MerchantTransaction.sum("amount", {
-      where: { merchantId },
+      where: { merchantId: merchant.id },
     })
 
     // Get pending transactions count
     const pendingTransactions = await MerchantTransaction.count({
       where: {
-        merchantId,
+        merchantId: merchant.id,
         status: "pending",
       },
     })
 
     // Get total deposits
     const totalDeposits = await MerchantDeposit.sum("amount", {
-      where: { merchantId },
+      where: { merchantId: merchant.id },
     })
 
     // Get current balance

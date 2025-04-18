@@ -11,8 +11,8 @@ export class MerchantDashboardController {
          return
       }
 
-      const merchantId = req.merchant.id
-      const result = await this.merchantDashboardService.getDashboardStats(merchantId)
+      const merchant = req.merchant
+      const result = await this.merchantDashboardService.getDashboardStats(merchant)
       res.status(200).json(result)
     } catch (error) {
       next(error)
