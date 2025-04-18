@@ -37,7 +37,7 @@ export class MerchantDashboardService {
     })
 
     // Get total deposits
-    const totalDeposits = await MerchantDeposit.sum("amount", {
+    const totalDeposits = await MerchantDeposit.sum("cashAmount", {
       where: { merchantId: merchant.id },
     })
 
@@ -61,8 +61,8 @@ export class MerchantDashboardService {
       include: [
         {
           model: User,
-          as: "customer",
-          attributes: ["id", "firstName", "lastName", "phoneNumber"],
+          as: "user", // Changed from "sender" to match the model relationship
+          attributes: ["studentId", "firstName", "lastName"],
         },
       ],
     })
@@ -158,7 +158,7 @@ export class MerchantDashboardService {
       attributes: [
         [sequelize.fn("date_trunc", "day", sequelize.col("createdAt")), "date"],
         [sequelize.fn("count", sequelize.col("id")), "count"],
-        [sequelize.fn("sum", sequelize.col("amount")), "volume"],
+        [sequelize.fn("sum", sequelize.col("cashAmount")), "volume"],
       ],
       where: {
         merchantId,
