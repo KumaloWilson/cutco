@@ -37,7 +37,7 @@ export class MerchantDashboardService {
     })
 
     // Get total deposits
-    const totalDeposits = await MerchantDeposit.sum("amount", {
+    const totalDeposits = await MerchantDeposit.sum("cashAmount", {
       where: { merchantId: merchant.id },
     })
 
