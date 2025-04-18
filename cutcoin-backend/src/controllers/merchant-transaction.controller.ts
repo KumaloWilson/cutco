@@ -1,8 +1,10 @@
 import type { Request, Response, NextFunction } from "express"
-import { MerchantTransaction } from "../models/merchant-transaction.model"
-import { User } from "../models/user.model"
+import { MerchantService } from '../services/merchant.service';
 
 export class MerchantTransactionController {
+  private merchantService = new MerchantService()
+
+
   public getPendingTransactions = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.merchant) {
@@ -10,40 +12,29 @@ export class MerchantTransactionController {
          return
       }
 
-      const merchantId = req.merchant.id
-      const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : undefined
+      const merchant = await req.merchant
+      if (!merchant) {
+        res.status(403).json({ message: "User is not a merchant" })
+        return 
+      }
 
-      const transactions = await MerchantTransaction.findAll({
-        where: {
-          merchantId,
-          status: "pending",
-        },
-        order: [["createdAt", "DESC"]],
-        limit,
-        include: [
-          {
-            model: User,
-            as: "customer",
-            attributes: ["id", "firstName", "lastName", "phoneNumber"],
-          },
-        ],
-      })
-
-      res.status(200).json({ transactions })
+      const result = await this.merchantService.getPendingMerchantTransactions(merchant.id, req.query)
+      res.status(200).json(result)
     } catch (error) {
       next(error)
     }
   }
 
+
   public getMerchantTransactions = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) {
+      if (!req.merchant) {
         res.status(401).json({ message: "Unauthorized" })
         return 
       }
 
-      // Get merchant ID from user's merchant profile
-      const merchant = await req.user.getMerchant()
+      const merchant = await req.merchant
+
       if (!merchant) {
         res.status(403).json({ message: "User is not a merchant" })
         return 
