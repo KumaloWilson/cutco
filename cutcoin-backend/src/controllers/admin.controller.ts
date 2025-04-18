@@ -43,6 +43,20 @@ export class AdminController {
     }
   }
 
+  public getAllTransactions = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.admin || !req.admin.id) {
+        res.status(401).json({ message: "Unauthorized" })
+        return;
+      }
+
+      const result = await this.adminService.getAllTransactions(req.query)
+      res.status(200).json(result)
+    } catch (error) {
+      next(error)
+    }
+  }
+
   public updateAdminProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
