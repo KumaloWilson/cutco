@@ -23,11 +23,7 @@ interface Transaction {
   status: string
   description: string
   createdAt: string
-  sender?: {
-    studentId: string
-    name: string
-  }
-  receiver?: {
+  customer?: {
     studentId: string
     name: string
   }
@@ -203,12 +199,12 @@ export default function TransactionsPage() {
                         </TableCell>
                         <TableCell>
                           <div className="font-medium">
-                            {transaction.type === "deposit" ? transaction.sender?.name : transaction.receiver?.name}
+                            {transaction.type === "deposit" ? transaction.customer?.name : transaction.customer?.name}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {transaction.type === "deposit"
-                              ? transaction.sender?.studentId
-                              : transaction.receiver?.studentId}
+                              ? transaction.customer?.studentId
+                              : transaction.customer?.studentId}
                           </div>
                         </TableCell>
                         <TableCell>{formatCurrency(transaction.amount)}</TableCell>
