@@ -61,8 +61,8 @@ export class MerchantDashboardService {
       include: [
         {
           model: User,
-          as: "customer",
-          attributes: ["id", "firstName", "lastName", "phoneNumber"],
+          as: "user", // Changed from "sender" to match the model relationship
+          attributes: ["studentId", "firstName", "lastName"],
         },
       ],
     })
