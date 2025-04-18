@@ -53,7 +53,7 @@ export default function TransactionsPage() {
     limit: 10,
     pages: 0
   })
-  const [transactionType, setTransactionType] = useState<string>("")
+  const [transactionType, setTransactionType] = useState<string>("all")
   const { toast } = useToast()
 
   const fetchTransactions = async (page = 1, limit = 10, type?: string) => {
@@ -62,7 +62,7 @@ export default function TransactionsPage() {
       const params = new URLSearchParams()
       params.append("page", page.toString())
       params.append("limit", limit.toString())
-      if (type) params.append("type", type)
+      if (type && type !== "all") params.append("type", type)
 
       const response = await api.get<TransactionsResponse>(`/all/transactions?${params.toString()}`)
       setTransactions(response.data.transactions || [])
@@ -134,10 +134,10 @@ export default function TransactionsPage() {
             </div>
             <Select value={transactionType} onValueChange={handleTypeChange}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="All types" />
+                <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All types</SelectItem>
+                <SelectItem value="all">All types</SelectItem>
                 <SelectItem value="deposit">Deposit</SelectItem>
                 <SelectItem value="withdrawal">Withdrawal</SelectItem>
                 <SelectItem value="transfer">Transfer</SelectItem>
