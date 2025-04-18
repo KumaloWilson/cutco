@@ -8,7 +8,8 @@ import { generateOTP, generateTransactionReference } from "../utils/generators"
 import { sendSMS } from "../utils/sms"
 import type { Transaction as SequelizeTransaction } from "sequelize"
 import sequelize from "../config/sequelize"
-import MerchantTransaction from "@/models/merchant-transaction.model"
+import MerchantTransaction from "../models/merchant-transaction.model"
+import { calculateWaitingTime } from "../utils/helpers"
 
 export class MerchantService {
   public async registerMerchant(
@@ -328,7 +329,7 @@ export class MerchantService {
         type: transaction.type,
         description: transaction.description,
         createdAt: transaction.createdAt,
-        waitingTime: this.calculateWaitingTime(transaction.createdAt),
+        waitingTime: calculateWaitingTime(transaction.createdAt),
         customer: transaction.user
           ? {
               studentId: transaction.user.studentId,
