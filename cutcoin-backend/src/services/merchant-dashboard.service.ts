@@ -2,7 +2,7 @@ import { MerchantTransaction } from "../models/merchant-transaction.model"
 import { MerchantDeposit } from "../models/merchant-deposit.model"
 import { User } from "../models/user.model"
 import { Wallet } from "../models/wallet.model"
-import { sequelize } from "../app"
+import sequelize from "../config/sequelize"
 import { Op } from "sequelize"
 
 export class MerchantDashboardService {

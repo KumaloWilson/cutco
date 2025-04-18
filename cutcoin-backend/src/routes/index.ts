@@ -8,9 +8,7 @@ import notificationRoute from "./notification.route"
 import merchantRoute from "./merchant.route"
 import paymentRoute from "./payment.route"
 import merchantAuthRoute from "./merchant-auth.route"
-// Add the import for merchant dashboard routes
 import merchantDashboardRoutes from "./merchant-dashboard.route"
-// Add the import for merchant transaction routes
 import merchantTransactionRoutes from "./merchant-transaction.route"
 
 const router = Router()
@@ -24,10 +22,7 @@ router.use("/notifications", notificationRoute)
 router.use("/merchants", merchantRoute)
 router.use("/payments", paymentRoute)
 router.use("/merchant-auth", merchantAuthRoute)
-
-// Add the merchant dashboard routes to the router
 router.use("/merchant/dashboard", merchantDashboardRoutes)
-// Add the merchant transaction routes to the router
 router.use("/merchant/transactions", merchantTransactionRoutes)
 
 export default router
