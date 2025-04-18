@@ -397,6 +397,8 @@ export class MerchantService {
         amount: Number(transaction.amount),
         status: transaction.status,
         description: transaction.description,
+        type: transaction.type,
+        fee: transaction.fee,
         createdAt: transaction.createdAt,
         customer: transaction.user
           ? {
