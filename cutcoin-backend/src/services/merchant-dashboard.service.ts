@@ -158,7 +158,7 @@ export class MerchantDashboardService {
       attributes: [
         [sequelize.fn("date_trunc", "day", sequelize.col("createdAt")), "date"],
         [sequelize.fn("count", sequelize.col("id")), "count"],
-        [sequelize.fn("sum", sequelize.col("amount")), "volume"],
+        [sequelize.fn("sum", sequelize.col("cashAmount")), "volume"],
       ],
       where: {
         merchantId,
