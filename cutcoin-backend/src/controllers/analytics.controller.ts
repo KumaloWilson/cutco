@@ -4,7 +4,7 @@ import { AnalyticsService } from "../services/analytics.service"
 export class AnalyticsController {
   private analyticsService = new AnalyticsService()
 
-  public getDashboardStats = async (req: any, res: Response, next: NextFunction) => {
+  public getDashboardStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin) {
         res.status(401).json({ message: "Unauthorized" })
@@ -19,7 +19,7 @@ export class AnalyticsController {
     }
   }
 
-  public getTransactionStats = async (req: any, res: Response, next: NextFunction) => {
+  public getTransactionStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin) {
         res.status(401).json({ message: "Unauthorized" })
@@ -33,7 +33,7 @@ export class AnalyticsController {
     }
   }
 
-  public getUserStats = async (req: any, res: Response, next: NextFunction) => {
+  public getUserStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin) {
         res.status(401).json({ message: "Unauthorized" })
@@ -47,7 +47,7 @@ export class AnalyticsController {
     }
   }
 
-  public getMerchantStats = async (req: any, res: Response, next: NextFunction) => {
+  public getMerchantStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin) {
         res.status(401).json({ message: "Unauthorized" })
@@ -61,7 +61,7 @@ export class AnalyticsController {
     }
   }
 
-  public getWalletStats = async (req: any, res: Response, next: NextFunction) => {
+  public getWalletStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin) {
         res.status(401).json({ message: "Unauthorized" })

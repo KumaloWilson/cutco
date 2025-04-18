@@ -5,7 +5,7 @@ export class PaymentController {
   private paymentService = new PaymentService()
 
   // User endpoints
-  public initiatePaynowPayment = async (req: any, res: Response, next: NextFunction) => {
+  public initiatePaynowPayment = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
          res.status(401).json({ message: "Unauthorized" })
@@ -31,7 +31,7 @@ export class PaymentController {
     }
   }
 
-  public confirmCashDeposit = async (req: any, res: Response, next: NextFunction) => {
+  public confirmCashDeposit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
         res.status(401).json({ message: "Unauthorized" })
@@ -47,7 +47,7 @@ export class PaymentController {
     }
   }
 
-  public getStudentDeposits = async (req: any, res: Response, next: NextFunction) => {
+  public getStudentDeposits = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
          res.status(401).json({ message: "Unauthorized" })
@@ -63,7 +63,7 @@ export class PaymentController {
   }
 
   // Merchant endpoints
-  public initiateCashDeposit = async (req: any, res: Response, next: NextFunction) => {
+  public initiateCashDeposit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
          res.status(401).json({ message: "Unauthorized" })
@@ -84,7 +84,7 @@ export class PaymentController {
     }
   }
 
-  public getMerchantDeposits = async (req: any, res: Response, next: NextFunction) => {
+  public getMerchantDeposits = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
        res.status(401).json({ message: "Unauthorized" })
@@ -105,7 +105,7 @@ export class PaymentController {
     }
   }
 
-  public getMerchantDepositDetails = async (req: any, res: Response, next: NextFunction) => {
+  public getMerchantDepositDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
          res.status(401).json({ message: "Unauthorized" })
@@ -128,7 +128,7 @@ export class PaymentController {
   }
 
   // Merchant deposits funds to their wallet
-  public merchantDepositFunds = async (req:any, res: Response, next: NextFunction) => {
+  public merchantDepositFunds = async (req:Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
         res.status(401).json({ message: "Unauthorized" })
@@ -150,7 +150,7 @@ export class PaymentController {
   }
 
   // Admin endpoints
-  public adminApproveCashDeposit = async (req: any, res: Response, next: NextFunction) => {
+  public adminApproveCashDeposit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
         res.status(401).json({ message: "Unauthorized" })
@@ -184,7 +184,7 @@ export class PaymentController {
     }
   }
 
-  public updateExchangeRate = async (req: any, res: Response, next: NextFunction) => {
+  public updateExchangeRate = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
        res.status(401).json({ message: "Unauthorized" })
@@ -200,7 +200,7 @@ export class PaymentController {
     }
   }
 
-  public setMerchantDepositLimits = async (req: any, res: Response, next: NextFunction) => {
+  public setMerchantDepositLimits = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
        res.status(401).json({ message: "Unauthorized" })
@@ -216,7 +216,7 @@ export class PaymentController {
   }
 
   // Admin approves merchant deposit
-  public adminApproveMerchantDeposit = async (req: any, res: Response, next: NextFunction) => {
+  public adminApproveMerchantDeposit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
         res.status(401).json({ message: "Unauthorized" })

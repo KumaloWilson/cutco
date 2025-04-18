@@ -184,7 +184,8 @@ export class WalletController {
     }
   }
 
-  public getAllTransactions = async (req: any, res: Response, next: NextFunction) => {
+  public getAllTransactions = async (req: Request, res: Response, next: NextFunction) => {
+    console.log("getAllTransactions", req.user)
     try {
       if (!req.admin || !req.admin.id) {
          res.status(401).json({ message: "Unauthorized" })

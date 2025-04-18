@@ -8,6 +8,21 @@ import { HttpException } from "../exceptions/HttpException"
 import type { Transaction } from "sequelize"
 import sequelize from "../config/sequelize"
 import { Op } from "sequelize" // Import the Sequelize operators
+import Admin from "../models/admin.model"
+import Merchant from "../models/merchant.model"
+
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User
+      admin?: Admin
+      merchant?: Merchant
+    }
+  }
+}
+
+
 
 export class AuthService {
   public async register(userData: {

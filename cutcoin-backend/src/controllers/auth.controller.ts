@@ -63,7 +63,7 @@ export class AuthController {
     }
   }
 
-  public completeKYC = async (req: any, res: Response, next: NextFunction) => {
+  public completeKYC = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
         res.status(401).json({ message: "Unauthorized" });
