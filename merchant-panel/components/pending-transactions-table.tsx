@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,6 +16,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { fetchApi } from "@/lib/api"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { ArrowDownRight, ArrowUpRight, Check, X } from "lucide-react"
+import { api } from "@/lib/axios"
 
 interface PendingTransaction {
   id: number
@@ -33,20 +34,48 @@ interface PendingTransaction {
   }
 }
 
+// Add a limit prop to the component
 interface PendingTransactionsTableProps {
-  transactions: PendingTransaction[]
-  isLoading: boolean
-  onRefresh: () => Promise<void>
+  transactions?: PendingTransaction[]
+  isLoading?: boolean
+  onRefresh?: () => Promise<void>
+  limit?: number
 }
 
-export default function PendingTransactionsTable({
-  transactions,
-  isLoading,
-  onRefresh,
+export function PendingTransactionsTable({
+  transactions: initialTransactions,
+  isLoading: initialIsLoading,
+  onRefresh: initialOnRefresh,
+  limit,
 }: PendingTransactionsTableProps) {
   const [selectedTransaction, setSelectedTransaction] = useState<PendingTransaction | null>(null)
   const [isConfirming, setIsConfirming] = useState(false)
   const { toast } = useToast()
+  const [pendingTransactions, setPendingTransactions] = useState<PendingTransaction[]>(initialTransactions || [])
+  const [isLoading, setIsLoading] = useState(initialIsLoading || false)
+  const [onRefresh, setOnRefresh] = useState<(() => Promise<void>) | undefined>(initialOnRefresh)
+
+  useEffect(() => {
+    fetchPendingTransactions()
+  }, [limit])
+
+  // Update the fetchPendingTransactions function to use the limit
+  const fetchPendingTransactions = async () => {
+    try {
+      setIsLoading(true)
+      const response = await api.get(`/merchant/transactions/pending${limit ? `?limit=${limit}` : ""}`)
+      setPendingTransactions(response.data.transactions || [])
+    } catch (error) {
+      console.error("Failed to fetch pending transactions:", error)
+      toast({
+        title: "Error",
+        description: "Failed to load pending transactions. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleConfirm = async () => {
     if (!selectedTransaction) return
@@ -70,7 +99,8 @@ export default function PendingTransactionsTable({
 
       // Close dialog and refresh data
       setSelectedTransaction(null)
-      onRefresh()
+      fetchPendingTransactions()
+      setOnRefresh && onRefresh()
     } catch (error) {
       toast({
         variant: "destructive",
@@ -90,7 +120,7 @@ export default function PendingTransactionsTable({
     )
   }
 
-  if (transactions.length === 0) {
+  if (pendingTransactions.length === 0) {
     return (
       <div className="flex justify-center items-center h-64 border rounded-lg">
         <div className="text-center">
@@ -115,7 +145,7 @@ export default function PendingTransactionsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.map((transaction) => (
+            {pendingTransactions.map((transaction) => (
               <TableRow key={transaction.id}>
                 <TableCell>
                   <Badge variant={transaction.type === "deposit" ? "default" : "secondary"}>
