@@ -8,7 +8,7 @@ const merchantTransactionController = new MerchantTransactionController()
 // All merchant transaction routes require merchant authentication
 router.use(merchantAuthMiddleware)
 
-router.get("/", merchantTransactionController.getPendingTransactions)
+router.get("/", merchantTransactionController.getMerchantTransactions)
 
 
 // Get pending transactions
