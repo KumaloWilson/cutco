@@ -13,7 +13,7 @@ export class AdminController {
     }
   }
 
-  public createAdmin = async (req: any, res: Response, next: NextFunction) => {
+  public createAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin) {
         res.status(401).json({ message: "Unauthorized" })
@@ -28,7 +28,7 @@ export class AdminController {
     }
   }
 
-  public getAdminProfile = async (req: any, res: Response, next: NextFunction) => {
+  public getAdminProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
         res.status(401).json({ message: "Unauthorized" })
@@ -43,7 +43,7 @@ export class AdminController {
     }
   }
 
-  public updateAdminProfile = async (req: any, res: Response, next: NextFunction) => {
+  public updateAdminProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
         res.status(401).json({ message: "Unauthorized" })
@@ -58,7 +58,7 @@ export class AdminController {
     }
   }
 
-  public getAllUsers = async (req: any, res: Response, next: NextFunction) => {
+  public getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.adminService.getAllUsers(req.query)
       res.status(200).json(result)

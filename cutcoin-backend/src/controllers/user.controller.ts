@@ -7,7 +7,7 @@ export class UserController {
   /**
    * Get authenticated user's profile
    */
-  public getProfile = async (req: any, res: Response, next: NextFunction) => {
+  public getProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
         res.status(401).json({ message: "Unauthorized" })
@@ -25,7 +25,7 @@ export class UserController {
   /**
    * Update authenticated user's profile
    */
-  public updateProfile = async (req: any, res: Response, next: NextFunction) => {
+  public updateProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user || !req.user.id) {
         res.status(401).json({ message: "Unauthorized" })
