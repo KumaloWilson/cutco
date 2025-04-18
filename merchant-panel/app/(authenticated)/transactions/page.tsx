@@ -9,10 +9,17 @@ import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { fetchApi } from "@/lib/api"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { ArrowDownRight, ArrowUpRight, RefreshCw, Search, Table } from "lucide-react"
+import { ArrowDownRight, ArrowUpRight, RefreshCw, Search } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { 
+  Table as UITable,  // Rename to avoid conflict
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
 
 interface Transaction {
   id: number
@@ -165,7 +172,7 @@ export default function TransactionsPage() {
           ) : (
             <>
               <div className="rounded-md border">
-                <Table>
+                <UITable>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Type</TableHead>
@@ -228,7 +235,7 @@ export default function TransactionsPage() {
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
+                </UITable>
               </div>
 
               <div className="flex items-center justify-between mt-4">
