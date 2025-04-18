@@ -64,7 +64,7 @@ export default function TransactionsPage() {
       params.append("limit", limit.toString())
       if (type && type !== "all") params.append("type", type)
 
-      const response = await api.get<TransactionsResponse>(`wallets/all/transactions?${params.toString()}`)
+      const response = await api.get<TransactionsResponse>(`admin/all/transactions?${params.toString()}`)
       setTransactions(response.data.transactions || [])
       setPagination(response.data.pagination)
     } catch (error) {
