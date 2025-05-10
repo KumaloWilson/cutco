@@ -11,7 +11,7 @@ export class OTP extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
-    field: "user_id", // Explicitly specify the field name
+    field: "userId", // Explicitly specify the field name
   })
   userId!: number
 
@@ -26,7 +26,7 @@ export class OTP extends Model {
   @Column({
     type: DataType.STRING,
     allowNull: true,
-    field: "phone_number", // Explicitly specify the field name
+    field: "phoneNumber", // Explicitly specify the field name
   })
   phoneNumber!: string
 
@@ -61,14 +61,14 @@ export class OTP extends Model {
   @Column({
     type: DataType.DATE,
     allowNull: false,
-    field: "expires_at", // Explicitly specify the field name
+    field: "expiresAt", // Explicitly specify the field name
   })
   expiresAt!: Date
 
   @Column({
     type: DataType.BOOLEAN,
     defaultValue: false,
-    field: "is_used", // Explicitly specify the field name
+    field: "isUsed", // Explicitly specify the field name
   })
   isUsed!: boolean
 
