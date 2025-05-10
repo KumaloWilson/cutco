@@ -51,6 +51,8 @@ export class OTP extends Model {
       "withdrawal",
       "merchant_registration",
       "merchant_password_reset",
+      "transaction",
+      "transfer",
     ],
     allowNull: false,
   })
