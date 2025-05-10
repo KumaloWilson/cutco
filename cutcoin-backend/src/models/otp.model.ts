@@ -53,6 +53,12 @@ export class OTP extends Model {
       "merchant_password_reset",
       "transaction",
       "transfer",
+      "merchant_transaction",
+      "merchant_transfer",
+      "merchant_withdrawal",
+      "merchant_login",
+      "merchant_otp_verification",
+      "merchant_otp_verification_resend",
     ],
     allowNull: false,
   })
