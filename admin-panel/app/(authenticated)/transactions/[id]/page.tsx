@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { formatCurrency } from "@/lib/utils"
 import { ArrowLeft, User, CreditCard, CheckCircle, XCircle } from "lucide-react"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 
 interface Transaction {
   id: number
@@ -36,7 +37,11 @@ interface Transaction {
   }
 }
 
-export default function TransactionDetailsPage({ params }: { params: { id: string } }) {
+export default function TransactionDetailsPage() {
+
+  const params = useParams();
+  const id = params?.id as string
+
   const [transaction, setTransaction] = useState<Transaction | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
@@ -45,7 +50,7 @@ export default function TransactionDetailsPage({ params }: { params: { id: strin
     const fetchTransactionDetails = async () => {
       try {
         setIsLoading(true)
-        const response = await api.get(`/admin/transactions/${params.id}`)
+        const response = await api.get(`/admin/transactions/${id}`)
         setTransaction(response.data.transaction)
       } catch (error) {
         console.error("Error fetching transaction details:", error)
@@ -60,11 +65,11 @@ export default function TransactionDetailsPage({ params }: { params: { id: strin
     }
 
     fetchTransactionDetails()
-  }, [params.id, toast])
+  }, [id, toast])
 
   const updateTransactionStatus = async (status: string) => {
     try {
-      const response = await api.put(`/admin/transactions/${params.id}/status`, { status })
+      const response = await api.put(`/admin/transactions/${id}/status`, { status })
       setTransaction((prevTransaction) => (prevTransaction ? { ...prevTransaction, status } : null))
       toast({
         title: "Success",

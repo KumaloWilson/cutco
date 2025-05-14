@@ -43,6 +43,27 @@ export class AdminController {
     }
   }
 
+  public getTransactionById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.admin || !req.admin.id) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+  
+      const { id } = req.params;
+      
+      if (!id) {
+        res.status(400).json({ message: "Transaction ID is required" });
+        return;
+      }
+  
+      const transaction = await this.adminService.getTransactionById(id);
+      res.status(200).json(transaction);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   public getAllTransactions = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.admin || !req.admin.id) {
