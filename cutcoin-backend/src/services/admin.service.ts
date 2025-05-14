@@ -588,6 +588,71 @@ export class AdminService {
         throw new HttpException(500, "Failed to fetch all transactions");
       }
     }
-  
+
+    
+    public async getTransactionById(id: string) {
+      try {
+        const transaction = await Transaction.findOne({
+          where: { id },
+          include: [
+            {
+              model: User,
+              as: "sender",
+              attributes: ["studentId", "firstName", "lastName"],
+            },
+            {
+              model: User,
+              as: "receiver",
+              attributes: ["studentId", "firstName", "lastName"],
+            },
+          ],
+        });
+    
+        if (!transaction) {
+          throw new HttpException(404, "Transaction not found");
+        }
+    
+        // Format transaction for better readability
+        let description = transaction.description || "";
+        let amount = Number(transaction.amount);
+    
+        if (transaction.type === "transfer") {
+          description = `Transfer from ${transaction.sender?.firstName || ""} ${transaction.sender?.lastName || ""} to ${transaction.receiver?.firstName || ""} ${transaction.receiver?.lastName || ""}`;
+        } else if (transaction.type === "deposit") {
+          description = `Deposit to ${transaction.receiver?.firstName || ""} ${transaction.receiver?.lastName || ""}'s wallet`;
+        } else if (transaction.type === "withdrawal") {
+          description = `Withdrawal from ${transaction.sender?.firstName || ""} ${transaction.sender?.lastName || ""}'s wallet`;
+        }
+    
+        return {
+          id: transaction.id,
+          reference: transaction.reference,
+          amount,
+          fee: Number(transaction.fee || 0),
+          type: transaction.type,
+          status: transaction.status,
+          description,
+          createdAt: transaction.createdAt,
+          sender: transaction.sender
+            ? {
+                studentId: transaction.sender.studentId,
+                name: `${transaction.sender.firstName} ${transaction.sender.lastName}`,
+              }
+            : null,
+          receiver: transaction.receiver
+            ? {
+                studentId: transaction.receiver.studentId,
+                name: `${transaction.receiver.firstName} ${transaction.receiver.lastName}`,
+              }
+            : null,
+        };
+      } catch (error) {
+        if (error instanceof HttpException) {
+          throw error;
+        }
+        console.error("Error fetching transaction by ID:", error);
+        throw new HttpException(500, "Failed to fetch transaction");
+      }
+    }
 
 }

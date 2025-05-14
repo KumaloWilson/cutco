@@ -40,7 +40,7 @@ router.put(
 
 // Transaction management
 router.get("/all/transactions", adminController.getAllTransactions)
-
+router.get("/transactions/:id", adminController.getTransactionById)
 
 // System stats and configuration
 router.get("/stats", adminController.getSystemStats)
