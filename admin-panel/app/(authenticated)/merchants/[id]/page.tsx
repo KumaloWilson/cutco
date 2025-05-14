@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate, formatCurrency } from "@/lib/utils"
 import { ArrowLeft, CheckCircle, XCircle, CreditCard } from "lucide-react"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 
 interface Merchant {
   id: number
@@ -50,7 +51,10 @@ interface Transaction {
   }
 }
 
-export default function MerchantDetailsPage({ params }: { params: { id: string } }) {
+export default function MerchantDetailsPage() {
+  const params = useParams();
+  const { id } = params;
+
   const [merchant, setMerchant] = useState<Merchant | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -60,7 +64,7 @@ export default function MerchantDetailsPage({ params }: { params: { id: string }
     const fetchMerchantDetails = async () => {
       try {
         setIsLoading(true)
-        const response = await api.get(`/admin/merchants/${params.id}`)
+        const response = await api.get(`/admin/merchants/${id}`)
         setMerchant(response.data.merchant)
         setTransactions(response.data.transactions)
       } catch (error) {
@@ -76,11 +80,11 @@ export default function MerchantDetailsPage({ params }: { params: { id: string }
     }
 
     fetchMerchantDetails()
-  }, [params.id, toast])
+  }, [id, toast])
 
   const updateMerchantStatus = async (data: { status?: string; isActive?: boolean }) => {
     try {
-      const response = await api.put(`/admin/merchants/${params.id}/status`, data)
+      const response = await api.put(`/admin/merchants/${id}/status`, data)
       setMerchant((prevMerchant) => (prevMerchant ? { ...prevMerchant, ...data } : null))
       toast({
         title: "Success",

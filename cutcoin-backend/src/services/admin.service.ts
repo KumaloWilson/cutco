@@ -254,6 +254,7 @@ export class AdminService {
     }
   }
 
+
   public async getMerchantDetails(merchantId: number) {
     const merchant = await Merchant.findByPk(merchantId, {
       include: [
@@ -268,34 +269,40 @@ export class AdminService {
           ],
         },
       ],
-    })
-
+    });
+  
     if (!merchant) {
-      throw new HttpException(404, "Merchant not found")
+      throw new HttpException(404, "Merchant not found");
     }
-
-    // Get merchant transactions
-    const transactions = await Transaction.findAll({
-      where: {
-        receiverId: merchant.user.id,
-        type: "payment",
-      },
-      limit: 10,
-      order: [["createdAt", "DESC"]],
-      include: [
-        {
-          model: User,
-          as: "sender",
-          attributes: ["studentId", "firstName", "lastName"],
+  
+    // Get merchant transactions - check if user exists first
+    let transactions: Transaction[] = [];
+    
+    if (merchant.user) {
+      // Only fetch transactions if the merchant has an associated user
+      transactions = await Transaction.findAll({
+        where: {
+          receiverId: merchant.user.id,
+          type: "payment",
         },
-      ],
-    })
-
+        limit: 10,
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: User,
+            as: "sender",
+            attributes: ["studentId", "firstName", "lastName"],
+          },
+        ],
+      });
+    }
+  
     return {
       merchant,
       transactions,
-    }
+    };
   }
+
 
   public async updateMerchantStatus(merchantId: number, data: { status: string; isActive: boolean }) {
     const merchant = await Merchant.findByPk(merchantId)

@@ -23,11 +23,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-muted/40">
-      <Card className="mx-auto w-full max-w-md">
+    <div className="flex h-screen w-full items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 dark:from-background dark:to-background/80">
+      <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
+      <div className="absolute pointer-events-none inset-0 flex items-center justify-center bg-background [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+      <Card className="mx-auto w-full max-w-md shadow-xl gradient-border">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
-          <CardDescription>Enter your credentials to access the admin panel</CardDescription>
+          <div className="flex justify-center mb-4">
+            <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-xl font-bold text-white">C</span>
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-center gradient-text">Admin Login</CardTitle>
+          <CardDescription className="text-center">Enter your credentials to access the admin panel</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -39,6 +46,7 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                className="border-primary/20 focus-visible:border-primary/50"
               />
             </div>
             <div className="space-y-2">
@@ -50,11 +58,12 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="border-primary/20 focus-visible:border-primary/50"
               />
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-primary hover:bg-primary-600" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait

@@ -16,13 +16,9 @@ interface Merchant {
   id: number
   name: string
   email: string
-  contactPhone: string
-  merchantNumber: string
+  phoneNumber: string
   status: string
-  isActive: boolean
   createdAt: string
-  location: string
-  contactPerson: string
 }
 
 export default function MerchantsPage() {
@@ -55,20 +51,18 @@ export default function MerchantsPage() {
   const filteredMerchants = merchants.filter(
     (merchant) =>
       merchant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      merchant.contactPhone.includes(searchQuery) ||
-      (merchant.email && merchant.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      merchant.merchantNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (merchant.contactPerson && merchant.contactPerson.toLowerCase().includes(searchQuery.toLowerCase()))
+      merchant.phoneNumber.includes(searchQuery) ||
+      (merchant.email && merchant.email.toLowerCase().includes(searchQuery.toLowerCase())),
   )
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Merchants</h1>
+          <h1 className="text-3xl font-bold tracking-tight gradient-text">Merchants</h1>
           <p className="text-muted-foreground">Manage and monitor merchant accounts.</p>
         </div>
-        <Button>
+        <Button className="bg-primary hover:bg-primary-600">
           <Store className="mr-2 h-4 w-4" /> Add Merchant
         </Button>
       </div>
@@ -104,8 +98,6 @@ export default function MerchantsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
-                    <TableHead>Merchant ID</TableHead>
-                    <TableHead>Contact Person</TableHead>
                     <TableHead>Phone Number</TableHead>
                     <TableHead className="hidden md:table-cell">Email</TableHead>
                     <TableHead>Status</TableHead>
@@ -117,16 +109,14 @@ export default function MerchantsPage() {
                   {filteredMerchants.map((merchant) => (
                     <TableRow key={merchant.id}>
                       <TableCell className="font-medium">{merchant.name}</TableCell>
-                      <TableCell>{merchant.merchantNumber}</TableCell>
-                      <TableCell>{merchant.contactPerson}</TableCell>
-                      <TableCell>{merchant.contactPhone}</TableCell>
+                      <TableCell>{merchant.phoneNumber}</TableCell>
                       <TableCell className="hidden md:table-cell">{merchant.email || "N/A"}</TableCell>
                       <TableCell>
                         <Badge
                           variant={
-                            merchant.isActive && merchant.status === "approved"
+                            merchant.status === "active"
                               ? "default"
-                              : merchant.status === "pending"
+                              : merchant.status === "inactive"
                                 ? "outline"
                                 : "destructive"
                           }
