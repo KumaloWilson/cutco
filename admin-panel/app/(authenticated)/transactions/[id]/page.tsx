@@ -51,7 +51,7 @@ export default function TransactionDetailsPage() {
       try {
         setIsLoading(true)
         const response = await api.get(`/admin/transactions/${id}`)
-        setTransaction(response.data.transaction)
+        setTransaction(response.data)
       } catch (error) {
         console.error("Error fetching transaction details:", error)
         toast({
