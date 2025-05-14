@@ -156,10 +156,10 @@ export default function NotificationsPage() {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
+          <h1 className="text-3xl font-bold tracking-tight gradient-text">Notifications</h1>
           <p className="text-muted-foreground">Manage system notifications and announcements.</p>
         </div>
-        <Button>
+        <Button className="bg-primary hover:bg-primary-600">
           <Send className="mr-2 h-4 w-4" /> Send Notification
         </Button>
       </div>

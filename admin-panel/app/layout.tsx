@@ -11,6 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "CUTcoin Admin Portal",
   description: "Administrative dashboard for the CUTcoin system",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({

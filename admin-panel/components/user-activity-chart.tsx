@@ -61,9 +61,30 @@ export function UserActivityChart() {
         <LineChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
           <XAxis dataKey="date" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
           <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-          <Tooltip />
-          <Line type="monotone" dataKey="users" stroke="#2563eb" strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey="merchants" stroke="#16a34a" strokeWidth={2} dot={false} />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
+              borderRadius: "8px",
+              border: "1px solid #6C63FF20",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="users"
+            stroke="#6C63FF"
+            strokeWidth={2}
+            dot={{ fill: "#6C63FF", strokeWidth: 2, r: 4 }}
+            activeDot={{ fill: "#6C63FF", strokeWidth: 0, r: 6 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="merchants"
+            stroke="#a78bfa"
+            strokeWidth={2}
+            dot={{ fill: "#a78bfa", strokeWidth: 2, r: 4 }}
+            activeDot={{ fill: "#a78bfa", strokeWidth: 0, r: 6 }}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>

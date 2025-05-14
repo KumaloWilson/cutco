@@ -18,14 +18,14 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6">
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-md px-6">
       <form onSubmit={handleSearch} className="flex-1 md:flex-initial">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
             placeholder="Search..."
-            className="w-full rounded-lg bg-background pl-8 md:w-[300px] lg:w-[400px]"
+            className="w-full rounded-lg bg-background pl-8 md:w-[300px] lg:w-[400px] border-primary/20 focus-visible:border-primary/50"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -34,7 +34,7 @@ export function Header() {
       <div className="ml-auto flex items-center gap-2">
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-primary"></span>
+          <span className="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
         </Button>
         <ModeToggle />
       </div>

@@ -51,7 +51,7 @@ export function Sidebar() {
   return (
     <div className="flex h-screen flex-col border-r bg-card">
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-primary">CUTcoin Admin</h1>
+        <h1 className="text-2xl font-bold gradient-text">CUTcoin Admin</h1>
       </div>
       <div className="flex-1 overflow-auto py-2">
         <nav className="grid items-start px-4 text-sm">
@@ -65,10 +65,10 @@ export function Sidebar() {
                   "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
                   isActive
                     ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    : "text-muted-foreground hover:bg-primary-100 dark:hover:bg-primary-900/20 hover:text-foreground",
                 )}
               >
-                <link.icon className="h-4 w-4" />
+                <link.icon className={cn("h-4 w-4", isActive ? "text-primary-foreground" : "text-primary-500/70")} />
                 <span>{link.title}</span>
               </Link>
             )
@@ -76,7 +76,7 @@ export function Sidebar() {
         </nav>
       </div>
       <div className="mt-auto p-4">
-        <div className="flex items-center gap-2 rounded-lg border p-4">
+        <div className="flex items-center gap-2 rounded-lg border p-4 gradient-border card-hover">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
             <span className="text-sm font-medium text-primary-foreground">{admin?.fullName?.charAt(0) || "A"}</span>
           </div>
@@ -87,7 +87,7 @@ export function Sidebar() {
         </div>
         <button
           onClick={logout}
-          className="mt-4 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
+          className="mt-4 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive"
         >
           <LogOut className="h-4 w-4" />
           <span>Log out</span>
