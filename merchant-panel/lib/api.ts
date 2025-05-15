@@ -316,6 +316,125 @@ export const wallet = {
   },
 }
 
+// Payment API functions for merchant deposits
+export const payments = {
+  // Initiate a deposit using Paynow
+  initiateDeposit: async (amount: number) => {
+    return fetchApi<{
+      paymentId: number
+      reference: string
+      amount: number
+      cutcoinAmount: number
+      redirectUrl: string
+      pollUrl: string
+      message: string
+    }>("/payments/merchant/deposit-funds", {
+      method: "POST",
+      body: JSON.stringify({
+        amount,
+        paymentMethod: "paynow",
+      }),
+    })
+  },
+
+  // Confirm payment completion (called after redirect from Paynow)
+  confirmPayment: async (reference: string, pollUrl: string) => {
+    return fetchApi<{
+      success: boolean
+      message: string
+      payment: {
+        id: number
+        reference: string
+        status: string
+      }
+      transaction: {
+        id: number
+        senderId: number
+        receiverId: number
+        amount: string
+        type: string
+        status: string
+        reference: string
+        description: string
+        fee: string
+        updatedAt: string
+        createdAt: string
+      }
+    }>("/payments/webhooks/paynow/return", {
+      method: "POST",
+      body: JSON.stringify({
+        reference,
+        pollUrl,
+        status: "paid",
+      }),
+    })
+  },
+
+  // Get merchant deposit history
+  getDeposits: async (page = 1, limit = 10) => {
+    return fetchApi<{
+      deposits: Array<{
+        id: number
+        userId: number
+        paymentMethod: string
+        amount: string
+        cutcoinAmount: string
+        reference: string
+        externalReference: string | null
+        status: string
+        metadata: {
+          pollUrl: string
+          redirectUrl: string
+          isMerchantDeposit: boolean
+        }
+        merchantId: number
+        createdAt: string
+        updatedAt: string
+        user: {
+          studentId: string
+          firstName: string
+          lastName: string
+          phoneNumber: string
+        }
+      }>
+      pagination: {
+        total: number
+        page: number
+        limit: number
+        pages: number
+      }
+    }>(`/payments/merchant/deposits?page=${page}&limit=${limit}`)
+  },
+
+  // Get details of a specific deposit
+  getDepositById: async (id: number) => {
+    return fetchApi<{
+      id: number
+      userId: number
+      paymentMethod: string
+      amount: string
+      cutcoinAmount: string
+      reference: string
+      externalReference: string | null
+      status: string
+      metadata: {
+        pollUrl: string
+        redirectUrl: string
+        isMerchantDeposit: boolean
+      }
+      merchantId: number
+      createdAt: string
+      updatedAt: string
+      user: {
+        studentId: string
+        firstName: string
+        lastName: string
+        phoneNumber: string
+      }
+    }>(`/payments/merchant/deposits/${id}`)
+  },
+}
+
 // Helper function for general API requests
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
