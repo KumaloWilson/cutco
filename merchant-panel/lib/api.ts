@@ -222,32 +222,81 @@ export const merchantDashboard = {
   },
 }
 
+// Update the transactions API functions to match the provided endpoints
+
 // Transactions API functions
 export const transactions = {
-  getAll: async (page = 1, limit = 20) => {
-    return fetchWithAuth<{
-      transactions: Array<any>
-      total: number
-      page: number
-      limit: number
-    }>(`/merchant/transactions?page=${page}&limit=${limit}`)
+  getAll: async (page = 1, limit = 10, type?: string) => {
+    let endpoint = `/merchant/transactions?page=${page}&limit=${limit}`
+    if (type && type !== "all") {
+      endpoint += `&type=${type}`
+    }
+    return fetchApi<{
+      transactions: Array<{
+        id: number
+        reference: string
+        amount: number
+        status: string
+        description: string
+        type: string
+        fee: string
+        createdAt: string
+        customer: {
+          studentId: string
+          name: string
+        }
+      }>
+      pagination: {
+        total: number
+        page: number
+        limit: number
+        pages: number
+      }
+    }>(endpoint)
+  },
+
+  getPending: async (page = 1, limit = 10) => {
+    return fetchApi<{
+      pendingTransactions: Array<{
+        id: number
+        reference: string
+        amount: number
+        type: string
+        description: string
+        createdAt: string
+        waitingTime: string
+        customer: {
+          studentId: string
+          name: string
+        }
+        studentConfirmed: boolean
+        merchantConfirmed: boolean
+      }>
+      pagination: {
+        total: number
+        page: number
+        limit: number
+        pages: number
+      }
+    }>(`/merchant/transactions/pending?page=${page}&limit=${limit}`)
+  },
+
+  confirmDeposit: async (reference: string) => {
+    return fetchApi<{ success: boolean; message: string }>(`/transactions/deposit/merchant-confirm`, {
+      method: "POST",
+      body: JSON.stringify({ reference }),
+    })
+  },
+
+  confirmWithdrawal: async (reference: string) => {
+    return fetchApi<{ success: boolean; message: string }>(`/merchant/transactions/withdraw/merchant-confirm`, {
+      method: "POST",
+      body: JSON.stringify({ reference }),
+    })
   },
 
   getById: async (id: string) => {
-    return fetchWithAuth<any>(`/merchant/transactions/${id}`)
-  },
-
-  confirm: async (id: string) => {
-    return fetchWithAuth<{ success: boolean; message: string }>(`/merchant/transactions/${id}/confirm`, {
-      method: "POST",
-    })
-  },
-
-  cancel: async (id: string, reason: string) => {
-    return fetchWithAuth<{ success: boolean; message: string }>(`/merchant/transactions/${id}/cancel`, {
-      method: "POST",
-      body: JSON.stringify({ reason }),
-    })
+    return fetchApi<any>(`/merchant/transactions/${id}`)
   },
 }
 

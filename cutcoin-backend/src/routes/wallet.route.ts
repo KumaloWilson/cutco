@@ -27,6 +27,7 @@ router.post("/deposit/initiate", validationMiddleware(InitiateDepositDto), walle
 
 // Withdrawal
 router.post("/withdraw/initiate", validationMiddleware(InitiateWithdrawalDto), walletController.initiateWithdrawal)
+
 router.post(
   "/withdraw/confirm-otp",
   validationMiddleware(ConfirmWithdrawalOtpDto),

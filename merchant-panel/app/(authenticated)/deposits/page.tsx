@@ -2,23 +2,46 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
-import { fetchApi } from "@/lib/api"
-import PendingTransactionsTable from "@/components/pending-transactions-table"
-import { ArrowDownRight } from "lucide-react"
+import { fetchApi, transactions } from "@/lib/api"
+import { PendingTransactionsTable } from "@/components/pending-transactions-table"
+import { ArrowDownRight, RefreshCw } from "lucide-react"
 
 export default function DepositsPage() {
   const [activeTab, setActiveTab] = useState("pending")
   const [studentId, setStudentId] = useState("")
   const [amount, setAmount] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [pendingTransactions, setPendingTransactions] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const { toast } = useToast()
+
+  useEffect(() => {
+    fetchPendingTransactions()
+  }, [])
+
+  const fetchPendingTransactions = async () => {
+    try {
+      setIsLoading(true)
+      const response = await transactions.getPending()
+      setPendingTransactions(response.pendingTransactions)
+    } catch (error: any) {
+      console.error("Failed to fetch pending transactions:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to load pending transactions",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleInitiateDeposit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,13 +85,14 @@ export default function DepositsPage() {
       setStudentId("")
       setAmount("")
 
-      // Switch to pending tab
+      // Switch to pending tab and refresh data
       setActiveTab("pending")
-    } catch (error) {
+      fetchPendingTransactions()
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to initiate deposit",
+        description: error.message || "Failed to initiate deposit",
       })
     } finally {
       setIsSubmitting(false)
@@ -77,13 +101,21 @@ export default function DepositsPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold tracking-tight">Deposits & Withdrawals</h2>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Deposits & Withdrawals</h2>
+          <p className="text-muted-foreground">Manage cash deposits and withdrawals</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={fetchPendingTransactions} disabled={isLoading}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="pending">Pending Transactions</TabsTrigger>
           <TabsTrigger value="initiate-deposit">Initiate Deposit</TabsTrigger>
-          <TabsTrigger value="history">Transaction History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="space-y-4 pt-4">
@@ -94,9 +126,8 @@ export default function DepositsPage() {
             </CardHeader>
             <CardContent>
               <PendingTransactionsTable
-                transactions={[]} // This would be fetched from the API
-                isLoading={false}
-                onRefresh={() => {}} // This would refresh the data
+                pendingTransactions={pendingTransactions}
+                onRefresh={fetchPendingTransactions}
               />
             </CardContent>
           </Card>
@@ -160,25 +191,6 @@ export default function DepositsPage() {
                   )}
                 </Button>
               </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-4 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Transaction History</CardTitle>
-              <CardDescription>View your past deposits and withdrawals</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-center items-center h-64">
-                <div className="text-center">
-                  <p className="text-muted-foreground">Transaction history will be displayed here</p>
-                  <Button variant="outline" className="mt-4">
-                    View All Transactions
-                  </Button>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>

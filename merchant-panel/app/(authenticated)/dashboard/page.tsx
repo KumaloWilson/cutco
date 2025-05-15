@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { merchantDashboard } from "@/lib/api"
-import { TransactionChart } from "@/components/transaction-chart"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowDownRight, CreditCard, DollarSign, Clock } from "lucide-react"
-import PendingTransactionsTable from "@/components/pending-transactions-table"
+import { merchantDashboard, transactions } from "@/lib/api"
+import { TransactionChart } from "@/components/transaction-chart"
+import { PendingTransactionsTable } from "@/components/pending-transactions-table"
+import { useToast } from "@/components/ui/use-toast"
+import { ArrowDownRight, CreditCard, DollarSign, Clock, RefreshCw } from "lucide-react"
+import { formatCurrency } from "@/lib/utils"
 
 interface DashboardStats {
   totalTransactions: number
@@ -17,79 +20,64 @@ interface DashboardStats {
   currentBalance: string
 }
 
-interface Transaction {
-  id: number
-  userId: number
-  merchantId: number
-  type: string
-  amount: string
-  fee: string
-  reference: string
-  status: string
-  description: string
-  studentConfirmed: boolean
-  merchantConfirmed: boolean
-  completedAt: string | null
-  cancelledAt: string | null
-  createdAt: string
-  updatedAt: string
-  user: {
-    studentId: string
-    firstName: string
-    lastName: string
-  }
-}
-
-interface TransactionStats {
-  dailyStats: Array<{
-    date: string
-    count: string
-    volume: string
-  }>
-  statusDistribution: Array<{
-    status: string
-    count: string
-  }>
-}
-
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([])
-  const [transactionStats, setTransactionStats] = useState<TransactionStats | null>(null)
+  const [pendingTransactions, setPendingTransactions] = useState<any[]>([])
+  const [transactionStats, setTransactionStats] = useState<any>(null)
   const [period, setPeriod] = useState("week")
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const { toast } = useToast()
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setIsLoading(true)
-        const [statsData, transactionsData, statsChartData] = await Promise.all([
-          merchantDashboard.getStats(),
-          merchantDashboard.getRecentTransactions(5),
-          merchantDashboard.getTransactionStats(period),
-        ])
-
-        setStats(statsData)
-        setRecentTransactions(transactionsData.transactions)
-        setTransactionStats(statsChartData)
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     fetchDashboardData()
   }, [period])
+
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true)
+
+      // Fetch dashboard stats
+      const statsData = await merchantDashboard.getStats()
+      setStats(statsData)
+
+      // Fetch pending transactions
+      const pendingData = await transactions.getPending()
+      setPendingTransactions(pendingData.pendingTransactions)
+
+      // Fetch transaction stats for chart
+      const statsChartData = await merchantDashboard.getTransactionStats(period)
+      setTransactionStats(statsChartData)
+    } catch (error: any) {
+      console.error("Error fetching dashboard data:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to load dashboard data. Please try again.",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handlePeriodChange = (value: string) => {
     setPeriod(value)
   }
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    await fetchDashboardData()
+    setIsRefreshing(false)
+  }
+
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -108,7 +96,7 @@ export default function DashboardPage() {
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${Number.parseFloat(stats?.currentBalance || "0").toFixed(2)}</div>
+                <div className="text-2xl font-bold">{formatCurrency(Number(stats?.currentBalance || 0))}</div>
                 <p className="text-xs text-muted-foreground">Available for withdrawal</p>
               </CardContent>
             </Card>
@@ -118,7 +106,7 @@ export default function DashboardPage() {
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${stats?.transactionVolume || 0}</div>
+                <div className="text-2xl font-bold">{formatCurrency(stats?.transactionVolume || 0)}</div>
                 <p className="text-xs text-muted-foreground">{stats?.totalTransactions || 0} total transactions</p>
               </CardContent>
             </Card>
@@ -171,8 +159,8 @@ export default function DashboardPage() {
         </Card>
         <Card className="col-span-3">
           <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>Your most recent transactions</CardDescription>
+            <CardTitle>Pending Transactions</CardTitle>
+            <CardDescription>Transactions awaiting your confirmation</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -184,7 +172,7 @@ export default function DashboardPage() {
                 <Skeleton className="h-12 w-full" />
               </div>
             ) : (
-              <PendingTransactionsTable transactions={recentTransactions} />
+              <PendingTransactionsTable pendingTransactions={pendingTransactions} onRefresh={fetchDashboardData} />
             )}
           </CardContent>
         </Card>
