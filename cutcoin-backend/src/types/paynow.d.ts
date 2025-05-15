@@ -47,3 +47,6 @@ declare module 'paynow' {
       paid: boolean;
     }
   }
+
+
+  

@@ -6,15 +6,15 @@ import { Transaction } from "../models/transaction.model"
 import { Merchant } from "../models/merchant.model"
 import { SystemConfig } from "../models/system-config.model"
 import { HttpException } from "../exceptions/HttpException"
-import { PaynowService } from "./paynow.service"
 import { NotificationService } from "./notification.service"
 import { generateTransactionReference } from "../utils/generators"
 import sequelize  from "../config/sequelize"
+import paynowService from "./paynow.service"
 import type { Transaction as SequelizeTransaction } from "sequelize"
 import { Op } from "sequelize"
 
 export class PaymentService {
-  private paynowService = new PaynowService()
+
   private notificationService = new NotificationService()
 
   // Get exchange rate from system config
@@ -67,14 +67,15 @@ export class PaymentService {
     })
 
     // Initialize Paynow payment
-    const paymentResult = await this.paynowService.createPayment(
-      reference,
-      user.email || `${user.studentId}@cutcoin.ac.zw`, // Fallback email
+    const paymentResult = await paynowService.initiateTransaction(
+      user.email || `${user.studentId}@cutcoin.ac.zw`, // Email
+      user.phoneNumber || "", // Phone number
       amount,
-      `CUTcoin purchase: ${cutcoinAmount} CUTcoins`,
+      reference,
+      `CUTcoin purchase: ${cutcoinAmount} CUTcoins` // Description
     )
 
-    if (!paymentResult.success) {
+    if (paymentResult.status !== "success") {
       // Update payment status to failed
       await payment.update({
         status: "failed",
@@ -127,7 +128,7 @@ export class PaymentService {
     }
 
     // Check payment status
-    const statusResult = await this.paynowService.checkPaymentStatus(pollUrl)
+    const statusResult = await paynowService.checkTransactionStatus(pollUrl)
 
     if (!statusResult.paid) {
       return {
@@ -146,6 +147,95 @@ export class PaymentService {
       transaction: result.transaction,
     }
   }
+
+
+  /**
+ * Update payment status from payment gateway webhook
+ * @param reference Payment reference number
+ * @param status Status from payment provider
+ * @param pollurl URL to check payment status
+ */
+public async updatePaymentStatusFromWebhook(reference: string, status?: string, pollurl?: string): Promise<any> {
+  // Find payment by reference number
+  const payment = await Payment.findOne({
+    where: { reference },
+  })
+
+  if (!payment) {
+    throw new HttpException(404, "Payment not found")
+  }
+
+  // If no pollurl provided, use the one from the payment metadata
+  const pollUrl = pollurl || payment.metadata?.pollUrl
+  
+  if (!pollUrl) {
+    throw new HttpException(400, "Invalid payment data - no poll URL available")
+  }
+
+  // Check payment status from Paynow
+  const paynowStatus = await paynowService.checkTransactionStatus(pollUrl)
+
+  // Determine if payment is completed based on Paynow status or webhook status
+  if (paynowStatus.status?.toLowerCase() === "paid" || status?.toLowerCase() === "paid") {
+    // Only process if not already completed
+    if (payment.status !== "completed") {
+      // Process the payment
+      const result = await this.processPayment(payment.id)
+
+      return {
+        success: true,
+        message: "Payment processed successfully",
+        payment: {
+          id: payment.id,
+          reference: payment.reference,
+          status: "paid",
+        },
+        transaction: result.transaction
+      }
+    } else {
+      return {
+        success: true,
+        message: "Payment already processed",
+        payment: {
+          id: payment.id,
+          reference: payment.reference,
+          status: payment.status,
+        }
+      }
+    }
+  } else if (paynowStatus.status?.toLowerCase() === "cancelled" || status?.toLowerCase() === "cancelled") {
+    // Update payment status to failed
+    payment.status = "failed"
+    payment.metadata = { 
+      ...payment.metadata, 
+      status: paynowStatus.status,
+      lastUpdated: new Date()
+    }
+    await payment.save()
+
+    return {
+      success: false,
+      message: "Payment was cancelled",
+      payment: {
+        id: payment.id,
+        reference: payment.reference,
+        status: payment.status,
+      }
+    }
+  } else {
+    // Payment is still pending
+    return {
+      success: false,
+      message: "Payment is still pending",
+      payment: {
+        id: payment.id,
+        reference: payment.reference,
+        status: payment.status,
+      }
+    }
+  }
+}
+
 
   // Process completed payment
   private async processPayment(paymentId: number) {
@@ -250,6 +340,7 @@ export class PaymentService {
       cutcoinAmount,
       reference,
       status: "pending",
+      merchantId: merchant.id,
       metadata: {
         isMerchantDeposit: true,
       },
@@ -257,14 +348,15 @@ export class PaymentService {
 
     // If payment method is paynow, initiate paynow payment
     if (paymentMethod === "paynow") {
-      const paymentResult = await this.paynowService.createPayment(
-        reference,
-        merchantUser.email || `${merchantUser.studentId}@cutcoin.ac.zw`,
+      const paymentResult = await paynowService.initiateTransaction(
+        merchantUser.email || `${merchantUser.studentId}@cutcoin.ac.zw`, // Email
+        merchantUser.phoneNumber || "", // Phone number
         amount,
-        `Merchant float deposit: ${cutcoinAmount} CUTcoins`,
+        reference,
+        `Merchant float deposit: ${cutcoinAmount} CUTcoins` // Description
       )
 
-      if (!paymentResult.success) {
+      if (paymentResult.status !== "success") {
         // Update payment status to failed
         await payment.update({
           status: "failed",
@@ -289,6 +381,8 @@ export class PaymentService {
         amount,
         cutcoinAmount,
         redirectUrl: paymentResult.redirectUrl,
+        pollUrl: paymentResult.pollUrl,
+        message: "Paynow payment initiated successfully. Please complete the payment.",
       }
     } else if (paymentMethod === "cash") {
       // For cash deposits, admin needs to approve
