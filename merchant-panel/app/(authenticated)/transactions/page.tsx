@@ -4,175 +4,175 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useToast } from "@/components/ui/use-toast"
-import { fetchApi } from "@/lib/api"
-import { formatCurrency, formatDate } from "@/lib/utils"
-import { ArrowDownRight, ArrowUpRight, RefreshCw, Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Table as UITable,  // Rename to avoid conflict
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-
-interface Transaction {
-  id: number
-  reference: string
-  type: string
-  amount: number
-  fee: number
-  status: string
-  description: string
-  createdAt: string
-  customer?: {
-    studentId: string
-    name: string
-  }
-}
-
-interface TransactionsResponse {
-  transactions: Transaction[]
-  pagination: {
-    total: number
-    page: number
-    limit: number
-    pages: number
-  }
-}
+import { Skeleton } from "@/components/ui/skeleton"
+import { transactions } from "@/lib/api"
+import { formatCurrency, formatDate } from "@/lib/utils"
+import { Search, Download, RefreshCw, ArrowDownRight, ArrowUpRight } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [pagination, setPagination] = useState({
-    total: 0,
-    page: 1,
-    limit: 10,
-    pages: 0,
-  })
+  const [transactionsList, setTransactionsList] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [filter, setFilter] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [filter, setFilter] = useState("all")
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const { toast } = useToast()
 
-  const fetchTransactions = async (page = 1, type?: string) => {
+  useEffect(() => {
+    fetchTransactions()
+  }, [currentPage, filter])
+
+  const fetchTransactions = async () => {
     try {
       setIsLoading(true)
-
-      let endpoint = `/merchant/transactions?page=${page}&limit=${pagination.limit}`
-      if (type && type !== "all") {
-        endpoint += `&type=${type}`
-      }
-
-      const data = await fetchApi<TransactionsResponse>(endpoint)
-      setTransactions(data.transactions)
-      setPagination(data.pagination)
-    } catch (error) {
+      const response = await transactions.getAll(currentPage, 10, filter !== "all" ? filter : undefined)
+      setTransactionsList(response.transactions)
+      setTotalPages(response.pagination.pages)
+    } catch (error: any) {
+      console.error("Failed to fetch transactions:", error)
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load transactions",
+        description: error.message || "Failed to load transactions. Please try again.",
       })
     } finally {
       setIsLoading(false)
     }
   }
 
-  const refreshTransactions = async () => {
-    setIsRefreshing(true)
-    await fetchTransactions(pagination.page, filter !== "all" ? filter : undefined)
-    setIsRefreshing(false)
-  }
-
-  const handleFilterChange = (value: string) => {
-    setFilter(value)
-    fetchTransactions(1, value !== "all" ? value : undefined)
-  }
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    // Implement search functionality here
+    // Implement search functionality when API supports it
     toast({
       title: "Search",
       description: `Searching for: ${searchQuery}`,
     })
   }
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage > 0 && newPage <= pagination.pages) {
-      fetchTransactions(newPage, filter !== "all" ? filter : undefined)
+  const handleFilterChange = (value: string) => {
+    setFilter(value)
+    setCurrentPage(1)
+  }
+
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page)
     }
   }
 
-  useEffect(() => {
-    fetchTransactions()
-  }, [])
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    await fetchTransactions()
+    setIsRefreshing(false)
+  }
+
+  const handleExport = () => {
+    // Placeholder for export functionality
+    toast({
+      title: "Export",
+      description: "Exporting transactions to CSV...",
+    })
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+            Completed
+          </Badge>
+        )
+      case "pending":
+        return (
+          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+            Pending
+          </Badge>
+        )
+      case "cancelled":
+        return (
+          <Badge variant="outline" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+            Cancelled
+          </Badge>
+        )
+      default:
+        return <Badge variant="outline">{status}</Badge>
+    }
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold tracking-tight">Transaction History</h2>
-        <Button variant="outline" size="sm" onClick={refreshTransactions} disabled={isRefreshing}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Transactions</h1>
+          <p className="text-muted-foreground">View and manage all your transactions</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <Button onClick={handleExport} size="sm">
+            <Download className="mr-2 h-4 w-4" />
+            Export
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4">
+        <form onSubmit={handleSearch} className="flex-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by reference, student ID, or amount..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </form>
+        <div className="w-full md:w-48">
+          <Select value={filter} onValueChange={handleFilterChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Transactions</SelectItem>
+              <SelectItem value="deposit">Deposits</SelectItem>
+              <SelectItem value="withdrawal">Withdrawals</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Transactions</CardTitle>
-          <CardDescription>View and manage your transaction history</CardDescription>
+          <CardTitle>Transaction History</CardTitle>
+          <CardDescription>A list of all your transactions</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <form onSubmit={handleSearch} className="flex w-full items-center space-x-2">
-                <Input
-                  type="text"
-                  placeholder="Search by reference or description"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Button type="submit" variant="secondary">
-                  <Search className="h-4 w-4 mr-2" />
-                  Search
-                </Button>
-              </form>
-            </div>
-            <div className="w-full md:w-48">
-              <Select value={filter} onValueChange={handleFilterChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Transactions</SelectItem>
-                  <SelectItem value="deposit">Deposits</SelectItem>
-                  <SelectItem value="withdrawal">Withdrawals</SelectItem>
-                  <SelectItem value="payment">Payments</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
           {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-pulse">Loading transactions...</div>
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
             </div>
-          ) : transactions.length === 0 ? (
-            <div className="flex justify-center items-center h-64 border rounded-lg">
-              <div className="text-center">
-                <p className="text-muted-foreground">No transactions found</p>
-              </div>
+          ) : transactionsList.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">No transactions found</p>
             </div>
           ) : (
             <>
               <div className="rounded-md border">
-                <UITable>
+                <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Type</TableHead>
@@ -184,7 +184,7 @@ export default function TransactionsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {transactions.map((transaction) => (
+                    {transactionsList.map((transaction) => (
                       <TableRow key={transaction.id}>
                         <TableCell>
                           <Badge
@@ -205,60 +205,40 @@ export default function TransactionsPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="font-medium">
-                            {transaction.type === "deposit" ? transaction.customer?.name : transaction.customer?.name}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {transaction.type === "deposit"
-                              ? transaction.customer?.studentId
-                              : transaction.customer?.studentId}
-                          </div>
+                          <div className="font-medium">{transaction.customer.name}</div>
+                          <div className="text-xs text-muted-foreground">{transaction.customer.studentId}</div>
                         </TableCell>
                         <TableCell>{formatCurrency(transaction.amount)}</TableCell>
                         <TableCell className="font-mono text-xs">{transaction.reference}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              transaction.status === "completed"
-                                ? "default"
-                                : transaction.status === "pending"
-                                  ? "secondary"
-                                  : transaction.status === "failed"
-                                    ? "destructive"
-                                    : "outline"
-                            }
-                          >
-                            {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                          </Badge>
-                        </TableCell>
+                        <TableCell>{getStatusBadge(transaction.status)}</TableCell>
                         <TableCell>{formatDate(transaction.createdAt)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
-                </UITable>
+                </Table>
               </div>
 
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-muted-foreground">
-                  Showing {transactions.length} of {pagination.total} transactions
+                  Showing page {currentPage} of {totalPages}
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page <= 1}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage <= 1}
                   >
                     Previous
                   </Button>
                   <div className="text-sm">
-                    Page {pagination.page} of {pagination.pages}
+                    Page {currentPage} of {totalPages}
                   </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={pagination.page >= pagination.pages}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage >= totalPages}
                   >
                     Next
                   </Button>

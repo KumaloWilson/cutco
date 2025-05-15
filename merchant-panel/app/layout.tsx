@@ -11,6 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "CUTcoin Merchant Panel",
   description: "Manage your CUTcoin merchant account",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({

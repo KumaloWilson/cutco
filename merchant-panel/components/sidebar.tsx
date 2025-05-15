@@ -1,81 +1,140 @@
 "use client"
 
+import type React from "react"
+
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Wallet, History, Download, Settings, LogOut } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/auth-context"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import {
+  LayoutDashboard,
+  Wallet,
+  CreditCard,
+  Settings,
+  Store,
+  User,
+  ChevronLeft,
+  ChevronRight,
+  LogOut,
+} from "lucide-react"
 
-const navItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Wallet",
-    href: "/wallet",
-    icon: Wallet,
-  },
-  {
-    title: "Transactions",
-    href: "/transactions",
-    icon: History,
-  },
-  {
-    title: "Deposits",
-    href: "/deposits",
-    icon: Download,
-  },
-  {
-    title: "Settings",
-    href: "/settings",
-    icon: Settings,
-  },
-]
+interface SidebarItemProps {
+  icon: React.ReactNode
+  title: string
+  href: string
+  isActive: boolean
+  isCollapsed: boolean
+  onClick?: () => void
+}
 
-export default function Sidebar() {
+function SidebarItem({ icon, title, href, isActive, isCollapsed, onClick }: SidebarItemProps) {
+  return (
+    <Link
+      href={href}
+      className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
+        isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      }`}
+      onClick={onClick}
+    >
+      {icon}
+      {!isCollapsed && <span>{title}</span>}
+    </Link>
+  )
+}
+
+export function Sidebar() {
+  const [isCollapsed, setIsCollapsed] = useState(false)
   const pathname = usePathname()
-  const { logout, user } = useAuth()
+  const { merchant, logout } = useAuth()
+
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed)
+  }
+
+  const sidebarItems = [
+    {
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      title: "Dashboard",
+      href: "/dashboard",
+    },
+    {
+      icon: <CreditCard className="h-5 w-5" />,
+      title: "Transactions",
+      href: "/transactions",
+    },
+    {
+      icon: <Wallet className="h-5 w-5" />,
+      title: "Wallet",
+      href: "/wallet",
+    },
+    {
+      icon: <User className="h-5 w-5" />,
+      title: "Profile",
+      href: "/profile",
+    },
+    {
+      icon: <Settings className="h-5 w-5" />,
+      title: "Settings",
+      href: "/settings",
+    },
+  ]
 
   return (
-    <div className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
-      <div className="flex flex-col flex-grow border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-y-auto">
-        <div className="flex items-center flex-shrink-0 px-4 h-16 border-b border-gray-200 dark:border-gray-800">
-          <h1 className="text-xl font-bold">CUTcoin Merchant</h1>
-        </div>
-        <div className="flex flex-col flex-grow px-4 pt-5 pb-4">
-          <div className="mb-5 px-4">
-            <div className="text-sm font-medium text-gray-500 dark:text-gray-400">Merchant</div>
-            <div className="text-base font-semibold truncate">{user?.name}</div>
+    <div
+      className={`relative flex flex-col border-r bg-card transition-all duration-300 ${
+        isCollapsed ? "w-[70px]" : "w-[240px]"
+      }`}
+    >
+      <div className="flex h-14 items-center px-3 border-b">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+            <Store className="h-4 w-4 text-primary" />
           </div>
-          <nav className="flex-1 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "group flex items-center px-4 py-2 text-sm font-medium rounded-md",
-                  pathname === item.href
-                    ? "bg-primary text-primary-foreground"
-                    : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800",
-                )}
-              >
-                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                {item.title}
-              </Link>
-            ))}
-          </nav>
+          {!isCollapsed && <span className="font-semibold">CUTcoin Merchant</span>}
         </div>
-        <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-800 p-4">
-          <button
-            onClick={logout}
-            className="flex items-center text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-          >
-            <LogOut className="mr-3 h-5 w-5 flex-shrink-0" />
-            Logout
-          </button>
+      </div>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute -right-3 top-16 h-6 w-6 rounded-full border bg-background shadow-sm"
+        onClick={toggleCollapse}
+      >
+        {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+      </Button>
+
+      <ScrollArea className="flex-1 py-4">
+        <div className="px-3 space-y-1">
+          {sidebarItems.map((item) => (
+            <SidebarItem
+              key={item.href}
+              icon={item.icon}
+              title={item.title}
+              href={item.href}
+              isActive={pathname === item.href}
+              isCollapsed={isCollapsed}
+            />
+          ))}
         </div>
+      </ScrollArea>
+
+      <div className="mt-auto border-t p-3">
+        {!isCollapsed && merchant && (
+          <div className="mb-4 px-2">
+            <p className="text-sm font-medium truncate">{merchant.name}</p>
+            <p className="text-xs text-muted-foreground truncate">{merchant.merchantNumber}</p>
+          </div>
+        )}
+        <Button
+          variant="ghost"
+          className={`w-full justify-${isCollapsed ? "center" : "start"} text-muted-foreground hover:text-foreground`}
+          onClick={logout}
+        >
+          <LogOut className="h-5 w-5 mr-2" />
+          {!isCollapsed && "Sign Out"}
+        </Button>
       </div>
     </div>
   )

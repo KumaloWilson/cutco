@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
+import { merchantAuth } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
 
-interface User {
+interface Merchant {
   id: number
   merchantNumber: string
   name: string
@@ -16,96 +17,201 @@ interface User {
 }
 
 interface AuthContextType {
-  user: User | null
-  token: string | null
+  merchant: Merchant | null
   isLoading: boolean
+  isAuthenticated: boolean
   login: (merchantNumber: string, password: string) => Promise<void>
   logout: () => void
+  register: (merchantData: any) => Promise<{ merchantNumber: string }>
+  verifyOtp: (merchantNumber: string, code: string) => Promise<void>
+  requestPasswordReset: (merchantNumber: string, email: string) => Promise<void>
+  resetPassword: (merchantNumber: string, code: string, newPassword: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
+  const [merchant, setMerchant] = useState<Merchant | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
   const { toast } = useToast()
 
+  // Check if user is logged in on initial load
   useEffect(() => {
-    // Check if user is logged in
-    // Only run on client side
-    if (typeof window !== "undefined") {
-      const storedToken = localStorage.getItem("token")
-      const storedUser = localStorage.getItem("user")
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        const storedMerchant = localStorage.getItem("merchant")
 
-      if (storedToken && storedUser) {
-        setToken(storedToken)
-        try {
-          setUser(JSON.parse(storedUser))
-        } catch (e) {
-          console.error("Failed to parse user data", e)
-          localStorage.removeItem("user")
-          localStorage.removeItem("token")
+        if (token && storedMerchant) {
+          setMerchant(JSON.parse(storedMerchant))
         }
+      } catch (error) {
+        console.error("Auth check failed:", error)
+        // Clear potentially corrupted data
+        localStorage.removeItem("token")
+        localStorage.removeItem("merchant")
+      } finally {
+        setIsLoading(false)
       }
-
-      setIsLoading(false)
     }
+
+    checkAuth()
   }, [])
 
   const login = async (merchantNumber: string, password: string) => {
-    setIsLoading(true)
     try {
-      // Call the login API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/merchant-auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ merchantNumber, password }),
-      })
+      setIsLoading(true)
+      const response = await merchantAuth.login(merchantNumber, password)
 
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || "Login failed")
-      }
+      // Save token and merchant data to localStorage
+      localStorage.setItem("token", response.token)
+      localStorage.setItem("merchant", JSON.stringify(response.merchant))
 
-      const data = await response.json()
+      // Update state
+      setMerchant(response.merchant)
 
-      // Save token and user data
-      localStorage.setItem("token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.merchant))
-
-      setToken(data.token)
-      setUser(data.merchant)
-
+      // Show success toast
       toast({
         title: "Login successful",
-        description: `Welcome back, ${data.merchant.name}!`,
+        description: `Welcome back, ${response.merchant.name}`,
       })
 
+      // Redirect to dashboard
       router.push("/dashboard")
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Login failed:", error)
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error.message || "Invalid credentials. Please try again.",
       })
+      throw error
     } finally {
       setIsLoading(false)
     }
   }
 
   const logout = () => {
+    // Clear localStorage
     localStorage.removeItem("token")
-    localStorage.removeItem("user")
-    setToken(null)
-    setUser(null)
+    localStorage.removeItem("merchant")
+
+    // Update state
+    setMerchant(null)
+
+    // Redirect to login page
     router.push("/login")
   }
 
-  return <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>{children}</AuthContext.Provider>
+  const register = async (merchantData: any) => {
+    try {
+      setIsLoading(true)
+      const response = await merchantAuth.register(merchantData)
+
+      toast({
+        title: "Registration successful",
+        description: "Please verify your account with the OTP sent to your email.",
+      })
+
+      return response
+    } catch (error: any) {
+      console.error("Registration failed:", error)
+      toast({
+        variant: "destructive",
+        title: "Registration failed",
+        description: error.message || "Failed to register. Please try again.",
+      })
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const verifyOtp = async (merchantNumber: string, code: string) => {
+    try {
+      setIsLoading(true)
+      const response = await merchantAuth.verifyOtp(merchantNumber, code)
+
+      toast({
+        title: "Verification successful",
+        description: "Your account has been verified. You can now log in.",
+      })
+
+      return response
+    } catch (error: any) {
+      console.error("OTP verification failed:", error)
+      toast({
+        variant: "destructive",
+        title: "Verification failed",
+        description: error.message || "Invalid OTP. Please try again.",
+      })
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const requestPasswordReset = async (merchantNumber: string, email: string) => {
+    try {
+      setIsLoading(true)
+      await merchantAuth.requestReset(merchantNumber, email)
+
+      toast({
+        title: "Reset request sent",
+        description: "If your account exists, you will receive a reset code via email.",
+      })
+    } catch (error: any) {
+      console.error("Password reset request failed:", error)
+      // Show generic message to prevent account enumeration
+      toast({
+        title: "Reset request sent",
+        description: "If your account exists, you will receive a reset code via email.",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const resetPassword = async (merchantNumber: string, code: string, newPassword: string) => {
+    try {
+      setIsLoading(true)
+      await merchantAuth.resetPassword(merchantNumber, code, newPassword)
+
+      toast({
+        title: "Password reset successful",
+        description: "Your password has been updated. You can now log in with your new password.",
+      })
+    } catch (error: any) {
+      console.error("Password reset failed:", error)
+      toast({
+        variant: "destructive",
+        title: "Password reset failed",
+        description: error.message || "Failed to reset password. Please try again.",
+      })
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <AuthContext.Provider
+      value={{
+        merchant,
+        isLoading,
+        isAuthenticated: !!merchant,
+        login,
+        logout,
+        register,
+        verifyOtp,
+        requestPasswordReset,
+        resetPassword,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {
