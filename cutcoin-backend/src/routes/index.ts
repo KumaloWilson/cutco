@@ -2,6 +2,7 @@ import { Router } from "express"
 import authRoute from "./auth.route"
 import userRoute from "./user.route"
 import walletRoute from "./wallet.route"
+import merchantWalletRoute from "./merchant-wallet.route"
 import adminRoute from "./admin.route"
 import analyticsRoute from "./analytics.route"
 import notificationRoute from "./notification.route"
@@ -24,5 +25,6 @@ router.use("/payments", paymentRoute)
 router.use("/merchant-auth", merchantAuthRoute)
 router.use("/merchant/dashboard", merchantDashboardRoutes)
 router.use("/merchant/transactions", merchantTransactionRoutes)
+router.use("/merchant/wallet", merchantWalletRoute)
 
 export default router
