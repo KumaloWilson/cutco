@@ -21,12 +21,12 @@ export class MerchantController {
 
   public getMerchantProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user || !req.user.id) {
+      if (!req.merchant) {
         res.status(401).json({ message: "Unauthorized" })
         return 
       }
 
-      const userId = req.user.id
+      const userId = req.merchant.userId
       const result = await this.merchantService.getMerchantProfile(userId)
       res.status(200).json(result)
     } catch (error) {
@@ -36,12 +36,13 @@ export class MerchantController {
 
   public updateMerchantProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user || !req.user.id) {
+      if (!req.merchant) {
         res.status(401).json({ message: "Unauthorized" })
         return 
       }
 
-      const userId = req.user.id
+      const userId = req.merchant.userId
+
       const result = await this.merchantService.updateMerchantProfile(userId, req.body)
       res.status(200).json(result)
     } catch (error) {

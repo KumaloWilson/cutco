@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { fetchApi } from "@/lib/api"
+import PendingTransactionsTable from "@/components/pending-transactions-table"
 import { ArrowDownRight } from "lucide-react"
-import { PendingTransactionsTable } from "@/components/pending-transactions-table"
 
 export default function DepositsPage() {
   const [activeTab, setActiveTab] = useState("pending")
@@ -96,7 +96,7 @@ export default function DepositsPage() {
               <PendingTransactionsTable
                 transactions={[]} // This would be fetched from the API
                 isLoading={false}
-                onRefresh={async () => Promise.resolve()} // This would refresh the data
+                onRefresh={() => {}} // This would refresh the data
               />
             </CardContent>
           </Card>

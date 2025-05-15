@@ -24,11 +24,6 @@ router.get("/balance", walletController.getWalletBalance)
 // Deposit
 router.post("/deposit/initiate", validationMiddleware(InitiateDepositDto), walletController.initiateDeposit)
 
-router.post(
-  "/deposit/merchant-confirm",
-  validationMiddleware(MerchantConfirmTransactionDto),
-  walletController.merchantConfirmDeposit,
-)
 
 // Withdrawal
 router.post("/withdraw/initiate", validationMiddleware(InitiateWithdrawalDto), walletController.initiateWithdrawal)
@@ -36,11 +31,6 @@ router.post(
   "/withdraw/confirm-otp",
   validationMiddleware(ConfirmWithdrawalOtpDto),
   walletController.confirmWithdrawalOTP,
-)
-router.post(
-  "/withdraw/merchant-confirm",
-  validationMiddleware(MerchantConfirmTransactionDto),
-  walletController.merchantConfirmWithdrawal,
 )
 
 // Cancel transaction

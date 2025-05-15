@@ -10,6 +10,7 @@ export function formatCurrency(amount: number): string {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount)
 }
 
@@ -17,26 +18,27 @@ export function formatNumber(num: number): string {
   return new Intl.NumberFormat("en-US").format(num)
 }
 
-export function formatDate(date: string | Date): string {
-  return new Date(date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  })
-}
-
-export function formatDateTime(dateString: string): string {
+export function formatDate(dateString: string): string {
   const date = new Date(dateString)
-  return date.toLocaleString("en-US", {
+  return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-  })
+  }).format(date)
 }
 
-export function truncateAddress(address: string, chars = 4): string {
-  if (!address) return ""
-  return `${address.substring(0, chars)}...${address.substring(address.length - chars)}`
+export function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text
+  return text.slice(0, maxLength) + "..."
+}
+
+export function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
 }

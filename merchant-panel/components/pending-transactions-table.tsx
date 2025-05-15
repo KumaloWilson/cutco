@@ -1,7 +1,7 @@
-"use client"
+"\"use client"
 
-import { useState, useEffect } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,240 +11,309 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { transactions } from "@/lib/api"
 import { useToast } from "@/components/ui/use-toast"
-import { fetchApi } from "@/lib/api"
-import { formatCurrency, formatDate } from "@/lib/utils"
-import { ArrowDownRight, ArrowUpRight, Check, X } from "lucide-react"
+import { CheckCircle, XCircle, AlertCircle } from "lucide-react"
 
-
-interface PendingTransaction {
+interface Transaction {
   id: number
+  userId: number
+  merchantId: number
+  type: string
+  amount: string
+  fee: string
   reference: string
-  type: "deposit" | "withdrawal"
-  amount: number
-  fee: number
   status: string
   description: string
+  studentConfirmed: boolean
+  merchantConfirmed: boolean
+  completedAt: string | null
+  cancelledAt: string | null
   createdAt: string
-  student: {
+  updatedAt: string
+  user: {
     studentId: string
-    name: string
-    phoneNumber: string
+    firstName: string
+    lastName: string
   }
 }
 
-// Add a limit prop to the component
 interface PendingTransactionsTableProps {
-  transactions?: PendingTransaction[]
-  isLoading?: boolean
-  onRefresh?: () => Promise<void>
-  limit?: number
+  transactions: Transaction[]
 }
 
-export function PendingTransactionsTable({
-  transactions: initialTransactions,
-  isLoading: initialIsLoading,
-  onRefresh: initialOnRefresh,
-  limit,
-}: PendingTransactionsTableProps) {
-  const [selectedTransaction, setSelectedTransaction] = useState<PendingTransaction | null>(null)
-  const [isConfirming, setIsConfirming] = useState(false)
+export default function PendingTransactionsTable({ transactions: initialTransactions }: PendingTransactionsTableProps) {
+  const [transactionsList, setTransactionsList] = useState<Transaction[]>(initialTransactions)
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const { toast } = useToast()
-  const [pendingTransactions, setPendingTransactions] = useState<PendingTransaction[]>(initialTransactions || [])
-  const [isLoading, setIsLoading] = useState(initialIsLoading || false)
-  const [onRefresh, setOnRefresh] = useState<(() => Promise<void>) | undefined>(initialOnRefresh)
 
-  useEffect(() => {
-    fetchPendingTransactions()
-  }, [limit])
-
-  // Update the fetchPendingTransactions function to use the limit
-  const fetchPendingTransactions = async () => {
-    try {
-      setIsLoading(true)
-      const response = await fetchApi(`/merchant/transactions/pending${limit ? `?limit=${limit}` : ""}`) as {
-        pendingTransactions: PendingTransaction[]
-      }
-
-      setPendingTransactions(response.pendingTransactions || [])
-    } catch (error) {
-      console.error("Failed to fetch pending transactions:", error)
-      toast({
-        title: "Error",
-        description: "Failed to load pending transactions. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleConfirm = async () => {
+  const handleConfirmTransaction = async () => {
     if (!selectedTransaction) return
 
-    setIsConfirming(true)
     try {
-      const endpoint =
-        selectedTransaction.type === "deposit"
-          ? "/wallet/deposit/merchant-confirm"
-          : "/wallet/withdraw/merchant-confirm"
+      setIsProcessing(true)
+      await transactions.confirm(selectedTransaction.id.toString())
 
-      await fetchApi(endpoint, {
-        method: "POST",
-        body: { reference: selectedTransaction.reference },
-      })
+      // Update the local state
+      setTransactionsList((prev) =>
+        prev.map((tx) =>
+          tx.id === selectedTransaction.id ? { ...tx, status: "completed", merchantConfirmed: true } : tx,
+        ),
+      )
 
       toast({
-        title: "Transaction confirmed",
-        description: `The ${selectedTransaction.type} has been successfully confirmed.`,
+        title: "Transaction Confirmed",
+        description: `Transaction ${selectedTransaction.reference} has been confirmed.`,
       })
-
-      // Close dialog and refresh data
-      setSelectedTransaction(null)
-      fetchPendingTransactions()
-      onRefresh?.()
     } catch (error) {
+      console.error("Failed to confirm transaction:", error)
       toast({
         variant: "destructive",
-        title: "Confirmation failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        title: "Confirmation Failed",
+        description: "Failed to confirm the transaction. Please try again.",
       })
     } finally {
-      setIsConfirming(false)
+      setIsProcessing(false)
+      setIsConfirmDialogOpen(false)
+      setSelectedTransaction(null)
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-pulse">Loading transactions...</div>
-      </div>
-    )
+  const handleRejectTransaction = async () => {
+    if (!selectedTransaction) return
+
+    try {
+      setIsProcessing(true)
+      await transactions.cancel(selectedTransaction.id.toString(), "Rejected by merchant")
+
+      // Update the local state
+      setTransactionsList((prev) =>
+        prev.map((tx) =>
+          tx.id === selectedTransaction.id ? { ...tx, status: "cancelled", merchantConfirmed: false } : tx,
+        ),
+      )
+
+      toast({
+        title: "Transaction Rejected",
+        description: `Transaction ${selectedTransaction.reference} has been rejected.`,
+      })
+    } catch (error) {
+      console.error("Failed to reject transaction:", error)
+      toast({
+        variant: "destructive",
+        title: "Rejection Failed",
+        description: "Failed to reject the transaction. Please try again.",
+      })
+    } finally {
+      setIsProcessing(false)
+      setIsRejectDialogOpen(false)
+      setSelectedTransaction(null)
+    }
   }
 
-  if (pendingTransactions.length === 0) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+            Completed
+          </Badge>
+        )
+      case "pending":
+        return (
+          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+            Pending
+          </Badge>
+        )
+      case "cancelled":
+        return (
+          <Badge variant="outline" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+            Cancelled
+          </Badge>
+        )
+      default:
+        return <Badge variant="outline">{status}</Badge>
+    }
+  }
+
+  if (transactionsList.length === 0) {
     return (
-      <div className="flex justify-center items-center h-64 border rounded-lg">
-        <div className="text-center">
-          <p className="text-muted-foreground">No pending transactions</p>
-        </div>
+      <div className="text-center py-6">
+        <p className="text-muted-foreground">No transactions found</p>
       </div>
     )
   }
 
   return (
     <>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Type</TableHead>
-              <TableHead>Student</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Reference</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {pendingTransactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell>
-                  <Badge variant={transaction.type === "deposit" ? "default" : "secondary"}>
-                    {transaction.type === "deposit" ? (
-                      <ArrowDownRight className="h-3 w-3 mr-1" />
-                    ) : (
-                      <ArrowUpRight className="h-3 w-3 mr-1" />
-                    )}
-                    {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="font-medium">{transaction.student.name}</div>
-                  <div className="text-xs text-muted-foreground">{transaction.student.studentId}</div>
-                </TableCell>
-                <TableCell>{formatCurrency(transaction.amount)}</TableCell>
-                <TableCell className="font-mono text-xs">{transaction.reference}</TableCell>
-                <TableCell>{formatDate(transaction.createdAt)}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="outline" size="sm" onClick={() => setSelectedTransaction(transaction)}>
-                    Confirm
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <Dialog open={!!selectedTransaction} onOpenChange={(open) => !open && setSelectedTransaction(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm {selectedTransaction?.type}</DialogTitle>
-            <DialogDescription>Please verify the details before confirming this transaction.</DialogDescription>
-          </DialogHeader>
-
-          {selectedTransaction && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Type</p>
-                  <p className="text-sm">
-                    {selectedTransaction.type.charAt(0).toUpperCase() + selectedTransaction.type.slice(1)}
-                  </p>
+      <ScrollArea className="h-[350px]">
+        <div className="space-y-4">
+          {transactionsList.map((transaction) => (
+            <div
+              key={transaction.id}
+              className="flex items-center justify-between p-4 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors"
+            >
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">
+                    {transaction.user.firstName} {transaction.user.lastName}
+                  </span>
+                  {getStatusBadge(transaction.status)}
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Amount</p>
-                  <p className="text-sm font-bold">{formatCurrency(selectedTransaction.amount)}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Student</p>
-                  <p className="text-sm">{selectedTransaction.student.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Student ID</p>
-                  <p className="text-sm">{selectedTransaction.student.studentId}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-sm font-medium text-muted-foreground">Reference</p>
-                  <p className="text-sm font-mono">{selectedTransaction.reference}</p>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {transaction.reference} • {formatDate(transaction.createdAt)}
                 </div>
               </div>
-
-              <div className="bg-muted p-3 rounded-md">
-                {selectedTransaction.type === "deposit" ? (
-                  <p className="text-sm">
-                    By confirming this deposit, you acknowledge that you have received{" "}
-                    {formatCurrency(selectedTransaction.amount)} in cash from the student.
-                  </p>
-                ) : (
-                  <p className="text-sm">
-                    By confirming this withdrawal, you acknowledge that you have given{" "}
-                    {formatCurrency(selectedTransaction.amount)} in cash to the student.
-                  </p>
+              <div className="flex items-center gap-4">
+                <span className="font-bold text-lg">${Number.parseFloat(transaction.amount).toFixed(2)}</span>
+                {transaction.status === "pending" && (
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-green-600 border-green-600 hover:bg-green-50 hover:text-green-700"
+                      onClick={() => {
+                        setSelectedTransaction(transaction)
+                        setIsConfirmDialogOpen(true)
+                      }}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Confirm
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-red-600 border-red-600 hover:bg-red-50 hover:text-red-700"
+                      onClick={() => {
+                        setSelectedTransaction(transaction)
+                        setIsRejectDialogOpen(true)
+                      }}
+                    >
+                      <XCircle className="h-4 w-4 mr-1" />
+                      Reject
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>
-          )}
+          ))}
+        </div>
+      </ScrollArea>
 
+      {/* Confirm Transaction Dialog */}
+      <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Transaction</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to confirm this transaction? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTransaction && (
+            <div className="py-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Reference:</span>
+                  <span className="font-medium">{selectedTransaction.reference}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Student:</span>
+                  <span className="font-medium">
+                    {selectedTransaction.user.firstName} {selectedTransaction.user.lastName}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Student ID:</span>
+                  <span className="font-medium">{selectedTransaction.user.studentId}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Amount:</span>
+                  <span className="font-bold">${Number.parseFloat(selectedTransaction.amount).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Date:</span>
+                  <span className="font-medium">{formatDate(selectedTransaction.createdAt)}</span>
+                </div>
+              </div>
+            </div>
+          )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedTransaction(null)}>
-              <X className="h-4 w-4 mr-2" />
+            <Button variant="outline" onClick={() => setIsConfirmDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleConfirm} disabled={isConfirming}>
-              {isConfirming ? (
-                <>
-                  <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Confirm
-                </>
-              )}
+            <Button
+              onClick={handleConfirmTransaction}
+              disabled={isProcessing}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isProcessing ? "Processing..." : "Confirm Transaction"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Transaction Dialog */}
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Transaction</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to reject this transaction? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTransaction && (
+            <div className="py-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Reference:</span>
+                  <span className="font-medium">{selectedTransaction.reference}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Student:</span>
+                  <span className="font-medium">
+                    {selectedTransaction.user.firstName} {selectedTransaction.user.lastName}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Student ID:</span>
+                  <span className="font-medium">{selectedTransaction.user.studentId}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Amount:</span>
+                  <span className="font-bold">${Number.parseFloat(selectedTransaction.amount).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Date:</span>
+                  <span className="font-medium">{formatDate(selectedTransaction.createdAt)}</span>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center p-3 bg-red-50 dark:bg-red-900/20 rounded-md">
+                <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  Rejecting this transaction will cancel it and notify the student.
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleRejectTransaction} disabled={isProcessing} variant="destructive">
+              {isProcessing ? "Processing..." : "Reject Transaction"}
             </Button>
           </DialogFooter>
         </DialogContent>

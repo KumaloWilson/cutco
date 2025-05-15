@@ -104,16 +104,22 @@ export class WalletService {
 
   public async merchantConfirmDeposit(merchantUserId: number, data: { reference: string }) {
     const { reference } = data
-
-    // Find the merchant
+  
+    // Find the merchant with user relationship loaded
     const merchant = await Merchant.findOne({
       where: { userId: merchantUserId, status: "approved", isActive: true },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "phoneNumber"],
+        },
+      ],
     })
-
+  
     if (!merchant) {
       throw new HttpException(404, "Merchant not found or not active")
     }
-
+  
     // Find the merchant transaction
     const merchantTransaction = await MerchantTransaction.findOne({
       where: {
@@ -130,25 +136,30 @@ export class WalletService {
         },
       ],
     })
-
+  
     if (!merchantTransaction) {
       throw new HttpException(404, "Deposit transaction not found or already processed")
     }
-
+  
+    // Ensure the user relationship is loaded
+    if (!merchantTransaction.user) {
+      throw new HttpException(500, "User relationship not loaded")
+    }
+  
     // Find merchant's wallet
     const merchantWallet = await Wallet.findOne({
       where: { userId: merchantUserId },
     })
-
+  
     if (!merchantWallet) {
       throw new HttpException(404, "Merchant wallet not found")
     }
-
+  
     // Check if merchant has sufficient balance
     if (Number(merchantWallet.balance) < Number(merchantTransaction.amount)) {
       throw new HttpException(400, "Insufficient merchant balance to complete this deposit")
     }
-
+  
     // Process the deposit in a transaction
     const result = await sequelize.transaction(async (t: SequelizeTransaction) => {
       // Update merchant transaction status
@@ -156,16 +167,16 @@ export class WalletService {
       merchantTransaction.status = "completed"
       merchantTransaction.completedAt = new Date()
       await merchantTransaction.save({ transaction: t })
-
+  
       // Update user wallet balance (add to student)
       const wallet = merchantTransaction.user.wallet
       wallet.balance = Number(wallet.balance) + Number(merchantTransaction.amount)
       await wallet.save({ transaction: t })
-
+  
       // Update merchant wallet balance (subtract from merchant)
       merchantWallet.balance = Number(merchantWallet.balance) - Number(merchantTransaction.amount)
       await merchantWallet.save({ transaction: t })
-
+  
       // Create transaction record
       const transaction = await Transaction.create(
         {
@@ -180,22 +191,33 @@ export class WalletService {
         },
         { transaction: t },
       )
-
+  
       return { wallet, merchantWallet, transaction, merchantTransaction }
     })
-
-    // Send notifications
-    await sendSMS(
-      merchantTransaction.user.phoneNumber,
-      `Your deposit of ${merchantTransaction.amount} CUTcoins has been confirmed by merchant ${merchant.name}. New balance: ${result.wallet.balance} CUTcoins.`,
-    )
-
-    // Notify merchant of their new balance
-    await sendSMS(
-      merchant.user.phoneNumber,
-      `You have confirmed a deposit of ${merchantTransaction.amount} CUTcoins to ${merchantTransaction.user.firstName} ${merchantTransaction.user.lastName}. Your new balance: ${result.merchantWallet.balance} CUTcoins.`,
-    )
-
+  
+    // Send notifications with error handling
+    try {
+      // Send SMS to student
+      if (merchantTransaction.user.phoneNumber) {
+        await sendSMS(
+          merchantTransaction.user.phoneNumber,
+          `Your deposit of ${merchantTransaction.amount} CUTcoins has been confirmed by merchant ${merchant.name}. New balance: ${result.wallet.balance} CUTcoins.`,
+        )
+      }
+  
+      // Send SMS to merchant (ensure user relationship exists)
+      if (merchant.user && merchant.user.phoneNumber) {
+        await sendSMS(
+          merchant.user.phoneNumber,
+          `You have confirmed a deposit of ${merchantTransaction.amount} CUTcoins to ${merchantTransaction.user.firstName} ${merchantTransaction.user.lastName}. Your new balance: ${result.merchantWallet.balance} CUTcoins.`,
+        )
+      }
+    } catch (smsError) {
+      // Log SMS error but don't fail the entire transaction
+      console.error("SMS sending failed:", smsError)
+      // You might want to log this to a proper logging service
+    }
+  
     return {
       message: "Deposit confirmed successfully",
       transaction: {
@@ -208,6 +230,7 @@ export class WalletService {
       },
     }
   }
+  
 
   public async initiateWithdrawal(userId: number, data: { amount: number; merchantNumber: string }) {
     const { amount, merchantNumber } = data
