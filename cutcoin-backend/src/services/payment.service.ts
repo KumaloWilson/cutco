@@ -182,6 +182,7 @@ public async updatePaymentStatusFromWebhook(reference: string, status?: string, 
       // Process the payment
       const result = await this.processPayment(payment.id)
 
+
       return {
         success: true,
         message: "Payment processed successfully",
@@ -657,43 +658,43 @@ public async updatePaymentStatusFromWebhook(reference: string, status?: string, 
   }
 
   // Get merchant deposits
-  public async getMerchantDeposits(merchantId: number, query: { page?: number; limit?: number; status?: string }) {
-    const page = query.page || 1
-    const limit = query.limit || 10
-    const offset = (page - 1) * limit
+public async getMerchantDeposits(merchantId: number, query: { page?: number; limit?: number; status?: string }) {
+  const page = query.page || 1
+  const limit = query.limit || 10
+  const offset = (page - 1) * limit
 
-    const whereClause: any = {
-      merchantId,
-    }
-
-    if (query.status) {
-      whereClause.status = query.status
-    }
-
-    const { count, rows } = await MerchantDeposit.findAndCountAll({
-      where: whereClause,
-      limit,
-      offset,
-      order: [["createdAt", "DESC"]],
-      include: [
-        {
-          model: User,
-          as: "student",
-          attributes: ["studentId", "firstName", "lastName", "phoneNumber"],
-        },
-      ],
-    })
-
-    return {
-      deposits: rows,
-      pagination: {
-        total: count,
-        page,
-        limit,
-        pages: Math.ceil(count / limit),
-      },
-    }
+  const whereClause: any = {
+    merchantId,
   }
+
+  if (query.status) {
+    whereClause.status = query.status
+  }
+
+  const { count, rows } = await Payment.findAndCountAll({
+    where: whereClause,
+    limit,
+    offset,
+    order: [["createdAt", "DESC"]],
+    include: [
+      {
+        model: User,
+        as: "user", // Changed from "student" to "user" to match the association defined in Payment model
+        attributes: ["studentId", "firstName", "lastName", "phoneNumber"],
+      },
+    ],
+  })
+
+  return {
+    deposits: rows,
+    pagination: {
+      total: count,
+      page,
+      limit,
+      pages: Math.ceil(count / limit),
+    },
+  }
+}
 
   // Get student deposits
   public async getStudentDeposits(studentId: number, query: { page?: number; limit?: number; status?: string }) {
@@ -735,17 +736,17 @@ public async updatePaymentStatusFromWebhook(reference: string, status?: string, 
 
   // Get merchant deposit details
   public async getMerchantDepositDetails(merchantId: number, depositId: number) {
-    const deposit = await MerchantDeposit.findOne({
+    const deposit = await Payment.findOne({
       where: {
         id: depositId,
         merchantId,
       },
       include: [
         {
-          model: User,
-          as: "student",
-          attributes: ["studentId", "firstName", "lastName", "phoneNumber"],
-        },
+        model: User,
+        as: "user", // Changed from "student" to "user" to match the association defined in Payment model
+        attributes: ["studentId", "firstName", "lastName", "phoneNumber"],
+      },
       ],
     })
 
