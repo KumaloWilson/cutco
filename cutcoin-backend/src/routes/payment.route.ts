@@ -10,24 +10,33 @@ import {
   MerchantDepositLimitsDto,
 } from "../dtos/payment.dto"
 import { MerchantDepositFundsDto } from "../dtos/payment.dto"
+import { merchantAuthMiddleware } from "../middlewares/merchant-auth.middleware"
 
 const router = Router()
 const paymentController = new PaymentController()
 
-// User routes
-router.use("/user", authMiddleware)
-router.post("/user/paynow", validationMiddleware(InitiatePaynowPaymentDto), paymentController.initiatePaynowPayment)
-router.get("/user/paynow/:reference/verify", paymentController.verifyPaynowPayment)
-router.post("/user/cash/:reference/confirm", paymentController.confirmCashDeposit)
-router.get("/user/deposits", paymentController.getStudentDeposits)
+// // User routes
+// router.use("/user", authMiddleware)
+// router.post("/user/paynow", validationMiddleware(InitiatePaynowPaymentDto), paymentController.initiatePaynowPayment)
+// router.get("/user/paynow/:reference/verify", paymentController.verifyPaynowPayment)
+// router.post("/user/cash/:reference/confirm", paymentController.confirmCashDeposit)
+// router.get("/user/deposits", paymentController.getStudentDeposits)
+
+
+// Update payment status (webhook from payment gateway)
+router.post("/webhooks/paynow/return", paymentController.handlePaynowReturnWebhook)
+
 
 // Merchant routes
-router.use("/merchant", authMiddleware)
-router.post(
-  "/merchant/cash-deposit",
-  validationMiddleware(InitiateCashDepositDto),
-  paymentController.initiateCashDeposit,
-)
+router.use("/merchant", merchantAuthMiddleware)
+
+// router.post(
+//   "/merchant/cash-deposit",
+//   validationMiddleware(InitiateCashDepositDto),
+//   paymentController.initiateCashDeposit,
+// )
+
+
 router.post(
   "/merchant/deposit-funds",
   validationMiddleware(MerchantDepositFundsDto),

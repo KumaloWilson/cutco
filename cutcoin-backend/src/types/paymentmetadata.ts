@@ -1,9 +1,12 @@
 import { Model, DataTypes } from "sequelize"
 
+
 export interface PaymentMetadata {
   pollUrl?: string
   redirectUrl?: string
   error?: string
+  isMerchantDeposit?: boolean
   merchantDepositId?: number
-  isMerchantDeposit: boolean
+  status?: string
+  lastUpdated?: Date
 }

@@ -4,6 +4,26 @@ import { PaymentService } from "../services/payment.service"
 export class PaymentController {
   private paymentService = new PaymentService()
 
+
+  public handlePaynowReturnWebhook = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { reference, status, pollurl } = req.body
+      
+      const result = await this.paymentService.updatePaymentStatusFromWebhook(reference, status, pollurl)
+      
+      res.status(200).json(result)
+    } catch (error) {
+      //logger.error("Payment webhook error:", error)
+      // For webhooks, we always respond with 200 to acknowledge receipt
+      // even if there's an error, to prevent retries
+      res.status(200).json({ 
+        success: false, 
+        message: "Error processing payment webhook" 
+      })
+    }
+  }
+
+
   // User endpoints
   public initiatePaynowPayment = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -86,13 +106,13 @@ export class PaymentController {
 
   public getMerchantDeposits = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) {
+      if (!req.merchant) {
        res.status(401).json({ message: "Unauthorized" })
        return 
       }
 
       // Get merchant ID from user's merchant profile
-      const merchant = await req.user.getMerchant()
+      const merchant = await req.merchant
       if (!merchant) {
         res.status(403).json({ message: "User is not a merchant" })
         return 
@@ -107,13 +127,13 @@ export class PaymentController {
 
   public getMerchantDepositDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) {
+      if (!req.merchant) {
          res.status(401).json({ message: "Unauthorized" })
          return
       }
 
       // Get merchant ID from user's merchant profile
-      const merchant = await req.user.getMerchant()
+      const merchant = await req.merchant
       if (!merchant) {
          res.status(403).json({ message: "User is not a merchant" })
          return
@@ -130,19 +150,19 @@ export class PaymentController {
   // Merchant deposits funds to their wallet
   public merchantDepositFunds = async (req:Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) {
+      if (!req.merchant) {
         res.status(401).json({ message: "Unauthorized" })
         return 
       }
 
       // Get merchant ID from user's merchant profile
-      const merchant = await req.user.getMerchant()
+      const merchant = await req.merchant
       if (!merchant) {
         res.status(403).json({ message: "User is not a merchant" })
         return 
       }
 
-      const result = await this.paymentService.merchantDepositFunds(req.user.id, req.body)
+      const result = await this.paymentService.merchantDepositFunds(req.merchant.userId, req.body)
       res.status(200).json(result)
     } catch (error) {
       next(error)
