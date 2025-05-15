@@ -1,200 +1,217 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/components/ui/use-toast"
-import { fetchApi, transactions } from "@/lib/api"
-import { PendingTransactionsTable } from "@/components/pending-transactions-table"
-import { ArrowDownRight, RefreshCw } from "lucide-react"
+import { merchantPayments } from "@/lib/api"
+import { formatCurrency } from "@/lib/utils"
+import { Plus, RefreshCw, Eye, Wallet, ArrowUpRight } from "lucide-react"
 
 export default function DepositsPage() {
-  const [activeTab, setActiveTab] = useState("pending")
-  const [studentId, setStudentId] = useState("")
-  const [amount, setAmount] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [pendingTransactions, setPendingTransactions] = useState<any[]>([])
+  const [deposits, setDeposits] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
-    fetchPendingTransactions()
-  }, [])
+    fetchDeposits()
+  }, [currentPage])
 
-  const fetchPendingTransactions = async () => {
+  const fetchDeposits = async () => {
     try {
       setIsLoading(true)
-      const response = await transactions.getPending()
-      setPendingTransactions(response.pendingTransactions)
+      const response = await merchantPayments.getDeposits(currentPage, 10)
+      setDeposits(response.deposits)
+      setTotalPages(response.pagination.pages)
     } catch (error: any) {
-      console.error("Failed to fetch pending transactions:", error)
+      console.error("Failed to fetch deposits:", error)
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to load pending transactions",
+        description: error.message || "Failed to load deposits. Please try again.",
       })
     } finally {
       setIsLoading(false)
+      setIsRefreshing(false)
     }
   }
 
-  const handleInitiateDeposit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleRefresh = () => {
+    setIsRefreshing(true)
+    fetchDeposits()
+  }
 
-    if (!studentId || !amount) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please fill in all fields",
-      })
-      return
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page)
     }
+  }
 
-    const amountValue = Number.parseFloat(amount)
-    if (isNaN(amountValue) || amountValue <= 0) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please enter a valid amount",
-      })
-      return
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+            Completed
+          </Badge>
+        )
+      case "pending":
+        return (
+          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+            Pending
+          </Badge>
+        )
+      case "failed":
+        return (
+          <Badge variant="outline" className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+            Failed
+          </Badge>
+        )
+      default:
+        return <Badge variant="outline">{status}</Badge>
     }
+  }
 
-    setIsSubmitting(true)
-    try {
-      await fetchApi("/merchant/cash-deposit", {
-        method: "POST",
-        body: {
-          studentId,
-          cashAmount: amountValue,
-          notes: "Initiated by merchant",
-        },
-      })
-
-      toast({
-        title: "Deposit initiated",
-        description: `Deposit of ${amountValue} for student ${studentId} has been initiated.`,
-      })
-
-      // Reset form
-      setStudentId("")
-      setAmount("")
-
-      // Switch to pending tab and refresh data
-      setActiveTab("pending")
-      fetchPendingTransactions()
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to initiate deposit",
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Deposits & Withdrawals</h2>
-          <p className="text-muted-foreground">Manage cash deposits and withdrawals</p>
+          <h1 className="text-3xl font-bold tracking-tight">Deposits</h1>
+          <p className="text-muted-foreground">Manage your CUTcoin deposits</p>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchPendingTransactions} disabled={isLoading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <Button asChild>
+            <Link href="/deposit-funds">
+              <Plus className="h-4 w-4 mr-2" />
+              Deposit Funds
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="pending">Pending Transactions</TabsTrigger>
-          <TabsTrigger value="initiate-deposit">Initiate Deposit</TabsTrigger>
-        </TabsList>
+      <Card>
+        <CardHeader>
+          <CardTitle>Deposit History</CardTitle>
+          <CardDescription>View all your CUTcoin deposits</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : deposits.length === 0 ? (
+            <div className="text-center py-10">
+              <Wallet className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium">No deposits found</h3>
+              <p className="text-muted-foreground mb-4">You haven't made any deposits yet.</p>
+              <Button asChild>
+                <Link href="/deposit-funds">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Make Your First Deposit
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Reference</TableHead>
+                      <TableHead>Amount (USD)</TableHead>
+                      <TableHead>CUTcoins</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {deposits.map((deposit) => (
+                      <TableRow key={deposit.id}>
+                        <TableCell className="font-mono text-xs">{deposit.reference}</TableCell>
+                        <TableCell>{formatCurrency(Number(deposit.amount))}</TableCell>
+                        <TableCell>{Number(deposit.cutcoinAmount).toLocaleString()}</TableCell>
+                        <TableCell>{getStatusBadge(deposit.status)}</TableCell>
+                        <TableCell>{formatDate(deposit.createdAt)}</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/deposits/${deposit.id}`}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
+                            </Link>
+                          </Button>
+                          {deposit.status === "pending" && deposit.metadata?.redirectUrl && (
+                            <Button variant="outline" size="sm" className="ml-2" asChild>
+                              <a href={deposit.metadata.redirectUrl} target="_blank" rel="noopener noreferrer">
+                                <ArrowUpRight className="h-4 w-4 mr-2" />
+                                Pay
+                              </a>
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
-        <TabsContent value="pending" className="space-y-4 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pending Transactions</CardTitle>
-              <CardDescription>Transactions that require your confirmation</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PendingTransactionsTable
-                pendingTransactions={pendingTransactions}
-                onRefresh={fetchPendingTransactions}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="initiate-deposit" className="space-y-4 pt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Initiate Cash Deposit</CardTitle>
-              <CardDescription>Initiate a cash deposit for a student</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleInitiateDeposit} className="space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="studentId">Student ID</Label>
-                    <Input
-                      id="studentId"
-                      placeholder="Enter student ID"
-                      value={studentId}
-                      onChange={(e) => setStudentId(e.target.value)}
-                      required
-                    />
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-sm text-muted-foreground">
+                    Showing page {currentPage} of {totalPages}
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="amount">Amount (Cash)</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      placeholder="Enter amount"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      min="0.01"
-                      step="0.01"
-                      required
-                    />
-                    <p className="text-xs text-muted-foreground">Enter the cash amount received from the student</p>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage <= 1}
+                    >
+                      Previous
+                    </Button>
+                    <div className="text-sm">
+                      Page {currentPage} of {totalPages}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage >= totalPages}
+                    >
+                      Next
+                    </Button>
                   </div>
                 </div>
-
-                <div className="bg-muted p-4 rounded-md">
-                  <div className="flex items-center">
-                    <ArrowDownRight className="h-5 w-5 mr-2 text-primary" />
-                    <p className="text-sm font-medium">Important Information</p>
-                  </div>
-                  <p className="text-sm mt-2">
-                    By initiating this deposit, you confirm that you have received the specified amount in cash from the
-                    student. The student will need to confirm this transaction.
-                  </p>
-                </div>
-
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                      Processing...
-                    </>
-                  ) : (
-                    "Initiate Deposit"
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
