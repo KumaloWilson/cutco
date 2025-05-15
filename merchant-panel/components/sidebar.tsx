@@ -18,7 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Plus,
+  ArrowDownRight,
 } from "lucide-react"
 
 interface SidebarItemProps {
@@ -65,10 +65,15 @@ export function Sidebar() {
       title: "Transactions",
       href: "/transactions",
     },
+    // {
+    //   icon: <Wallet className="h-5 w-5" />,
+    //   title: "Wallet",
+    //   href: "/wallet",
+    // },
     {
-      icon: <Wallet className="h-5 w-5" />,
-      title: "Wallet",
-      href: "/wallet",
+      icon: <ArrowDownRight className="h-5 w-5" />,
+      title: "Deposits",
+      href: "/deposits",
     },
     {
       icon: <User className="h-5 w-5" />,
@@ -114,24 +119,10 @@ export function Sidebar() {
               icon={item.icon}
               title={item.title}
               href={item.href}
-              isActive={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+              isActive={pathname === item.href}
               isCollapsed={isCollapsed}
             />
           ))}
-
-          {/* Add special item for deposit */}
-          {pathname.includes("/wallet") && (
-            <div className="pt-2 pb-1">
-              {!isCollapsed && <div className="text-xs text-muted-foreground px-3 mb-2">Wallet Actions</div>}
-              <SidebarItem
-                icon={<Plus className="h-5 w-5" />}
-                title="Deposit Funds"
-                href="/wallet/deposit"
-                isActive={pathname === "/wallet/deposit"}
-                isCollapsed={isCollapsed}
-              />
-            </div>
-          )}
         </div>
       </ScrollArea>
 
