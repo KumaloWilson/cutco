@@ -13,11 +13,9 @@ router.use(auth_middleware_1.authMiddleware);
 router.get("/balance", walletController.getWalletBalance);
 // Deposit
 router.post("/deposit/initiate", (0, validation_middleware_1.validationMiddleware)(wallet_dto_1.InitiateDepositDto), walletController.initiateDeposit);
-router.post("/deposit/merchant-confirm", (0, validation_middleware_1.validationMiddleware)(wallet_dto_1.MerchantConfirmTransactionDto), walletController.merchantConfirmDeposit);
 // Withdrawal
 router.post("/withdraw/initiate", (0, validation_middleware_1.validationMiddleware)(wallet_dto_1.InitiateWithdrawalDto), walletController.initiateWithdrawal);
 router.post("/withdraw/confirm-otp", (0, validation_middleware_1.validationMiddleware)(wallet_dto_1.ConfirmWithdrawalOtpDto), walletController.confirmWithdrawalOTP);
-router.post("/withdraw/merchant-confirm", (0, validation_middleware_1.validationMiddleware)(wallet_dto_1.MerchantConfirmTransactionDto), walletController.merchantConfirmWithdrawal);
 // Cancel transaction
 router.post("/transaction/cancel", (0, validation_middleware_1.validationMiddleware)(wallet_dto_1.CancelTransactionDto), walletController.cancelMerchantTransaction);
 // Pending transactions
@@ -27,7 +25,7 @@ router.get("/pending-transactions", walletController.getUserPendingTransactions)
 router.post("/transfer", (0, validation_middleware_1.validationMiddleware)(wallet_dto_1.TransferDto), walletController.transfer);
 router.post("/transfer/confirm", (0, validation_middleware_1.validationMiddleware)(wallet_dto_1.ConfirmTransferDto), walletController.confirmTransfer);
 // Transaction history
-router.get("/transactions", walletController.getTransactionHistory);
+router.get("/transactions", walletController.getUserTransactionHistory);
 router.get("/transactions/:id", walletController.getTransactionDetails);
 exports.default = router;
 //# sourceMappingURL=wallet.route.js.map

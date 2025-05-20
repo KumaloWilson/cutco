@@ -45,8 +45,7 @@ class AuthService {
                 expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
             }, { transaction: t });
             // Send OTP via SMS
-            await (0, sms_1.sendSMS)(`+263771910924`, // userData.phoneNumber,
-            `Your CUTcoin verification code is: ${otpCode}. Valid for 10 minutes.`);
+            await (0, sms_1.sendSMS)(userData.phoneNumber, `Your CUTcoin verification code is: ${otpCode}. Valid for 10 minutes.`);
             return user;
         });
         return {
@@ -108,8 +107,7 @@ class AuthService {
             purpose: "login",
             expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
         });
-        await (0, sms_1.sendSMS)(`+263771910924`, // userData.phoneNumber,
-        `Your CUTcoin login code is: ${otpCode}. Valid for 10 minutes.`);
+        await (0, sms_1.sendSMS)(user.phoneNumber, `Your CUTcoin login code is: ${otpCode}. Valid for 10 minutes.`);
         return {
             message: "OTP sent to your registered phone number",
             userId: user.id,
@@ -177,8 +175,7 @@ class AuthService {
             purpose: "password_reset",
             expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
         });
-        await (0, sms_1.sendSMS)(`+263771910924`, // userData.phoneNumber,
-        `Your CUTcoin PIN reset code is: ${otpCode}. Valid for 10 minutes.`);
+        await (0, sms_1.sendSMS)(user.phoneNumber, `Your CUTcoin PIN reset code is: ${otpCode}. Valid for 10 minutes.`);
         return {
             message: "OTP sent to your registered phone number",
             userId: user.id,

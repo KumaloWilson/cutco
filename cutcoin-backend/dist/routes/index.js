@@ -5,28 +5,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const auth_route_1 = __importDefault(require("./auth.route"));
+const user_route_1 = __importDefault(require("./user.route"));
 const wallet_route_1 = __importDefault(require("./wallet.route"));
-const merchant_route_1 = __importDefault(require("./merchant.route"));
+const merchant_wallet_route_1 = __importDefault(require("./merchant-wallet.route"));
 const admin_route_1 = __importDefault(require("./admin.route"));
 const analytics_route_1 = __importDefault(require("./analytics.route"));
 const notification_route_1 = __importDefault(require("./notification.route"));
+const merchant_route_1 = __importDefault(require("./merchant.route"));
 const payment_route_1 = __importDefault(require("./payment.route"));
-const rate_limiter_middleware_1 = require("../middlewares/rate-limiter.middleware");
-const logger_middleware_1 = require("../middlewares/logger.middleware");
+const merchant_auth_route_1 = __importDefault(require("./merchant-auth.route"));
+const merchant_dashboard_route_1 = __importDefault(require("./merchant-dashboard.route"));
+const merchant_transaction_route_1 = __importDefault(require("./merchant-transaction.route"));
 const router = (0, express_1.Router)();
-// Apply global middlewares
-router.use(logger_middleware_1.requestLogger);
-router.use(rate_limiter_middleware_1.apiLimiter);
-// Apply specific rate limiters
-router.use("/auth/login", rate_limiter_middleware_1.authLimiter);
-router.use("/auth/verify-login", rate_limiter_middleware_1.authLimiter);
-// Register routes
 router.use("/auth", auth_route_1.default);
-router.use("/wallet", wallet_route_1.default);
-router.use("/merchant", merchant_route_1.default);
+router.use("/users", user_route_1.default);
+router.use("/wallets", wallet_route_1.default);
 router.use("/admin", admin_route_1.default);
 router.use("/analytics", analytics_route_1.default);
 router.use("/notifications", notification_route_1.default);
+router.use("/merchants", merchant_route_1.default);
 router.use("/payments", payment_route_1.default);
+router.use("/merchant-auth", merchant_auth_route_1.default);
+router.use("/merchant/dashboard", merchant_dashboard_route_1.default);
+router.use("/merchant/transactions", merchant_transaction_route_1.default);
+router.use("/merchant/wallet", merchant_wallet_route_1.default);
 exports.default = router;
 //# sourceMappingURL=index.js.map

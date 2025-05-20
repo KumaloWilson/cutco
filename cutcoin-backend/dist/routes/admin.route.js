@@ -22,6 +22,9 @@ router.put("/users/:userId/status", (0, validation_middleware_1.validationMiddle
 router.get("/merchants", adminController.getAllMerchants);
 router.get("/merchants/:merchantId", adminController.getMerchantDetails);
 router.put("/merchants/:merchantId/status", (0, validation_middleware_1.validationMiddleware)(admin_dto_1.UpdateMerchantStatusDto), adminController.updateMerchantStatus);
+// Transaction management
+router.get("/all/transactions", adminController.getAllTransactions);
+router.get("/transactions/:id", adminController.getTransactionById);
 // System stats and configuration
 router.get("/stats", adminController.getSystemStats);
 router.get("/config", adminController.getSystemConfig);

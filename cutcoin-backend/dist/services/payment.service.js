@@ -12,14 +12,13 @@ const transaction_model_1 = require("../models/transaction.model");
 const merchant_model_1 = require("../models/merchant.model");
 const system_config_model_1 = require("../models/system-config.model");
 const HttpException_1 = require("../exceptions/HttpException");
-const paynow_service_1 = require("./paynow.service");
 const notification_service_1 = require("./notification.service");
 const generators_1 = require("../utils/generators");
 const sequelize_1 = __importDefault(require("../config/sequelize"));
+const paynow_service_1 = __importDefault(require("./paynow.service"));
 const sequelize_2 = require("sequelize");
 class PaymentService {
     constructor() {
-        this.paynowService = new paynow_service_1.PaynowService();
         this.notificationService = new notification_service_1.NotificationService();
     }
     // Get exchange rate from system config
@@ -63,9 +62,10 @@ class PaymentService {
             metadata: {},
         });
         // Initialize Paynow payment
-        const paymentResult = await this.paynowService.createPayment(reference, user.email || `${user.studentId}@cutcoin.ac.zw`, // Fallback email
-        amount, `CUTcoin purchase: ${cutcoinAmount} CUTcoins`);
-        if (!paymentResult.success) {
+        const paymentResult = await paynow_service_1.default.initiateTransaction("kumalowilson900@gmail.com", user.phoneNumber || "", // Phone number
+        amount, reference, `CUTcoin purchase: ${cutcoinAmount} CUTcoins` // Description
+        );
+        if (paymentResult.status !== "success") {
             // Update payment status to failed
             await payment.update({
                 status: "failed",
@@ -111,7 +111,7 @@ class PaymentService {
             throw new HttpException_1.HttpException(400, "Invalid payment data");
         }
         // Check payment status
-        const statusResult = await this.paynowService.checkPaymentStatus(pollUrl);
+        const statusResult = await paynow_service_1.default.checkTransactionStatus(pollUrl);
         if (!statusResult.paid) {
             return {
                 success: false,
@@ -126,6 +126,89 @@ class PaymentService {
             message: "Payment processed successfully",
             transaction: result.transaction,
         };
+    }
+    /**
+   * Update payment status from payment gateway webhook
+   * @param reference Payment reference number
+   * @param status Status from payment provider
+   * @param pollurl URL to check payment status
+   */
+    async updatePaymentStatusFromWebhook(reference, status, pollurl) {
+        var _a, _b, _c;
+        // Find payment by reference number
+        const payment = await payment_model_1.Payment.findOne({
+            where: { reference },
+        });
+        if (!payment) {
+            throw new HttpException_1.HttpException(404, "Payment not found");
+        }
+        // If no pollurl provided, use the one from the payment metadata
+        const pollUrl = pollurl || ((_a = payment.metadata) === null || _a === void 0 ? void 0 : _a.pollUrl);
+        if (!pollUrl) {
+            throw new HttpException_1.HttpException(400, "Invalid payment data - no poll URL available");
+        }
+        // Check payment status from Paynow
+        const paynowStatus = await paynow_service_1.default.checkTransactionStatus(pollUrl);
+        // Determine if payment is completed based on Paynow status or webhook status
+        if (((_b = paynowStatus.status) === null || _b === void 0 ? void 0 : _b.toLowerCase()) === "paid" || (status === null || status === void 0 ? void 0 : status.toLowerCase()) === "paid") {
+            // Only process if not already completed
+            if (payment.status !== "completed") {
+                // Process the payment
+                const result = await this.processPayment(payment.id);
+                return {
+                    success: true,
+                    message: "Payment processed successfully",
+                    payment: {
+                        id: payment.id,
+                        reference: payment.reference,
+                        status: "paid",
+                    },
+                    transaction: result.transaction
+                };
+            }
+            else {
+                return {
+                    success: true,
+                    message: "Payment already processed",
+                    payment: {
+                        id: payment.id,
+                        reference: payment.reference,
+                        status: payment.status,
+                    }
+                };
+            }
+        }
+        else if (((_c = paynowStatus.status) === null || _c === void 0 ? void 0 : _c.toLowerCase()) === "cancelled" || (status === null || status === void 0 ? void 0 : status.toLowerCase()) === "cancelled") {
+            // Update payment status to failed
+            payment.status = "failed";
+            payment.metadata = {
+                ...payment.metadata,
+                status: paynowStatus.status,
+                lastUpdated: new Date()
+            };
+            await payment.save();
+            return {
+                success: false,
+                message: "Payment was cancelled",
+                payment: {
+                    id: payment.id,
+                    reference: payment.reference,
+                    status: payment.status,
+                }
+            };
+        }
+        else {
+            // Payment is still pending
+            return {
+                success: false,
+                message: "Payment is still pending",
+                payment: {
+                    id: payment.id,
+                    reference: payment.reference,
+                    status: payment.status,
+                }
+            };
+        }
     }
     // Process completed payment
     async processPayment(paymentId) {
@@ -208,14 +291,18 @@ class PaymentService {
             cutcoinAmount,
             reference,
             status: "pending",
+            merchantId: merchant.id,
             metadata: {
                 isMerchantDeposit: true,
             },
         });
         // If payment method is paynow, initiate paynow payment
         if (paymentMethod === "paynow") {
-            const paymentResult = await this.paynowService.createPayment(reference, merchantUser.email || `${merchantUser.studentId}@cutcoin.ac.zw`, amount, `Merchant float deposit: ${cutcoinAmount} CUTcoins`);
-            if (!paymentResult.success) {
+            const paymentResult = await paynow_service_1.default.initiateTransaction(merchantUser.email || `${merchantUser.studentId}@cutcoin.ac.zw`, // Email
+            merchantUser.phoneNumber || "", // Phone number
+            amount, reference, `Merchant float deposit: ${cutcoinAmount} CUTcoins` // Description
+            );
+            if (paymentResult.status !== "success") {
                 // Update payment status to failed
                 await payment.update({
                     status: "failed",
@@ -237,6 +324,8 @@ class PaymentService {
                 amount,
                 cutcoinAmount,
                 redirectUrl: paymentResult.redirectUrl,
+                pollUrl: paymentResult.pollUrl,
+                message: "Paynow payment initiated successfully. Please complete the payment.",
             };
         }
         else if (paymentMethod === "cash") {
@@ -467,7 +556,7 @@ class PaymentService {
         if (query.status) {
             whereClause.status = query.status;
         }
-        const { count, rows } = await merchant_deposit_model_1.MerchantDeposit.findAndCountAll({
+        const { count, rows } = await payment_model_1.Payment.findAndCountAll({
             where: whereClause,
             limit,
             offset,
@@ -475,7 +564,7 @@ class PaymentService {
             include: [
                 {
                     model: user_model_1.User,
-                    as: "student",
+                    as: "user", // Changed from "student" to "user" to match the association defined in Payment model
                     attributes: ["studentId", "firstName", "lastName", "phoneNumber"],
                 },
             ],
@@ -525,7 +614,7 @@ class PaymentService {
     }
     // Get merchant deposit details
     async getMerchantDepositDetails(merchantId, depositId) {
-        const deposit = await merchant_deposit_model_1.MerchantDeposit.findOne({
+        const deposit = await payment_model_1.Payment.findOne({
             where: {
                 id: depositId,
                 merchantId,
@@ -533,7 +622,7 @@ class PaymentService {
             include: [
                 {
                     model: user_model_1.User,
-                    as: "student",
+                    as: "user", // Changed from "student" to "user" to match the association defined in Payment model
                     attributes: ["studentId", "firstName", "lastName", "phoneNumber"],
                 },
             ],

@@ -19,6 +19,20 @@ class WalletController {
                 next(error);
             }
         };
+        this.getMerchantWalletBalance = async (req, res, next) => {
+            try {
+                if (!req.merchant) {
+                    res.status(401).json({ message: "Unauthorized" });
+                    return;
+                }
+                const userId = req.merchant.userId;
+                const result = await this.walletService.getWalletBalance(userId);
+                res.status(200).json(result);
+            }
+            catch (error) {
+                next(error);
+            }
+        };
         this.initiateDeposit = async (req, res, next) => {
             try {
                 if (!req.user || !req.user.id) {
@@ -35,11 +49,11 @@ class WalletController {
         };
         this.merchantConfirmDeposit = async (req, res, next) => {
             try {
-                if (!req.user || !req.user.id) {
+                if (!req.merchant) {
                     res.status(401).json({ message: "Unauthorized" });
                     return;
                 }
-                const merchantUserId = req.user.id;
+                const merchantUserId = req.merchant.userId;
                 const result = await this.walletService.merchantConfirmDeposit(merchantUserId, req.body);
                 res.status(200).json(result);
             }
@@ -77,11 +91,11 @@ class WalletController {
         };
         this.merchantConfirmWithdrawal = async (req, res, next) => {
             try {
-                if (!req.user || !req.user.id) {
+                if (!req.merchant) {
                     res.status(401).json({ message: "Unauthorized" });
                     return;
                 }
-                const merchantUserId = req.user.id;
+                const merchantUserId = req.merchant.userId;
                 const result = await this.walletService.merchantConfirmWithdrawal(merchantUserId, req.body);
                 res.status(200).json(result);
             }
@@ -91,12 +105,12 @@ class WalletController {
         };
         this.cancelMerchantTransaction = async (req, res, next) => {
             try {
-                if (!req.user || !req.user.id) {
+                if (!req.merchant) {
                     res.status(401).json({ message: "Unauthorized" });
                     return;
                 }
-                const userId = req.user.id;
-                const result = await this.walletService.cancelMerchantTransaction(userId, req.body);
+                const merchantUserId = req.merchant.userId;
+                const result = await this.walletService.cancelMerchantTransaction(merchantUserId, req.body);
                 res.status(200).json(result);
             }
             catch (error) {
@@ -159,14 +173,14 @@ class WalletController {
                 next(error);
             }
         };
-        this.getTransactionHistory = async (req, res, next) => {
+        this.getUserTransactionHistory = async (req, res, next) => {
             try {
                 if (!req.user || !req.user.id) {
                     res.status(401).json({ message: "Unauthorized" });
                     return;
                 }
                 const userId = req.user.id;
-                const result = await this.walletService.getTransactionHistory(userId, req.query);
+                const result = await this.walletService.getUserTransactionHistory(userId, req.query);
                 res.status(200).json(result);
             }
             catch (error) {

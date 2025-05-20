@@ -6,16 +6,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.migrate = migrate;
 exports.runMigrations = runMigrations;
 exports.runSeeders = runSeeders;
-const umzug_1 = require("umzug");
 const sequelize_1 = __importDefault(require("./sequelize"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
+// Import the actual implementations
+const { Umzug } = require('umzug');
+const { SequelizeStorage } = require('umzug/lib/storage');
 // Initialize Umzug for migrations
-const migrator = new umzug_1.Umzug({
+const migrator = new Umzug({
     migrations: {
         glob: ["migrations/*.ts", { cwd: __dirname }],
         resolve: ({ name, path, context }) => {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const migration = require(path);
             return {
                 name,
@@ -25,15 +26,14 @@ const migrator = new umzug_1.Umzug({
         },
     },
     context: sequelize_1.default.getQueryInterface(),
-    storage: new umzug_1.SequelizeStorage({ sequelize: sequelize_1.default }),
+    storage: new SequelizeStorage({ sequelize: sequelize_1.default }),
     logger: console,
 });
 // Initialize Umzug for seeders
-const seeder = new umzug_1.Umzug({
+const seeder = new Umzug({
     migrations: {
         glob: ["seeds/*.ts", { cwd: __dirname }],
         resolve: ({ name, path, context }) => {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const seeder = require(path);
             return {
                 name,
@@ -43,7 +43,7 @@ const seeder = new umzug_1.Umzug({
         },
     },
     context: sequelize_1.default.getQueryInterface(),
-    storage: new umzug_1.SequelizeStorage({ sequelize: sequelize_1.default, tableName: "seeder_meta" }),
+    storage: new SequelizeStorage({ sequelize: sequelize_1.default, tableName: "seeder_meta" }),
     logger: console,
 });
 // Function to display migration/seeder order
