@@ -1,39 +1,28 @@
-import { Infobip, AuthType } from '@infobip-api/sdk'
+import twilio from 'twilio'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
-const infobipUrl = process.env.INFOBIP_URL
-const infobipKey = process.env.INFOBIP_KEY
-const infobipSender = process.env.INFOBIP_SENDER
+const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID
+const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN
+const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER
 
 export const sendSMS = async (to: string, body: string): Promise<boolean> => {
   try {
-    if (!infobipUrl || !infobipKey || !infobipSender) {
-      console.error("Infobip configuration is missing.")
+    if (!twilioAccountSid || !twilioAuthToken || !twilioPhoneNumber) {
+      console.error("Twilio configuration is missing.")
       return false
     }
 
-    const infobipClient = new Infobip({
-      baseUrl: infobipUrl,
-      apiKey: infobipKey,
-      authType: AuthType.ApiKey,
+    const twilioClient = twilio(twilioAccountSid, twilioAuthToken)
+
+    const response = await twilioClient.messages.create({
+      body: body,
+      from: twilioPhoneNumber,
+      to: to
     })
 
-    const response = await infobipClient.channels.sms.send({
-      type: 'text',
-      messages: [{
-        destinations: [
-          {
-            to: to,
-          },
-        ],
-        from: infobipSender,
-        text: body,
-      }],
-    })
-
-    if (response && response.messages && response.messages.length > 0) {
+    if (response && response.sid) {
       console.log("SMS sent successfully.")
       return true
     } else {

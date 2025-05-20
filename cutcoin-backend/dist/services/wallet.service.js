@@ -89,9 +89,15 @@ class WalletService {
     }
     async merchantConfirmDeposit(merchantUserId, data) {
         const { reference } = data;
-        // Find the merchant
+        // Find the merchant with user relationship loaded
         const merchant = await merchant_model_1.Merchant.findOne({
             where: { userId: merchantUserId, status: "approved", isActive: true },
+            include: [
+                {
+                    model: user_model_1.User,
+                    attributes: ["id", "phoneNumber"],
+                },
+            ],
         });
         if (!merchant) {
             throw new HttpException_1.HttpException(404, "Merchant not found or not active");
@@ -114,6 +120,10 @@ class WalletService {
         });
         if (!merchantTransaction) {
             throw new HttpException_1.HttpException(404, "Deposit transaction not found or already processed");
+        }
+        // Ensure the user relationship is loaded
+        if (!merchantTransaction.user) {
+            throw new HttpException_1.HttpException(500, "User relationship not loaded");
         }
         // Find merchant's wallet
         const merchantWallet = await wallet_model_1.Wallet.findOne({
@@ -153,15 +163,141 @@ class WalletService {
             }, { transaction: t });
             return { wallet, merchantWallet, transaction, merchantTransaction };
         });
-        // Send notifications
-        await (0, sms_1.sendSMS)(merchantTransaction.user.phoneNumber, `Your deposit of ${merchantTransaction.amount} CUTcoins has been confirmed by merchant ${merchant.name}. New balance: ${result.wallet.balance} CUTcoins.`);
-        // Notify merchant of their new balance
-        await (0, sms_1.sendSMS)(merchant.user.phoneNumber, `You have confirmed a deposit of ${merchantTransaction.amount} CUTcoins to ${merchantTransaction.user.firstName} ${merchantTransaction.user.lastName}. Your new balance: ${result.merchantWallet.balance} CUTcoins.`);
+        // Send notifications with error handling
+        try {
+            // Send SMS to student
+            if (merchantTransaction.user.phoneNumber) {
+                await (0, sms_1.sendSMS)(merchantTransaction.user.phoneNumber, `Your deposit of ${merchantTransaction.amount} CUTcoins has been confirmed by merchant ${merchant.name}. New balance: ${result.wallet.balance} CUTcoins.`);
+            }
+            // Send SMS to merchant (ensure user relationship exists)
+            if (merchant.user && merchant.user.phoneNumber) {
+                await (0, sms_1.sendSMS)(merchant.user.phoneNumber, `You have confirmed a deposit of ${merchantTransaction.amount} CUTcoins to ${merchantTransaction.user.firstName} ${merchantTransaction.user.lastName}. Your new balance: ${result.merchantWallet.balance} CUTcoins.`);
+            }
+        }
+        catch (smsError) {
+            // Log SMS error but don't fail the entire transaction
+            console.error("SMS sending failed:", smsError);
+            // You might want to log this to a proper logging service
+        }
         return {
             message: "Deposit confirmed successfully",
             transaction: {
                 id: result.transaction.id,
                 amount: result.transaction.amount,
+                type: result.transaction.type,
+                status: result.transaction.status,
+                reference: result.transaction.reference,
+                createdAt: result.transaction.createdAt,
+            },
+        };
+    }
+    async merchantConfirmWithdrawal(merchantUserId, data) {
+        const { reference } = data;
+        // Find the merchant with user relationship loaded
+        const merchant = await merchant_model_1.Merchant.findOne({
+            where: { userId: merchantUserId, status: "approved", isActive: true },
+            include: [
+                {
+                    model: user_model_1.User,
+                    attributes: ["id", "phoneNumber"],
+                },
+            ],
+        });
+        if (!merchant) {
+            throw new HttpException_1.HttpException(404, "Merchant not found or not active");
+        }
+        // Find the merchant transaction
+        const merchantTransaction = await merchant_transaction_model_1.MerchantTransaction.findOne({
+            where: {
+                reference,
+                merchantId: merchant.id,
+                type: "withdrawal",
+                status: "pending",
+            },
+            include: [
+                {
+                    model: user_model_1.User,
+                    attributes: ["id", "studentId", "firstName", "lastName", "phoneNumber"],
+                },
+            ],
+        });
+        if (!merchantTransaction) {
+            throw new HttpException_1.HttpException(404, "Withdrawal transaction not found or already processed");
+        }
+        // Ensure the user relationship is loaded
+        if (!merchantTransaction.user) {
+            throw new HttpException_1.HttpException(500, "User relationship not loaded");
+        }
+        // Find merchant's wallet
+        const merchantWallet = await wallet_model_1.Wallet.findOne({
+            where: { userId: merchantUserId },
+        });
+        if (!merchantWallet) {
+            throw new HttpException_1.HttpException(404, "Merchant wallet not found");
+        }
+        // Find user's wallet separately to ensure it's loaded
+        const userWallet = await wallet_model_1.Wallet.findOne({
+            where: { userId: merchantTransaction.userId },
+        });
+        if (!userWallet) {
+            throw new HttpException_1.HttpException(500, "User wallet not found");
+        }
+        // Check if user has sufficient balance (including fee)
+        const totalAmount = Number(merchantTransaction.amount) + Number(merchantTransaction.fee || 0);
+        const userBalance = Number(userWallet.balance);
+        console.log(`Checking balance: User has ${userBalance}, needs ${totalAmount}`);
+        console.log(`Amount: ${merchantTransaction.amount}, Fee: ${merchantTransaction.fee}`);
+        if (userBalance < totalAmount) {
+            throw new HttpException_1.HttpException(400, `Insufficient user balance to complete this withdrawal. Available: ${userBalance}, Required: ${totalAmount}`);
+        }
+        // Process the withdrawal in a transaction
+        const result = await sequelize_1.default.transaction(async (t) => {
+            // Update merchant transaction status
+            merchantTransaction.merchantConfirmed = true;
+            merchantTransaction.status = "completed";
+            merchantTransaction.completedAt = new Date();
+            await merchantTransaction.save({ transaction: t });
+            // Update user wallet balance (subtract from student)
+            userWallet.balance = Number(userWallet.balance) - totalAmount;
+            await userWallet.save({ transaction: t });
+            // Update merchant wallet balance (add to merchant)
+            merchantWallet.balance = Number(merchantWallet.balance) + Number(merchantTransaction.amount);
+            await merchantWallet.save({ transaction: t });
+            // Create transaction record
+            const transaction = await transaction_model_1.Transaction.create({
+                senderId: merchantTransaction.userId, // Student is the sender
+                receiverId: merchantUserId, // Merchant is the receiver
+                amount: merchantTransaction.amount,
+                type: "withdrawal",
+                status: "completed",
+                reference: merchantTransaction.reference,
+                description: merchantTransaction.description,
+                fee: merchantTransaction.fee || 0,
+            }, { transaction: t });
+            return { merchantWallet, userWallet, transaction, merchantTransaction };
+        });
+        // Send notifications with error handling
+        try {
+            // Send SMS to student
+            if (merchantTransaction.user.phoneNumber) {
+                await (0, sms_1.sendSMS)(merchantTransaction.user.phoneNumber, `Your withdrawal of ${merchantTransaction.amount} CUTcoins has been confirmed by merchant ${merchant.name}. Fee: ${merchantTransaction.fee || 0} CUTcoins. New balance: ${result.userWallet.balance} CUTcoins.`);
+            }
+            // Send SMS to merchant (ensure user relationship exists)
+            if (merchant.user && merchant.user.phoneNumber) {
+                await (0, sms_1.sendSMS)(merchant.user.phoneNumber, `You have confirmed a withdrawal of ${merchantTransaction.amount} CUTcoins from ${merchantTransaction.user.firstName} ${merchantTransaction.user.lastName}. Your new balance: ${result.merchantWallet.balance} CUTcoins.`);
+            }
+        }
+        catch (smsError) {
+            // Log SMS error but don't fail the entire transaction
+            console.error("SMS sending failed:", smsError);
+            // You might want to log this to a proper logging service
+        }
+        return {
+            message: "Withdrawal confirmed successfully",
+            transaction: {
+                id: result.transaction.id,
+                amount: result.transaction.amount,
+                fee: result.transaction.fee,
                 type: result.transaction.type,
                 status: result.transaction.status,
                 reference: result.transaction.reference,
@@ -230,7 +366,7 @@ class WalletService {
                 code,
                 purpose: "withdrawal",
                 isUsed: false,
-                expiresAt: { $gt: new Date() },
+                expiresAt: { [sequelize_2.Op.gt]: new Date() },
             },
         });
         if (!otp) {
@@ -262,13 +398,13 @@ class WalletService {
         // Calculate fee (1% for withdrawals above 2000 CUTcoins)
         const fee = amount > 2000 ? amount * 0.01 : 0;
         const totalAmount = amount + fee;
-        // Check if wallet has sufficient balance
+        // Check if wallet has sufficient balance (but don't deduct yet)
         if (Number(user.wallet.balance) < totalAmount) {
             throw new HttpException_1.HttpException(400, "Insufficient balance including fees");
         }
         // Generate a unique reference
         const reference = (0, generators_1.generateTransactionReference)();
-        // Create a pending merchant transaction
+        // Create a pending merchant transaction (NO DEDUCTION HERE)
         const merchantTransaction = await merchant_transaction_model_1.MerchantTransaction.create({
             userId,
             merchantId: merchant.id,
@@ -281,15 +417,20 @@ class WalletService {
             merchantConfirmed: false,
             description: `Withdrawal via merchant ${merchant.name} (${merchant.merchantNumber})`,
         });
-        // Deduct the amount from the user's wallet immediately to prevent double spending
-        await sequelize_1.default.transaction(async (t) => {
-            user.wallet.balance = Number(user.wallet.balance) - totalAmount;
-            await user.wallet.save({ transaction: t });
-        });
-        // Send notification to merchant
-        await (0, sms_1.sendSMS)(merchant.user.phoneNumber, `A withdrawal request of ${amount} CUTcoins has been initiated by ${user.firstName} ${user.lastName} (${user.studentId}). Reference: ${reference}. Please provide the cash and confirm.`);
-        // Send confirmation to student
-        await (0, sms_1.sendSMS)(user.phoneNumber, `Your withdrawal request of ${amount} CUTcoins via merchant ${merchant.name} (${merchant.merchantNumber}) has been initiated. Reference: ${reference}. Please collect your cash from the merchant.`);
+        // Send notification to merchant with error handling
+        try {
+            if (merchant.user && merchant.user.phoneNumber) {
+                await (0, sms_1.sendSMS)(merchant.user.phoneNumber, `A withdrawal request of ${amount} CUTcoins has been initiated by ${user.firstName} ${user.lastName} (${user.studentId}). Reference: ${reference}. Please provide the cash and confirm.`);
+            }
+            // Send confirmation to student
+            if (user.phoneNumber) {
+                await (0, sms_1.sendSMS)(user.phoneNumber, `Your withdrawal request of ${amount} CUTcoins via merchant ${merchant.name} (${merchant.merchantNumber}) has been initiated. Reference: ${reference}. Please collect your cash from the merchant.`);
+            }
+        }
+        catch (smsError) {
+            // Log SMS error but don't fail the entire transaction
+            console.error("SMS sending failed:", smsError);
+        }
         return {
             message: "Withdrawal request initiated successfully. Waiting for merchant confirmation.",
             reference,
@@ -299,80 +440,6 @@ class WalletService {
             merchantName: merchant.name,
             merchantNumber: merchant.merchantNumber,
             status: "pending",
-        };
-    }
-    async merchantConfirmWithdrawal(merchantUserId, data) {
-        const { reference } = data;
-        // Find the merchant
-        const merchant = await merchant_model_1.Merchant.findOne({
-            where: { userId: merchantUserId, status: "approved", isActive: true },
-        });
-        if (!merchant) {
-            throw new HttpException_1.HttpException(404, "Merchant not found or not active");
-        }
-        // Find the merchant transaction
-        const merchantTransaction = await merchant_transaction_model_1.MerchantTransaction.findOne({
-            where: {
-                reference,
-                merchantId: merchant.id,
-                type: "withdrawal",
-                status: "pending",
-            },
-            include: [
-                {
-                    model: user_model_1.User,
-                    attributes: ["id", "studentId", "firstName", "lastName", "phoneNumber"],
-                },
-            ],
-        });
-        if (!merchantTransaction) {
-            throw new HttpException_1.HttpException(404, "Withdrawal transaction not found or already processed");
-        }
-        // Find merchant's wallet
-        const merchantWallet = await wallet_model_1.Wallet.findOne({
-            where: { userId: merchantUserId },
-        });
-        if (!merchantWallet) {
-            throw new HttpException_1.HttpException(404, "Merchant wallet not found");
-        }
-        // Process the withdrawal in a transaction
-        const result = await sequelize_1.default.transaction(async (t) => {
-            // Update merchant transaction status
-            merchantTransaction.merchantConfirmed = true;
-            merchantTransaction.status = "completed";
-            merchantTransaction.completedAt = new Date();
-            await merchantTransaction.save({ transaction: t });
-            // Update merchant wallet balance (add to merchant)
-            merchantWallet.balance = Number(merchantWallet.balance) + Number(merchantTransaction.amount);
-            await merchantWallet.save({ transaction: t });
-            // Create transaction record
-            const transaction = await transaction_model_1.Transaction.create({
-                senderId: merchantTransaction.userId, // Student is the sender
-                receiverId: merchantUserId, // Merchant is the receiver
-                amount: merchantTransaction.amount,
-                type: "withdrawal",
-                status: "completed",
-                reference: merchantTransaction.reference,
-                description: merchantTransaction.description,
-                fee: merchantTransaction.fee || 0,
-            }, { transaction: t });
-            return { merchantWallet, transaction, merchantTransaction };
-        });
-        // Send notifications
-        await (0, sms_1.sendSMS)(merchantTransaction.user.phoneNumber, `Your withdrawal of ${merchantTransaction.amount} CUTcoins has been confirmed by merchant ${merchant.name}. Fee: ${merchantTransaction.fee || 0} CUTcoins.`);
-        // Notify merchant of their new balance
-        await (0, sms_1.sendSMS)(merchant.user.phoneNumber, `You have confirmed a withdrawal of ${merchantTransaction.amount} CUTcoins from ${merchantTransaction.user.firstName} ${merchantTransaction.user.lastName}. Your new balance: ${result.merchantWallet.balance} CUTcoins.`);
-        return {
-            message: "Withdrawal confirmed successfully",
-            transaction: {
-                id: result.transaction.id,
-                amount: result.transaction.amount,
-                fee: result.transaction.fee,
-                type: result.transaction.type,
-                status: result.transaction.status,
-                reference: result.transaction.reference,
-                createdAt: result.transaction.createdAt,
-            },
         };
     }
     async cancelMerchantTransaction(userId, data) {
@@ -569,7 +636,7 @@ class WalletService {
                 code,
                 purpose: "transfer",
                 isUsed: false,
-                expiresAt: { $gt: new Date() },
+                expiresAt: { [sequelize_2.Op.gt]: new Date() },
             },
         });
         if (!otp) {
@@ -699,97 +766,103 @@ class WalletService {
             throw new HttpException_1.HttpException(400, `Daily transfer limit of ${dailyLimit} CUTcoins exceeded`);
         }
     }
-    async getTransactionHistory(userId, query) {
-        const page = query.page || 1;
-        const limit = query.limit || 10;
-        const offset = (page - 1) * limit;
-        const whereClause = {
-            $or: [{ senderId: userId }, { receiverId: userId }],
-        };
-        if (query.type) {
-            whereClause.type = query.type;
-        }
-        const { count, rows } = await transaction_model_1.Transaction.findAndCountAll({
-            where: whereClause,
-            limit,
-            offset,
-            order: [["createdAt", "DESC"]],
-            include: [
-                {
-                    model: user_model_1.User,
-                    as: "sender",
-                    attributes: ["studentId", "firstName", "lastName"],
-                },
-                {
-                    model: user_model_1.User,
-                    as: "receiver",
-                    attributes: ["studentId", "firstName", "lastName"],
-                },
-            ],
-        });
-        // Format transactions for better readability
-        const transactions = rows.map((transaction) => {
-            var _a, _b, _c, _d;
-            const isSender = transaction.senderId === userId;
-            const isReceiver = transaction.receiverId === userId;
-            const isDeposit = transaction.type === "deposit";
-            const isWithdrawal = transaction.type === "withdrawal";
-            let description = transaction.description;
-            let amount = Number(transaction.amount);
-            if (transaction.type === "transfer") {
-                if (isSender) {
-                    description = `Transfer to ${(_a = transaction.receiver) === null || _a === void 0 ? void 0 : _a.firstName} ${(_b = transaction.receiver) === null || _b === void 0 ? void 0 : _b.lastName}`;
+    async getUserTransactionHistory(userId, query) {
+        try {
+            const page = Number(query.page) || 1;
+            const limit = Number(query.limit) || 10;
+            const offset = (page - 1) * limit;
+            const whereClause = {
+                [sequelize_2.Op.or]: [{ senderId: userId }, { receiverId: userId }],
+            };
+            if (query.type && typeof query.type === "string") {
+                whereClause.type = query.type;
+            }
+            const { count, rows } = await transaction_model_1.Transaction.findAndCountAll({
+                where: whereClause,
+                limit,
+                offset,
+                order: [["createdAt", "DESC"]],
+                include: [
+                    {
+                        model: user_model_1.User,
+                        as: "sender",
+                        attributes: ["studentId", "firstName", "lastName"],
+                    },
+                    {
+                        model: user_model_1.User,
+                        as: "receiver",
+                        attributes: ["studentId", "firstName", "lastName"],
+                    },
+                ],
+            });
+            // Format transactions for better readability
+            const transactions = rows.map((transaction) => {
+                var _a, _b, _c, _d;
+                const isSender = transaction.senderId === userId;
+                const isReceiver = transaction.receiverId === userId;
+                const isDeposit = transaction.type === "deposit";
+                const isWithdrawal = transaction.type === "withdrawal";
+                let description = transaction.description || "";
+                let amount = Number(transaction.amount);
+                if (transaction.type === "transfer") {
+                    if (isSender) {
+                        description = `Transfer to ${((_a = transaction.receiver) === null || _a === void 0 ? void 0 : _a.firstName) || ""} ${((_b = transaction.receiver) === null || _b === void 0 ? void 0 : _b.lastName) || ""}`;
+                        amount = -amount; // Negative for outgoing
+                    }
+                    else if (isReceiver) {
+                        description = `Transfer from ${((_c = transaction.sender) === null || _c === void 0 ? void 0 : _c.firstName) || ""} ${((_d = transaction.sender) === null || _d === void 0 ? void 0 : _d.lastName) || ""}`;
+                    }
+                }
+                else if (isDeposit) {
+                    description = "Deposit to wallet";
+                }
+                else if (isWithdrawal) {
+                    description = "Withdrawal from wallet";
                     amount = -amount; // Negative for outgoing
                 }
-                else if (isReceiver) {
-                    description = `Transfer from ${(_c = transaction.sender) === null || _c === void 0 ? void 0 : _c.firstName} ${(_d = transaction.sender) === null || _d === void 0 ? void 0 : _d.lastName}`;
-                }
-            }
-            else if (isDeposit) {
-                description = "Deposit to wallet";
-            }
-            else if (isWithdrawal) {
-                description = "Withdrawal from wallet";
-                amount = -amount; // Negative for outgoing
-            }
+                return {
+                    id: transaction.id,
+                    reference: transaction.reference,
+                    amount,
+                    fee: Number(transaction.fee || 0),
+                    type: transaction.type,
+                    status: transaction.status,
+                    description,
+                    createdAt: transaction.createdAt,
+                    sender: transaction.sender
+                        ? {
+                            studentId: transaction.sender.studentId,
+                            name: `${transaction.sender.firstName} ${transaction.sender.lastName}`,
+                        }
+                        : null,
+                    receiver: transaction.receiver
+                        ? {
+                            studentId: transaction.receiver.studentId,
+                            name: `${transaction.receiver.firstName} ${transaction.receiver.lastName}`,
+                        }
+                        : null,
+                };
+            });
             return {
-                id: transaction.id,
-                reference: transaction.reference,
-                amount,
-                fee: Number(transaction.fee),
-                type: transaction.type,
-                status: transaction.status,
-                description,
-                createdAt: transaction.createdAt,
-                sender: transaction.sender
-                    ? {
-                        studentId: transaction.sender.studentId,
-                        name: `${transaction.sender.firstName} ${transaction.sender.lastName}`,
-                    }
-                    : null,
-                receiver: transaction.receiver
-                    ? {
-                        studentId: transaction.receiver.studentId,
-                        name: `${transaction.receiver.firstName} ${transaction.receiver.lastName}`,
-                    }
-                    : null,
+                transactions,
+                pagination: {
+                    total: count,
+                    page,
+                    limit,
+                    pages: Math.ceil(count / limit),
+                },
             };
-        });
-        return {
-            transactions,
-            pagination: {
-                total: count,
-                page,
-                limit,
-                pages: Math.ceil(count / limit),
-            },
-        };
+        }
+        catch (error) {
+            console.error("Error fetching transaction history:", error);
+            throw new HttpException_1.HttpException(500, "Failed to fetch transaction history");
+        }
     }
     async getTransactionDetails(userId, transactionId) {
         const transaction = await transaction_model_1.Transaction.findOne({
             where: {
                 id: transactionId,
-                $or: [{ senderId: userId }, { receiverId: userId }],
+                [sequelize_2.Op.or]: [{ senderId: userId }, { receiverId: userId }],
             },
             include: [
                 {
@@ -811,7 +884,7 @@ class WalletService {
             id: transaction.id,
             reference: transaction.reference,
             amount: Number(transaction.amount),
-            fee: Number(transaction.fee),
+            fee: Number(transaction.fee || 0),
             type: transaction.type,
             status: transaction.status,
             description: transaction.description,

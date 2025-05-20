@@ -21,11 +21,11 @@ class MerchantController {
         };
         this.getMerchantProfile = async (req, res, next) => {
             try {
-                if (!req.user || !req.user.id) {
+                if (!req.merchant) {
                     res.status(401).json({ message: "Unauthorized" });
                     return;
                 }
-                const userId = req.user.id;
+                const userId = req.merchant.userId;
                 const result = await this.merchantService.getMerchantProfile(userId);
                 res.status(200).json(result);
             }
@@ -35,11 +35,11 @@ class MerchantController {
         };
         this.updateMerchantProfile = async (req, res, next) => {
             try {
-                if (!req.user || !req.user.id) {
+                if (!req.merchant) {
                     res.status(401).json({ message: "Unauthorized" });
                     return;
                 }
-                const userId = req.user.id;
+                const userId = req.merchant.userId;
                 const result = await this.merchantService.updateMerchantProfile(userId, req.body);
                 res.status(200).json(result);
             }
@@ -69,25 +69,6 @@ class MerchantController {
         this.confirmPayment = async (req, res, next) => {
             try {
                 const result = await this.merchantService.confirmPayment(req.body);
-                res.status(200).json(result);
-            }
-            catch (error) {
-                next(error);
-            }
-        };
-        this.getMerchantTransactions = async (req, res, next) => {
-            try {
-                if (!req.user) {
-                    res.status(401).json({ message: "Unauthorized" });
-                    return;
-                }
-                // Get merchant ID from user's merchant profile
-                const merchant = await req.user.getMerchant();
-                if (!merchant) {
-                    res.status(403).json({ message: "User is not a merchant" });
-                    return;
-                }
-                const result = await this.merchantService.getMerchantTransactions(merchant.id, req.query);
                 res.status(200).json(result);
             }
             catch (error) {

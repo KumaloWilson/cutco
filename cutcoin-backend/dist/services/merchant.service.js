@@ -13,6 +13,8 @@ const HttpException_1 = require("../exceptions/HttpException");
 const generators_1 = require("../utils/generators");
 const sms_1 = require("../utils/sms");
 const sequelize_1 = __importDefault(require("../config/sequelize"));
+const merchant_transaction_model_1 = __importDefault(require("../models/merchant-transaction.model"));
+const helpers_1 = require("../utils/helpers");
 class MerchantService {
     async registerMerchant(userId, merchantData) {
         // Check if user already has a merchant account
@@ -205,6 +207,66 @@ class MerchantService {
             },
         };
     }
+    async getPendingMerchantTransactions(merchantId, query) {
+        const page = query.page || 1;
+        const limit = query.limit || 10;
+        const offset = (page - 1) * limit;
+        // Find merchant
+        const merchant = await merchant_model_1.Merchant.findByPk(merchantId);
+        if (!merchant) {
+            throw new HttpException_1.HttpException(404, "Merchant not found");
+        }
+        const whereClause = {
+            merchantId: merchantId,
+            status: "pending" // Always filter for pending status
+        };
+        // Add type filter if provided
+        if (query.type) {
+            whereClause.type = query.type;
+        }
+        const { count, rows } = await merchant_transaction_model_1.default.findAndCountAll({
+            where: whereClause,
+            limit,
+            offset,
+            order: [["createdAt", "ASC"]], // Oldest pending transactions first
+            include: [
+                {
+                    model: user_model_1.User,
+                    as: "user",
+                    attributes: ["studentId", "firstName", "lastName"],
+                },
+            ],
+        });
+        // Format transactions for better readability
+        const pendingTransactions = rows.map((transaction) => {
+            return {
+                id: transaction.id,
+                reference: transaction.reference,
+                amount: Number(transaction.amount),
+                type: transaction.type,
+                description: transaction.description,
+                createdAt: transaction.createdAt,
+                waitingTime: (0, helpers_1.calculateWaitingTime)(transaction.createdAt),
+                customer: transaction.user
+                    ? {
+                        studentId: transaction.user.studentId,
+                        name: `${transaction.user.firstName} ${transaction.user.lastName}`,
+                    }
+                    : null,
+                studentConfirmed: transaction.studentConfirmed,
+                merchantConfirmed: transaction.merchantConfirmed
+            };
+        });
+        return {
+            pendingTransactions,
+            pagination: {
+                total: count,
+                page,
+                limit,
+                pages: Math.ceil(count / limit),
+            },
+        };
+    }
     async getMerchantTransactions(merchantId, query) {
         const page = query.page || 1;
         const limit = query.limit || 10;
@@ -214,19 +276,16 @@ class MerchantService {
         if (!merchant) {
             throw new HttpException_1.HttpException(404, "Merchant not found");
         }
-        // Find merchant user
-        const merchantUser = await user_model_1.User.findByPk(merchant.userId);
-        if (!merchantUser) {
-            throw new HttpException_1.HttpException(404, "Merchant user not found");
-        }
         const whereClause = {
-            receiverId: merchantUser.id,
-            type: "payment",
+            merchantId: merchantId
         };
         if (query.status) {
             whereClause.status = query.status;
         }
-        const { count, rows } = await transaction_model_1.Transaction.findAndCountAll({
+        if (query.type) {
+            whereClause.type = query.type;
+        }
+        const { count, rows } = await merchant_transaction_model_1.default.findAndCountAll({
             where: whereClause,
             limit,
             offset,
@@ -234,7 +293,7 @@ class MerchantService {
             include: [
                 {
                     model: user_model_1.User,
-                    as: "sender",
+                    as: "user", // Changed from "sender" to match the model relationship
                     attributes: ["studentId", "firstName", "lastName"],
                 },
             ],
@@ -247,11 +306,13 @@ class MerchantService {
                 amount: Number(transaction.amount),
                 status: transaction.status,
                 description: transaction.description,
+                type: transaction.type,
+                fee: transaction.fee,
                 createdAt: transaction.createdAt,
-                customer: transaction.sender
+                customer: transaction.user
                     ? {
-                        studentId: transaction.sender.studentId,
-                        name: `${transaction.sender.firstName} ${transaction.sender.lastName}`,
+                        studentId: transaction.user.studentId,
+                        name: `${transaction.user.firstName} ${transaction.user.lastName}`,
                     }
                     : null,
             };

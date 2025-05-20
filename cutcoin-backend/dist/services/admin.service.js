@@ -227,22 +227,26 @@ class AdminService {
         if (!merchant) {
             throw new HttpException_1.HttpException(404, "Merchant not found");
         }
-        // Get merchant transactions
-        const transactions = await transaction_model_1.Transaction.findAll({
-            where: {
-                receiverId: merchant.user.id,
-                type: "payment",
-            },
-            limit: 10,
-            order: [["createdAt", "DESC"]],
-            include: [
-                {
-                    model: user_model_1.User,
-                    as: "sender",
-                    attributes: ["studentId", "firstName", "lastName"],
+        // Get merchant transactions - check if user exists first
+        let transactions = [];
+        if (merchant.user) {
+            // Only fetch transactions if the merchant has an associated user
+            transactions = await transaction_model_1.Transaction.findAll({
+                where: {
+                    receiverId: merchant.user.id,
+                    type: "payment",
                 },
-            ],
-        });
+                limit: 10,
+                order: [["createdAt", "DESC"]],
+                include: [
+                    {
+                        model: user_model_1.User,
+                        as: "sender",
+                        attributes: ["studentId", "firstName", "lastName"],
+                    },
+                ],
+            });
+        }
         return {
             merchant,
             transactions,
@@ -414,6 +418,149 @@ class AdminService {
             role: admin.role,
             isAdmin: true,
         }, secretKey, { expiresIn });
+    }
+    async getAllTransactions(query) {
+        try {
+            const page = Number(query.page) || 1;
+            const limit = Number(query.limit) || 10;
+            const offset = (page - 1) * limit;
+            const whereClause = {};
+            if (query.type && typeof query.type === "string") {
+                whereClause.type = query.type;
+            }
+            const { count, rows } = await transaction_model_1.Transaction.findAndCountAll({
+                where: whereClause,
+                limit,
+                offset,
+                order: [["createdAt", "DESC"]],
+                include: [
+                    {
+                        model: user_model_1.User,
+                        as: "sender",
+                        attributes: ["studentId", "firstName", "lastName"],
+                    },
+                    {
+                        model: user_model_1.User,
+                        as: "receiver",
+                        attributes: ["studentId", "firstName", "lastName"],
+                    },
+                ],
+            });
+            // Format transactions for better readability
+            const transactions = rows.map((transaction) => {
+                var _a, _b, _c, _d, _e, _f, _g, _h;
+                let description = transaction.description || "";
+                let amount = Number(transaction.amount);
+                if (transaction.type === "transfer") {
+                    description = `Transfer from ${((_a = transaction.sender) === null || _a === void 0 ? void 0 : _a.firstName) || ""} ${((_b = transaction.sender) === null || _b === void 0 ? void 0 : _b.lastName) || ""} to ${((_c = transaction.receiver) === null || _c === void 0 ? void 0 : _c.firstName) || ""} ${((_d = transaction.receiver) === null || _d === void 0 ? void 0 : _d.lastName) || ""}`;
+                }
+                else if (transaction.type === "deposit") {
+                    description = `Deposit to ${((_e = transaction.receiver) === null || _e === void 0 ? void 0 : _e.firstName) || ""} ${((_f = transaction.receiver) === null || _f === void 0 ? void 0 : _f.lastName) || ""}'s wallet`;
+                }
+                else if (transaction.type === "withdrawal") {
+                    description = `Withdrawal from ${((_g = transaction.sender) === null || _g === void 0 ? void 0 : _g.firstName) || ""} ${((_h = transaction.sender) === null || _h === void 0 ? void 0 : _h.lastName) || ""}'s wallet`;
+                }
+                return {
+                    id: transaction.id,
+                    reference: transaction.reference,
+                    amount,
+                    fee: Number(transaction.fee || 0),
+                    type: transaction.type,
+                    status: transaction.status,
+                    description,
+                    createdAt: transaction.createdAt,
+                    sender: transaction.sender
+                        ? {
+                            studentId: transaction.sender.studentId,
+                            name: `${transaction.sender.firstName} ${transaction.sender.lastName}`,
+                        }
+                        : null,
+                    receiver: transaction.receiver
+                        ? {
+                            studentId: transaction.receiver.studentId,
+                            name: `${transaction.receiver.firstName} ${transaction.receiver.lastName}`,
+                        }
+                        : null,
+                };
+            });
+            return {
+                transactions,
+                pagination: {
+                    total: count,
+                    page,
+                    limit,
+                    pages: Math.ceil(count / limit),
+                },
+            };
+        }
+        catch (error) {
+            console.error("Error fetching all transactions:", error);
+            throw new HttpException_1.HttpException(500, "Failed to fetch all transactions");
+        }
+    }
+    async getTransactionById(id) {
+        var _a, _b, _c, _d, _e, _f, _g, _h;
+        try {
+            const transaction = await transaction_model_1.Transaction.findOne({
+                where: { id },
+                include: [
+                    {
+                        model: user_model_1.User,
+                        as: "sender",
+                        attributes: ["studentId", "firstName", "lastName"],
+                    },
+                    {
+                        model: user_model_1.User,
+                        as: "receiver",
+                        attributes: ["studentId", "firstName", "lastName"],
+                    },
+                ],
+            });
+            if (!transaction) {
+                throw new HttpException_1.HttpException(404, "Transaction not found");
+            }
+            // Format transaction for better readability
+            let description = transaction.description || "";
+            let amount = Number(transaction.amount);
+            if (transaction.type === "transfer") {
+                description = `Transfer from ${((_a = transaction.sender) === null || _a === void 0 ? void 0 : _a.firstName) || ""} ${((_b = transaction.sender) === null || _b === void 0 ? void 0 : _b.lastName) || ""} to ${((_c = transaction.receiver) === null || _c === void 0 ? void 0 : _c.firstName) || ""} ${((_d = transaction.receiver) === null || _d === void 0 ? void 0 : _d.lastName) || ""}`;
+            }
+            else if (transaction.type === "deposit") {
+                description = `Deposit to ${((_e = transaction.receiver) === null || _e === void 0 ? void 0 : _e.firstName) || ""} ${((_f = transaction.receiver) === null || _f === void 0 ? void 0 : _f.lastName) || ""}'s wallet`;
+            }
+            else if (transaction.type === "withdrawal") {
+                description = `Withdrawal from ${((_g = transaction.sender) === null || _g === void 0 ? void 0 : _g.firstName) || ""} ${((_h = transaction.sender) === null || _h === void 0 ? void 0 : _h.lastName) || ""}'s wallet`;
+            }
+            return {
+                id: transaction.id,
+                reference: transaction.reference,
+                amount,
+                fee: Number(transaction.fee || 0),
+                type: transaction.type,
+                status: transaction.status,
+                description,
+                createdAt: transaction.createdAt,
+                sender: transaction.sender
+                    ? {
+                        studentId: transaction.sender.studentId,
+                        name: `${transaction.sender.firstName} ${transaction.sender.lastName}`,
+                    }
+                    : null,
+                receiver: transaction.receiver
+                    ? {
+                        studentId: transaction.receiver.studentId,
+                        name: `${transaction.receiver.firstName} ${transaction.receiver.lastName}`,
+                    }
+                    : null,
+            };
+        }
+        catch (error) {
+            if (error instanceof HttpException_1.HttpException) {
+                throw error;
+            }
+            console.error("Error fetching transaction by ID:", error);
+            throw new HttpException_1.HttpException(500, "Failed to fetch transaction");
+        }
     }
 }
 exports.AdminService = AdminService;

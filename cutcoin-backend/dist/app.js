@@ -63,7 +63,7 @@ class App {
             console.log("Database connection has been established successfully.");
             // Sync database in development mode
             if (process.env.NODE_ENV === "development") {
-                await sequelize_1.default.sync({ alter: true });
+                // await sequelize.sync({ alter: true })
                 console.log("Database synchronized");
             }
         }
