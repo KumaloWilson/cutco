@@ -68,7 +68,7 @@ export class PaymentService {
 
     // Initialize Paynow payment
     const paymentResult = await paynowService.initiateTransaction(
-      user.email || `${user.studentId}@cutcoin.ac.zw`, // Email
+      "kumalowilson900@gmail.com",
       user.phoneNumber || "", // Phone number
       amount,
       reference,
