@@ -13,6 +13,7 @@ export const sendSMS = async (to: string, body: string): Promise<boolean> => {
       console.error("Twilio configuration is missing.")
       return false
     }
+    
 
     const twilioClient = twilio(twilioAccountSid, twilioAuthToken)
 
