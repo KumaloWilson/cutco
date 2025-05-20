@@ -1,11 +1,13 @@
 import twilio from 'twilio'
 import dotenv from 'dotenv'
 
+
 dotenv.config()
 
 const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID
 const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER
+
 
 export const sendSMS = async (to: string, body: string): Promise<boolean> => {
   try {
@@ -13,7 +15,7 @@ export const sendSMS = async (to: string, body: string): Promise<boolean> => {
       console.error("Twilio configuration is missing.")
       return false
     }
-    
+
 
     const twilioClient = twilio(twilioAccountSid, twilioAuthToken)
 
